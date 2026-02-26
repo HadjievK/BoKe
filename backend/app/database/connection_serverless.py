@@ -3,8 +3,8 @@ Use this for Vercel deployment (no connection pooling)
 """
 import os
 from contextlib import contextmanager
-import psycopg2
-from psycopg2.extras import RealDictCursor
+import psycopg
+from psycopg.rows import dict_row
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -16,7 +16,7 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 
 def get_connection():
     """Get a new database connection (no pooling for serverless)"""
-    return psycopg2.connect(DATABASE_URL)
+    return psycopg.connect(DATABASE_URL)
 
 
 @contextmanager
@@ -39,7 +39,7 @@ def get_db():
 def execute_query(query: str, params: tuple = None, fetch_one: bool = False, fetch_all: bool = False):
     """Execute a query and return results"""
     with get_db() as conn:
-        with conn.cursor(cursor_factory=RealDictCursor) as cursor:
+        with conn.cursor(row_factory=dict_row) as cursor:
             cursor.execute(query, params or ())
 
             if fetch_one:

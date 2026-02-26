@@ -1,5 +1,5 @@
 """Script to initialize database schema"""
-import psycopg2
+import psycopg
 from dotenv import load_dotenv
 import os
 
@@ -8,7 +8,7 @@ load_dotenv()
 DATABASE_URL = os.getenv("DATABASE_URL")
 
 print("🔧 Connecting to database...")
-conn = psycopg2.connect(DATABASE_URL)
+conn = psycopg.connect(DATABASE_URL)
 cursor = conn.cursor()
 
 print("📄 Reading schema file...")
