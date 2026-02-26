@@ -1,276 +1,276 @@
-# BuKe - Simple Booking Platform MVP
+# 🗓️ BuKe - Simple Booking Platform
 
-A multi-tenant booking platform for service providers (barbers, dentists, nail artists, etc.) with registration and calendar functionality.
+**Multi-tenant booking platform where service providers (nail artists, barbers, dentists, etc.) create profiles and share booking links with customers.**
 
-## Project Structure
+## 🎯 How It Works
+
+1. **Service Provider** visits landing page → Creates account
+2. Gets unique URL: `boke.app/sally-nails`
+3. Shares link on Instagram/social media
+4. **Customers** click link → Book services
+5. **Provider** checks dashboard with PIN → Sees bookings
+
+---
+
+## 🏗️ Architecture
+
+### Simple Stack (100% Serverless - FREE)
+
+```
+User Request
+    ↓
+Vercel Edge Network
+    ↓
+├── Frontend (Next.js 14)
+│   ├── Landing Page (/)
+│   ├── Provider Profile (/sally-nails)
+│   ├── Booking Page (/sally-nails/book)
+│   └── Dashboard (/dashboard/sally-nails?pin=1234)
+│
+└── Backend (FastAPI Serverless)
+    ├── Registration API (/api/onboard)
+    ├── Booking API (/api/{slug}/book)
+    └── Dashboard API (/api/dashboard/{slug})
+    ↓
+Supabase PostgreSQL
+    └── Transaction Pooler (IPv4-compatible)
+        └── 3 Tables: service_providers, customers, appointments
+```
+
+### Tech Stack
+
+- **Frontend**: Next.js 14 (App Router), TypeScript, Tailwind CSS
+- **Backend**: FastAPI (Python), Pydantic
+- **Database**: Supabase PostgreSQL (Transaction Pooler - port 6543)
+- **Hosting**: Vercel (Frontend + Backend serverless functions)
+- **Cost**: $0/month (free tier)
+
+### Key Design Decisions
+
+✅ **No Connection Pool** - Each serverless function opens/closes DB connection
+✅ **Supabase Pooler** - Handles connection reuse (IPv4-compatible for Vercel)
+✅ **JSONB Storage** - Services and availability stored as JSON (no joins)
+✅ **Slug-based Multi-tenancy** - Each provider gets unique route
+✅ **PIN Authentication** - Simple 4-digit PIN for dashboard access
+
+---
+
+## 📂 Project Structure
 
 ```
 BoKe/
-├── backend/              # FastAPI backend
+├── frontend/                 # Next.js 14 App
 │   ├── app/
-│   │   ├── database/     # Database schema and connection
-│   │   ├── models/       # Pydantic models
-│   │   ├── routes/       # API endpoints
-│   │   ├── services/     # Business logic
-│   │   └── main.py       # FastAPI app
-│   └── requirements.txt
+│   │   ├── page.tsx         # Landing page (registration)
+│   │   ├── [slug]/
+│   │   │   ├── page.tsx     # Provider profile
+│   │   │   └── book/
+│   │   │       └── page.tsx # Booking form
+│   │   └── dashboard/
+│   │       └── [slug]/
+│   │           └── page.tsx # Dashboard (PIN-protected)
+│   └── lib/
+│       ├── api.ts           # API client
+│       └── types.ts         # TypeScript types
 │
-└── frontend/             # Next.js 14 frontend
-    ├── app/              # App router pages
-    ├── components/       # React components
-    ├── lib/              # Utilities and API client
-    └── package.json
+├── backend/                  # FastAPI App
+│   └── app/
+│       ├── main.py          # FastAPI app + CORS
+│       ├── routes/          # API endpoints
+│       ├── services/        # Business logic
+│       ├── models/          # Pydantic schemas
+│       └── database/
+│           ├── schema_v2.sql         # Database schema
+│           └── connection.py         # DB connection (serverless-optimized)
+│
+├── api/
+│   └── index.py             # Vercel serverless handler (Mangum)
+│
+└── vercel.json              # Vercel deployment config
 ```
 
-## Features
+---
 
-### MVP Scope
-- ✅ Service provider registration with unique booking link
-- ✅ Public booking page for customers
-- ✅ Calendar and time slot availability
-- ✅ Appointment booking (no customer accounts required)
-- ✅ Barber dashboard (PIN-protected)
-- ✅ Multi-service support
-- ✅ Responsive design
+## 🗄️ Database Schema
 
-### Explicitly NOT in MVP
-- ❌ Email/SMS notifications
-- ❌ Payment processing
-- ❌ Customer accounts
-- ❌ Rescheduling/cancellation
-- ❌ Reviews
-- ❌ Multiple staff per business
+```sql
+-- 3 Simple Tables
 
-## Tech Stack
+service_providers (
+  id UUID PRIMARY KEY,
+  slug TEXT UNIQUE,              -- "sally-nails"
+  name TEXT,                     -- "Sally"
+  business_name TEXT,            -- "Sally's Nails"
+  service_type TEXT,             -- "nail_artist"
+  email TEXT UNIQUE,
+  phone TEXT,
+  pin TEXT,                      -- "1234"
+  services JSONB,                -- [{"name": "Manicure", "price": 30, ...}]
+  availability JSONB,            -- [{"day": 0, "start": "09:00", ...}]
+  theme_config JSONB
+)
 
-**Backend:**
-- FastAPI (Python)
-- PostgreSQL (Supabase)
-- psycopg2 for database
+customers (
+  id UUID PRIMARY KEY,
+  email TEXT UNIQUE,
+  first_name TEXT,
+  last_name TEXT,
+  phone TEXT
+)
 
-**Frontend:**
-- Next.js 14 (App Router)
-- TypeScript
-- Tailwind CSS
-- React hooks
+appointments (
+  id UUID PRIMARY KEY,
+  provider_id UUID → service_providers(id),
+  customer_id UUID → customers(id),
+  service_id TEXT,               -- "provider-id-0"
+  appointment_date DATE,
+  appointment_time TIME,
+  duration INT,
+  price DECIMAL,
+  status TEXT,                   -- "confirmed", "cancelled", "completed"
+  UNIQUE(provider_id, appointment_date, appointment_time)  -- Prevent double-booking
+)
+```
 
-**Hosting:**
-- Backend: Railway ($5/mo)
-- Frontend: Vercel (free)
-- Database: Supabase (free tier)
+---
 
-## Setup Instructions
+## 🚀 Local Development
 
 ### Prerequisites
-- Python 3.10+
-- Node.js 18+
-- PostgreSQL database (Supabase recommended)
+- Node.js 20+
+- Python 3.12+
+- Supabase account (free tier)
 
-### Backend Setup
+### 1. Clone & Install
 
-1. Navigate to backend directory:
 ```bash
-cd backend
-```
+git clone https://github.com/HadjievK/BoKe.git
+cd BoKe
 
-2. Create virtual environment and install dependencies:
-```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+# Install frontend
+cd frontend
+npm install
+
+# Install backend
+cd ../backend
 pip install -r requirements.txt
 ```
 
-3. Create `.env` file:
+### 2. Setup Database
+
+1. Create Supabase project at https://supabase.com
+2. Run SQL from `backend/app/database/schema_v2.sql`
+3. Copy **Transaction Pooler** connection string (port 6543)
+
+### 3. Configure Environment
+
 ```bash
-cp .env.example .env
+# backend/.env
+DATABASE_URL=postgresql://postgres.xxx:password@aws-1-eu-central-1.pooler.supabase.com:6543/postgres
+ALLOWED_ORIGINS=http://localhost:3000,http://localhost:3001
 ```
 
-4. Update `.env` with your Supabase credentials:
-```
-DATABASE_URL=postgresql://user:password@host:5432/database
-ENVIRONMENT=development
-PORT=8000
-ALLOWED_ORIGINS=http://localhost:3000
-```
+### 4. Run Locally
 
-5. Run database migrations:
 ```bash
-psql $DATABASE_URL -f app/database/schema.sql
-```
+# Terminal 1 - Backend (port 8000)
+cd backend
+python -m uvicorn app.main:app --reload --port 8000
 
-6. Start the server:
-```bash
-python app/main.py
-```
-
-API will be available at `http://localhost:8000`
-API docs at `http://localhost:8000/docs`
-
-### Frontend Setup
-
-1. Navigate to frontend directory:
-```bash
+# Terminal 2 - Frontend (port 3001)
 cd frontend
+npm run dev -- -p 3001
 ```
 
-2. Install dependencies:
-```bash
-npm install
-```
+Visit: http://localhost:3001
 
-3. Create `.env.local` file:
-```bash
-cp .env.local.example .env.local
-```
+---
 
-4. Update `.env.local`:
-```
-NEXT_PUBLIC_API_URL=http://localhost:8000
-```
+## 🌐 Deployment (Vercel)
 
-5. Start the development server:
-```bash
-npm run dev
-```
+### One-Click Deploy
 
-Frontend will be available at `http://localhost:3000`
-
-## Usage Flow
-
-### 1. Provider Registration
-1. Visit `http://localhost:3000`
-2. Fill out registration form with:
-   - Service type (barber, dentist, etc.)
-   - Name and business name
-   - Email and phone
-   - Location and bio
-   - Services (name, duration, price)
-3. Submit to receive:
-   - Unique slug (e.g., `karloscuts`)
-   - 4-digit PIN for dashboard
-   - Public booking URL
-
-### 2. Customer Booking
-1. Visit `http://localhost:3000/{slug}` (e.g., `/karloscuts`)
-2. View barber profile and services
-3. Click "Book" on a service
-4. Select date from calendar
-5. Choose available time slot
-6. Enter contact details (no account needed)
-7. Confirm booking
-
-### 3. Barber Dashboard
-1. Visit `http://localhost:3000/dashboard/{slug}`
-2. Enter 4-digit PIN
-3. View:
-   - Today's appointments
-   - Weekly stats
-   - Total customers
-   - Recent customers
-
-## API Endpoints
-
-### Public Endpoints
-```
-GET  /api/barber/{slug}               - Get barber profile with services
-GET  /api/{slug}/services             - Get all services
-GET  /api/{slug}/availability?date=   - Get available time slots
-POST /api/{slug}/book                 - Create appointment
-```
-
-### Dashboard Endpoints (PIN-protected)
-```
-GET /api/dashboard/{slug}?pin=        - Get dashboard data
-GET /api/dashboard/{slug}/appointments?pin= - Get appointments
-GET /api/dashboard/{slug}/customers?pin=    - Get customers
-```
-
-### Onboarding
-```
-POST /api/onboard                     - Register new barber
-```
-
-## Database Schema
-
-### Tables
-- `barbers` - Service providers (tenants)
-- `services` - Services offered by each barber
-- `customers` - Customer contact info
-- `appointments` - Booked appointments
-- `availability` - Weekly recurring availability schedule
-
-### Key Features
-- Multi-tenancy via `barber_id`
-- Unique constraint on appointment slots (prevents double booking)
-- Cascade deletes for data integrity
-- Indexes for performance
-
-## Testing
-
-### Backend Testing
-Use the sample data included in `schema.sql`:
-- Slug: `karloscuts`
-- PIN: `1234`
-- Services: Classic Cut, Fade, Beard Trim
-
-### Manual Testing Checklist
-- [ ] Register new barber
-- [ ] View barber profile page
-- [ ] Book an appointment
-- [ ] Try booking same slot twice (should fail)
-- [ ] Access dashboard with PIN
-- [ ] View appointments in dashboard
-- [ ] Try wrong PIN (should fail)
-
-## Deployment
-
-### Backend (Railway)
-```bash
-# Install Railway CLI
-npm install -g @railway/cli
-
-# Login and deploy
-railway login
-railway init
-railway up
-
-# Set environment variables in Railway dashboard
-DATABASE_URL=postgresql://...
-ENVIRONMENT=production
-```
-
-### Frontend (Vercel)
 ```bash
 # Install Vercel CLI
 npm install -g vercel
 
+# Login
+vercel login
+
 # Deploy
 vercel --prod
-
-# Set environment variable in Vercel dashboard
-NEXT_PUBLIC_API_URL=https://your-railway-app.railway.app
 ```
 
-## Future Enhancements (Post-MVP)
+### Set Environment Variable
 
-**Phase 2:**
-- Email confirmations
-- SMS reminders
-- Customer rescheduling
-- Block time off
-- Custom domains
+Go to Vercel Dashboard → Project Settings → Environment Variables:
 
-**Phase 3:**
-- Payment processing
-- Review system
-- Customer accounts
-- Analytics
-- Mobile app
+```
+DATABASE_URL = postgresql://postgres.xxx:password@aws-1-eu-central-1.pooler.supabase.com:6543/postgres
+```
 
-## License
+**That's it!** ✅ Your app is live.
+
+---
+
+## 📋 API Endpoints
+
+### Public (No Auth)
+- `POST /api/onboard` - Register new provider
+- `GET /api/provider/{slug}` - Get provider profile
+- `GET /api/{slug}/availability?date=2024-01-15` - Get available slots
+- `POST /api/{slug}/book` - Book appointment
+
+### Protected (PIN Required)
+- `GET /api/dashboard/{slug}?pin=1234` - Get dashboard data
+- `GET /api/dashboard/{slug}/appointments?pin=1234` - Get appointments
+- `GET /api/dashboard/{slug}/customers?pin=1234` - Get customers
+
+---
+
+## 🔒 Security
+
+- ✅ PIN-based dashboard authentication (4-digit)
+- ✅ CORS restricted to allowed origins
+- ✅ SQL injection prevention (parameterized queries)
+- ✅ Unique constraint prevents double-booking
+- ✅ Customer email deduplication
+
+---
+
+## 💡 Why Serverless?
+
+**Perfect for booking platforms:**
+
+| Traditional Server | Vercel Serverless |
+|-------------------|-------------------|
+| 💰 $5-20/month | 💰 $0/month (free tier) |
+| 🏃 24/7 running | ⚡ Runs on-demand |
+| 🔧 Manual scaling | 📈 Auto-scales |
+| 🛠️ Server management | ✅ Zero maintenance |
+
+**Traffic Pattern**: Provider creates profile (rare) → Customers book (occasional) → Dashboard checks (periodic)
+
+**Cost Example**: 10 providers, 100 bookings/month = ~1000 API calls = **FREE**
+
+---
+
+## 🎨 Customization
+
+Each provider can have:
+- Custom slug (`/sally-nails`)
+- Custom services (stored in JSONB)
+- Custom availability schedule
+- Custom theme colors (future feature)
+
+---
+
+## 📝 License
 
 MIT
 
-## Support
+---
 
-For issues and questions, open an issue on GitHub.
+## 🙋 Support
+
+Issues: https://github.com/HadjievK/BoKe/issues
