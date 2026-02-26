@@ -1,6 +1,8 @@
 """Main FastAPI application"""
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.requests import Request
 import os
 from dotenv import load_dotenv
 
@@ -16,8 +18,43 @@ app = FastAPI(
 )
 
 # CORS configuration
-allowed_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000").split(",")
+allowed_origins_str = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000")
+allowed_origins = [origin.strip() for origin in allowed_origins_str.split(",")]
 
+# Custom CORS middleware to handle Vercel preview deployments
+class CustomCORSMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        origin = request.headers.get("origin")
+
+        # Check if origin matches allowed origins or Vercel preview domains
+        is_allowed = False
+        if origin:
+            # Check exact matches
+            if origin in allowed_origins:
+                is_allowed = True
+            # Check if it's a Vercel preview deployment
+            elif origin.endswith(".vercel.app") and origin.startswith("https://"):
+                is_allowed = True
+
+        response = await call_next(request)
+
+        # Add CORS headers if origin is allowed
+        if is_allowed and origin:
+            response.headers["Access-Control-Allow-Origin"] = origin
+            response.headers["Access-Control-Allow-Credentials"] = "true"
+            response.headers["Access-Control-Allow-Methods"] = "*"
+            response.headers["Access-Control-Allow-Headers"] = "*"
+
+        # Handle preflight requests
+        if request.method == "OPTIONS":
+            response.headers["Access-Control-Max-Age"] = "3600"
+
+        return response
+
+# Add custom CORS middleware
+app.add_middleware(CustomCORSMiddleware)
+
+# Also add standard CORS middleware as fallback
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,

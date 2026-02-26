@@ -1,4 +1,4 @@
-"""API routes for barber dashboard (PIN-protected)"""
+"""API routes for provider dashboard (PIN-protected)"""
 from fastapi import APIRouter, HTTPException, Query
 from datetime import date
 from typing import Optional
@@ -8,12 +8,12 @@ from app.models.schemas import (
     AppointmentWithDetails,
     CustomerPublic
 )
-from app.services.barber_service import verify_pin, get_barber_id_by_slug
+from app.services.provider_service import verify_pin, get_provider_id_by_slug
 from app.services.dashboard_service import (
     get_dashboard_data,
-    get_customers_for_barber
+    get_customers_for_provider
 )
-from app.services.appointment_service import get_appointments_for_barber
+from app.services.appointment_service import get_appointments_for_provider
 
 router = APIRouter()
 
@@ -24,7 +24,7 @@ async def get_dashboard(
     pin: str = Query(..., description="4-digit PIN for authentication")
 ):
     """
-    Get dashboard data for a barber
+    Get dashboard data for a service provider
 
     Requires PIN authentication
     """
@@ -32,11 +32,11 @@ async def get_dashboard(
     if not verify_pin(slug, pin):
         raise HTTPException(status_code=401, detail="Invalid PIN")
 
-    barber_id = get_barber_id_by_slug(slug)
-    if not barber_id:
-        raise HTTPException(status_code=404, detail="Barber not found")
+    provider_id = get_provider_id_by_slug(slug)
+    if not provider_id:
+        raise HTTPException(status_code=404, detail="Provider not found")
 
-    dashboard = get_dashboard_data(barber_id)
+    dashboard = get_dashboard_data(provider_id)
     return dashboard
 
 
@@ -56,11 +56,11 @@ async def get_appointments(
     if not verify_pin(slug, pin):
         raise HTTPException(status_code=401, detail="Invalid PIN")
 
-    barber_id = get_barber_id_by_slug(slug)
-    if not barber_id:
-        raise HTTPException(status_code=404, detail="Barber not found")
+    provider_id = get_provider_id_by_slug(slug)
+    if not provider_id:
+        raise HTTPException(status_code=404, detail="Provider not found")
 
-    appointments = get_appointments_for_barber(barber_id, start_date, end_date)
+    appointments = get_appointments_for_provider(provider_id, start_date, end_date)
     return appointments
 
 
@@ -70,7 +70,7 @@ async def get_customers(
     pin: str = Query(..., description="4-digit PIN for authentication")
 ):
     """
-    Get all customers who have booked with this barber
+    Get all customers who have booked with this provider
 
     Requires PIN authentication
     """
@@ -78,9 +78,9 @@ async def get_customers(
     if not verify_pin(slug, pin):
         raise HTTPException(status_code=401, detail="Invalid PIN")
 
-    barber_id = get_barber_id_by_slug(slug)
-    if not barber_id:
-        raise HTTPException(status_code=404, detail="Barber not found")
+    provider_id = get_provider_id_by_slug(slug)
+    if not provider_id:
+        raise HTTPException(status_code=404, detail="Provider not found")
 
-    customers = get_customers_for_barber(barber_id)
+    customers = get_customers_for_provider(provider_id)
     return customers

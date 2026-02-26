@@ -5,7 +5,7 @@ export interface ThemeConfig {
   secondary_color: string
 }
 
-export interface Barber {
+export interface Provider {
   id: string
   slug: string
   name: string
@@ -22,7 +22,7 @@ export interface Barber {
 
 export interface Service {
   id: string
-  barber_id: string
+  provider_id: string
   name: string
   duration: number // minutes
   price: number
@@ -32,7 +32,7 @@ export interface Service {
   created_at: string
 }
 
-export interface BarberWithServices extends Barber {
+export interface ProviderWithServices extends Provider {
   services: Service[]
 }
 
@@ -50,7 +50,7 @@ export interface CustomerPublic extends Customer {
 
 export interface Appointment {
   id: string
-  barber_id: string
+  provider_id: string
   customer_id: string
   service_id: string
   appointment_date: string // YYYY-MM-DD
@@ -111,7 +111,7 @@ export interface OnboardingResponse {
   slug: string
   pin: string
   public_url: string
-  barber: Barber
+  provider: Provider
 }
 
 export interface DashboardStats {
@@ -126,3 +126,7 @@ export interface DashboardData {
   appointments: AppointmentWithDetails[]
   recent_customers: CustomerPublic[]
 }
+
+// Backward compatibility aliases
+export type Barber = Provider
+export type BarberWithServices = ProviderWithServices

@@ -1,31 +1,31 @@
 """API routes for onboarding"""
 from fastapi import APIRouter, HTTPException
 
-from app.models.schemas import BarberCreate, OnboardingResponse
-from app.services.barber_service import create_barber
+from app.models.schemas import ProviderCreate, OnboardingResponse
+from app.services.provider_service import create_provider
 
 router = APIRouter()
 
 
 @router.post("/onboard", response_model=OnboardingResponse)
-async def onboard_barber(barber_data: BarberCreate):
+async def onboard_provider(provider_data: ProviderCreate):
     """
-    Register a new barber/service provider
+    Register a new service provider
 
-    Creates barber account, services, and default availability.
+    Creates provider account, services, and default availability.
     Returns slug, PIN, and public booking URL.
     """
     try:
-        result = create_barber(barber_data)
+        result = create_provider(provider_data)
         return result
     except Exception as e:
         # Check for duplicate email
-        if 'barbers_email_key' in str(e):
+        if 'email' in str(e).lower() and 'unique' in str(e).lower():
             raise HTTPException(
                 status_code=400,
                 detail="Email already registered"
             )
         raise HTTPException(
             status_code=500,
-            detail="Failed to create barber account"
+            detail="Failed to create provider account"
         )

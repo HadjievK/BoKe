@@ -8,7 +8,7 @@ import json
 
 from app.database.connection import execute_query
 from app.models.schemas import (
-    BarberCreate, BarberPublic, BarberWithServices,
+    ProviderCreate, ProviderPublic, ProviderWithServices,
     ServiceCreate, ServicePublic, OnboardingResponse
 )
 
@@ -44,10 +44,10 @@ def generate_pin() -> str:
     return str(random.randint(1000, 9999))
 
 
-def create_barber(barber_data: BarberCreate) -> OnboardingResponse:
+def create_provider(provider_data: ProviderCreate) -> OnboardingResponse:
     """Create a new service provider with services"""
     # Generate slug and PIN
-    slug = generate_slug(barber_data.business_name)
+    slug = generate_slug(provider_data.business_name)
     pin = generate_pin()
 
     # Prepare services as JSONB
@@ -60,7 +60,7 @@ def create_barber(barber_data: BarberCreate) -> OnboardingResponse:
             "icon": s.icon,
             "is_active": True
         }
-        for s in barber_data.services
+        for s in provider_data.services
     ])
 
     # Default availability (Mon-Fri 9-5)
@@ -82,13 +82,13 @@ def create_barber(barber_data: BarberCreate) -> OnboardingResponse:
         """,
         (
             slug,
-            barber_data.name,
-            barber_data.business_name,
-            barber_data.service_type,
-            barber_data.email,
-            barber_data.phone,
-            barber_data.location,
-            barber_data.bio,
+            provider_data.name,
+            provider_data.business_name,
+            provider_data.service_type,
+            provider_data.email,
+            provider_data.phone,
+            provider_data.location,
+            provider_data.bio,
             pin,
             services_json,
             availability_json
@@ -96,17 +96,17 @@ def create_barber(barber_data: BarberCreate) -> OnboardingResponse:
         fetch_one=True
     )
 
-    barber_public = BarberPublic(**dict(provider))
+    provider_public = ProviderPublic(**dict(provider))
 
     return OnboardingResponse(
         slug=slug,
         pin=pin,
         public_url=f"https://buke.app/{slug}",
-        barber=barber_public
+        provider=provider_public
     )
 
 
-def get_barber_by_slug(slug: str) -> Optional[BarberWithServices]:
+def get_provider_by_slug(slug: str) -> Optional[ProviderWithServices]:
     """Get service provider profile with services"""
     # Get provider with services
     provider = execute_query(
@@ -132,7 +132,7 @@ def get_barber_by_slug(slug: str) -> Optional[BarberWithServices]:
         if s.get('is_active', True):
             services.append(ServicePublic(
                 id=f"{provider['id']}-{idx}",  # Generate consistent ID
-                barber_id=provider['id'],
+                provider_id=provider['id'],
                 name=s['name'],
                 duration=s['duration'],
                 price=s['price'],
@@ -145,7 +145,7 @@ def get_barber_by_slug(slug: str) -> Optional[BarberWithServices]:
     provider_dict = dict(provider)
     provider_dict['services'] = services
 
-    return BarberWithServices(**provider_dict)
+    return ProviderWithServices(**provider_dict)
 
 
 def verify_pin(slug: str, pin: str) -> bool:
@@ -158,7 +158,7 @@ def verify_pin(slug: str, pin: str) -> bool:
     return result is not None
 
 
-def get_barber_id_by_slug(slug: str) -> Optional[UUID]:
+def get_provider_id_by_slug(slug: str) -> Optional[UUID]:
     """Get provider ID from slug"""
     result = execute_query(
         "SELECT id FROM service_providers WHERE slug = %s",

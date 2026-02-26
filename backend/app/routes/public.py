@@ -4,43 +4,43 @@ from datetime import date
 from typing import Optional
 
 from app.models.schemas import (
-    BarberWithServices,
+    ProviderWithServices,
     ServicePublic,
     AvailabilityResponse,
     AppointmentCreate,
     BookingConfirmation
 )
-from app.services.barber_service import get_barber_by_slug, get_barber_id_by_slug
+from app.services.provider_service import get_provider_by_slug, get_provider_id_by_slug
 from app.services.availability_service import get_available_slots
 from app.services.appointment_service import create_appointment
 
 router = APIRouter()
 
 
-@router.get("/barber/{slug}", response_model=BarberWithServices)
-async def get_barber_profile(slug: str):
+@router.get("/provider/{slug}", response_model=ProviderWithServices)
+async def get_provider_profile(slug: str):
     """
-    Get barber profile with services for public booking page
+    Get provider profile with services for public booking page
     """
-    barber = get_barber_by_slug(slug)
+    provider = get_provider_by_slug(slug)
 
-    if not barber:
-        raise HTTPException(status_code=404, detail="Barber not found")
+    if not provider:
+        raise HTTPException(status_code=404, detail="Provider not found")
 
-    return barber
+    return provider
 
 
 @router.get("/{slug}/services", response_model=list[ServicePublic])
-async def get_barber_services(slug: str):
+async def get_provider_services(slug: str):
     """
-    Get all active services for a barber
+    Get all active services for a provider
     """
-    barber = get_barber_by_slug(slug)
+    provider = get_provider_by_slug(slug)
 
-    if not barber:
-        raise HTTPException(status_code=404, detail="Barber not found")
+    if not provider:
+        raise HTTPException(status_code=404, detail="Provider not found")
 
-    return barber.services
+    return provider.services
 
 
 @router.get("/{slug}/availability", response_model=AvailabilityResponse)
@@ -55,20 +55,20 @@ async def get_availability(
     If service_id is provided, uses that service's duration.
     Otherwise, uses default 30-minute slots.
     """
-    barber_id = get_barber_id_by_slug(slug)
+    provider_id = get_provider_id_by_slug(slug)
 
-    if not barber_id:
-        raise HTTPException(status_code=404, detail="Barber not found")
+    if not provider_id:
+        raise HTTPException(status_code=404, detail="Provider not found")
 
     # Get service duration if provided
     service_duration = 30  # Default
     if service_id:
         from app.services.appointment_service import get_service_details
-        service = get_service_details(barber_id, service_id)
+        service = get_service_details(provider_id, service_id)
         if service:
             service_duration = service['duration']
 
-    slots = get_available_slots(barber_id, date, service_duration)
+    slots = get_available_slots(provider_id, date, service_duration)
 
     return slots
 
@@ -80,13 +80,13 @@ async def book_appointment(slug: str, booking: AppointmentCreate):
 
     Validates availability and prevents double booking
     """
-    barber_id = get_barber_id_by_slug(slug)
+    provider_id = get_provider_id_by_slug(slug)
 
-    if not barber_id:
-        raise HTTPException(status_code=404, detail="Barber not found")
+    if not provider_id:
+        raise HTTPException(status_code=404, detail="Provider not found")
 
     try:
-        confirmation = create_appointment(barber_id, booking)
+        confirmation = create_appointment(provider_id, booking)
         return confirmation
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))

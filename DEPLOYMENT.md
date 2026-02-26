@@ -4,10 +4,9 @@
 
 This guide covers deploying the BuKe MVP to production:
 - **Database**: Supabase (free tier)
-- **Backend**: Railway ($5/month)
-- **Frontend**: Vercel (free tier)
+- **Backend + Frontend**: Vercel (free tier) - Monorepo deployment
 
-Total cost: ~$5/month
+Total cost: Free (Vercel free tier)
 
 ## 1. Database Setup (Supabase)
 
@@ -32,93 +31,57 @@ Total cost: ~$5/month
 3. Replace `[YOUR-PASSWORD]` with your database password
 4. Save this for backend deployment
 
-## 2. Backend Deployment (Railway)
-
-### Prerequisites
-- GitHub account
-- Railway account (sign up at https://railway.app)
-
-### Prepare Repository
-1. Initialize git in backend folder:
-```bash
-cd backend
-git init
-git add .
-git commit -m "Initial backend commit"
-```
-
-2. Create `Procfile` in backend folder:
-```
-web: uvicorn app.main:app --host 0.0.0.0 --port $PORT
-```
-
-3. Create `runtime.txt`:
-```
-python-3.11
-```
-
-### Deploy to Railway
-
-**Option A: Railway CLI**
-```bash
-# Install Railway CLI
-npm install -g @railway/cli
-
-# Login
-railway login
-
-# Initialize project
-railway init
-
-# Link to new project
-railway link
-
-# Deploy
-railway up
-
-# Set environment variables
-railway variables set DATABASE_URL="postgresql://..."
-railway variables set ENVIRONMENT="production"
-railway variables set ALLOWED_ORIGINS="https://yourdomain.vercel.app"
-```
-
-**Option B: Railway Dashboard**
-1. Go to https://railway.app/new
-2. Click "Deploy from GitHub repo"
-3. Connect your GitHub account
-4. Select your backend repository
-5. Configure:
-   - Root Directory: `/` (or `backend` if monorepo)
-   - Build Command: `pip install -r requirements.txt`
-   - Start Command: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
-6. Add environment variables:
-   - `DATABASE_URL`: Your Supabase connection string
-   - `ENVIRONMENT`: `production`
-   - `ALLOWED_ORIGINS`: Your frontend URL (will add after Vercel deploy)
-7. Click "Deploy"
-
-### Get Backend URL
-- After deployment, Railway provides a URL like: `https://your-app.railway.app`
-- Save this for frontend configuration
-- Test at: `https://your-app.railway.app/health`
-
-## 3. Frontend Deployment (Vercel)
+## 2. Vercel Deployment (Backend + Frontend Monorepo)
 
 ### Prerequisites
 - GitHub account
 - Vercel account (sign up at https://vercel.com)
+- Push your code to a GitHub repository
 
-### Prepare Repository
-```bash
-cd frontend
-git init
-git add .
-git commit -m "Initial frontend commit"
-```
+### Environment Variables Setup
+
+Before deploying, you need to set up these environment variables in Vercel:
+
+**Backend Variables:**
+- `DATABASE_URL`: Your Supabase connection string
+- `ALLOWED_ORIGINS`: Comma-separated list of allowed origins (your Vercel domains)
+  - Example: `https://yourdomain.vercel.app,https://buke-brown-ten.vercel.app`
+
+**Frontend Variables:**
+- `NEXT_PUBLIC_API_URL`: Leave empty or don't set (will use relative URLs in production)
 
 ### Deploy to Vercel
 
-**Option A: Vercel CLI**
+**Option A: Vercel Dashboard (Recommended)**
+
+1. Go to https://vercel.com/new
+2. Import your GitHub repository
+3. Vercel will auto-detect the monorepo structure
+4. Configure project settings:
+   - Framework Preset: Next.js
+   - Root Directory: `./` (keep as root for monorepo)
+   - Build Command: (use default)
+   - Output Directory: (use default)
+
+5. Add environment variables:
+   - Click "Environment Variables"
+   - Add `DATABASE_URL` (get from Supabase)
+   - Add `ALLOWED_ORIGINS` (you'll update this after getting your Vercel URL)
+
+6. Click "Deploy"
+
+7. After deployment, get your Vercel URL (e.g., `https://boke-brown-ten.vercel.app`)
+
+8. Update environment variables:
+   - Go to Project Settings > Environment Variables
+   - Update `ALLOWED_ORIGINS` to include your Vercel URL(s):
+     ```
+     https://boke-brown-ten.vercel.app,https://boke-78g2pyah7-kristiyan-hadjievs-projects.vercel.app
+     ```
+   - Redeploy to apply changes
+
+**Option B: Vercel CLI**
+
 ```bash
 # Install Vercel CLI
 npm install -g vercel
@@ -126,99 +89,74 @@ npm install -g vercel
 # Login
 vercel login
 
-# Deploy
+# Deploy from root directory
 vercel
 
-# Follow prompts:
-# - Set up and deploy: Yes
-# - Project name: buke-frontend
-# - Framework: Next.js
-# - Root directory: ./
-# - Build settings: (use defaults)
-
-# Set environment variable
-vercel env add NEXT_PUBLIC_API_URL production
-
-# Enter your Railway backend URL
-# Example: https://your-app.railway.app
+# Set environment variables
+vercel env add DATABASE_URL production
+vercel env add ALLOWED_ORIGINS production
 
 # Deploy to production
 vercel --prod
 ```
 
-**Option B: Vercel Dashboard**
-1. Go to https://vercel.com/new
-2. Import your frontend Git repository
-3. Configure:
-   - Framework Preset: Next.js
-   - Root Directory: `./` (or `frontend` if monorepo)
-   - Build Command: `npm run build`
-   - Output Directory: `.next`
-4. Add environment variable:
-   - Name: `NEXT_PUBLIC_API_URL`
-   - Value: Your Railway backend URL (e.g., `https://your-app.railway.app`)
-5. Click "Deploy"
+### Verify Deployment
 
-### Get Frontend URL
-- Vercel provides a URL like: `https://buke-frontend.vercel.app`
-- You can add custom domain in project settings
+1. **Test Backend API:**
+   - Visit: `https://yourdomain.vercel.app/api/health`
+   - Should return: `{"status": "healthy"}`
 
-## 4. Connect Frontend and Backend
+2. **Test Frontend:**
+   - Visit: `https://yourdomain.vercel.app`
+   - Should load the homepage
 
-### Update Railway CORS
-1. Go to Railway project settings
-2. Update `ALLOWED_ORIGINS` environment variable:
-```
-https://buke-frontend.vercel.app,https://yourdomain.com
-```
-3. Redeploy backend
+3. **Test API Connection:**
+   - Try registering a new barber
+   - The frontend should successfully call the backend API
 
-### Test Connection
-1. Visit your Vercel URL
-2. Try registering a new barber
-3. Try booking an appointment
-4. Check dashboard access
+### CORS Configuration
 
-## 5. Custom Domain (Optional)
+The backend is configured to automatically allow:
+- All URLs in the `ALLOWED_ORIGINS` environment variable
+- All Vercel preview deployments (`*.vercel.app`)
 
-### For Frontend (Vercel)
+If you get CORS errors:
+1. Check that `ALLOWED_ORIGINS` includes your Vercel URL
+2. Make sure the frontend is using relative URLs (no hardcoded localhost)
+3. Redeploy after updating environment variables
+
+## 3. Custom Domain (Optional)
+
+### For Frontend & Backend (Vercel)
 1. Go to Project Settings > Domains
 2. Add your domain (e.g., `buke.app`)
 3. Add DNS records at your domain provider:
    - Type: A, Name: @, Value: 76.76.21.21
    - Type: CNAME, Name: www, Value: cname.vercel-dns.com
 4. Wait for DNS propagation (~1 hour)
+5. API will be accessible at: `https://yourdomain.com/api/*`
+6. Update `ALLOWED_ORIGINS` environment variable to include your custom domain
 
-### For Backend (Railway)
-1. Go to Project Settings > Domains
-2. Add custom domain
-3. Add CNAME record at your domain provider:
-   - Type: CNAME, Name: api, Value: provided by Railway
-4. Update frontend `NEXT_PUBLIC_API_URL` in Vercel
+## 4. Post-Deployment Checklist
 
-## 6. Post-Deployment Checklist
-
-- [ ] Backend health check: `https://api.yourdomain.com/health`
-- [ ] Frontend loads: `https://yourdomain.com`
+- [ ] Backend health check: `https://yourdomain.vercel.app/api/health`
+- [ ] Frontend loads: `https://yourdomain.vercel.app`
 - [ ] Registration works
 - [ ] Can access test barber page
 - [ ] Can book appointment
 - [ ] Appointment shows in database
 - [ ] Dashboard access works with PIN
 - [ ] Mobile responsive
-- [ ] API docs accessible: `https://api.yourdomain.com/docs`
+- [ ] API docs accessible: `https://yourdomain.vercel.app/api/docs`
+- [ ] No CORS errors in browser console
 
-## 7. Monitoring and Maintenance
-
-### Railway Monitoring
-- View logs in Railway dashboard
-- Set up alerts for crashes
-- Monitor database connections
+## 5. Monitoring and Maintenance
 
 ### Vercel Monitoring
-- View deployment logs
+- View deployment logs in Vercel dashboard
 - Monitor build times
 - Check analytics
+- View function logs for API errors
 
 ### Supabase Monitoring
 - Monitor database size (500 MB free tier limit)
@@ -232,7 +170,7 @@ https://buke-frontend.vercel.app,https://yourdomain.com
 pg_dump $DATABASE_URL > backup_$(date +%Y%m%d).sql
 ```
 
-## 8. Scaling Considerations
+## 6. Scaling Considerations
 
 ### When to upgrade:
 
@@ -241,15 +179,12 @@ pg_dump $DATABASE_URL > backup_$(date +%Y%m%d).sql
 - 50,000 API requests/month → Pro gives 5M requests
 - 10 concurrent connections → Pro gives 200
 
-**Railway Starter Limits:**
-- $5/mo included → Additional usage billed per hour
-- Sleep after 30 minutes inactivity → Upgrade to prevent sleep
-
 **Vercel Free Tier:**
 - 100 GB bandwidth/month → Upgrade to Pro ($20/mo) for 1 TB
 - 100 deployments/day → Pro gives unlimited
+- Serverless function execution time: 10s max → Pro gives 60s
 
-## 9. Security Checklist
+## 7. Security Checklist
 
 - [ ] Environment variables not committed to git
 - [ ] CORS configured correctly
@@ -258,17 +193,19 @@ pg_dump $DATABASE_URL > backup_$(date +%Y%m%d).sql
 - [ ] HTTPS enforced
 - [ ] PIN stored securely (hashed in future)
 
-## 10. Troubleshooting
+## 8. Troubleshooting
 
 ### Backend won't deploy
-- Check Python version in `runtime.txt`
+- Check Python version compatibility with Vercel
 - Verify `requirements.txt` is complete
-- Check Railway logs for errors
+- Check Vercel function logs for errors
+- Ensure `api/index.py` exists and is configured correctly
 
 ### Frontend build fails
 - Check Node version compatibility
 - Verify all dependencies in `package.json`
 - Check Vercel build logs
+- Ensure `frontend/` directory structure is correct
 
 ### Database connection fails
 - Verify DATABASE_URL format
@@ -276,25 +213,31 @@ pg_dump $DATABASE_URL > backup_$(date +%Y%m%d).sql
 - Test connection locally first
 
 ### CORS errors
-- Check ALLOWED_ORIGINS in Railway
-- Verify frontend URL is correct
-- Check browser console for exact error
+- **Issue**: "Access to fetch at 'http://localhost:8000/api/...' has been blocked by CORS policy"
+- **Solution 1**: Ensure `NEXT_PUBLIC_API_URL` is NOT set in production (leave empty to use relative URLs)
+- **Solution 2**: Update `ALLOWED_ORIGINS` environment variable in Vercel to include all deployment URLs
+- **Solution 3**: Check that the custom CORS middleware is working (see `backend/app/main.py`)
+- **Solution 4**: Redeploy after updating environment variables
+- **Verify**: Check browser console for exact error and origin URL
+- **Debug**: Use browser DevTools Network tab to see actual request/response headers
 
-## 11. Rollback Procedure
+### API calls fail with 404
+- Verify API routes are accessible at `/api/*`
+- Check `vercel.json` routing configuration
+- Ensure `api/index.py` is present
+- Check function logs in Vercel dashboard
 
-### Railway
-- Go to Deployments
-- Click on previous successful deployment
-- Click "Redeploy"
+## 9. Rollback Procedure
 
 ### Vercel
 - Go to Deployments
 - Find working deployment
 - Click three dots > "Promote to Production"
+- Both frontend and backend will rollback together
 
 ## Support
 
 For deployment issues:
-- Railway docs: https://docs.railway.app
 - Vercel docs: https://vercel.com/docs
 - Supabase docs: https://supabase.com/docs
+- Next.js deployment: https://nextjs.org/docs/deployment

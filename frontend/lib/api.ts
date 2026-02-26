@@ -1,9 +1,10 @@
 // API client functions
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+// Use relative URL in production (deployed on same domain), localhost in development
+const API_URL = process.env.NEXT_PUBLIC_API_URL || (typeof window !== 'undefined' && window.location.origin.includes('vercel.app') ? '' : 'http://localhost:8000')
 
 import type {
-  BarberWithServices,
+  ProviderWithServices,
   Service,
   AvailabilityResponse,
   BookingRequest,
@@ -18,14 +19,14 @@ import type {
 
 // ============ Public Booking API ============
 
-export async function getBarberProfile(slug: string): Promise<BarberWithServices> {
-  const res = await fetch(`${API_URL}/api/barber/${slug}`)
+export async function getProviderProfile(slug: string): Promise<ProviderWithServices> {
+  const res = await fetch(`${API_URL}/api/provider/${slug}`)
 
   if (!res.ok) {
     if (res.status === 404) {
-      throw new Error('Barber not found')
+      throw new Error('Provider not found')
     }
-    throw new Error('Failed to fetch barber profile')
+    throw new Error('Failed to fetch provider profile')
   }
 
   return res.json()
@@ -83,7 +84,7 @@ export async function bookAppointment(
 
 // ============ Onboarding API ============
 
-export async function registerBarber(data: OnboardingData): Promise<OnboardingResponse> {
+export async function registerProvider(data: OnboardingData): Promise<OnboardingResponse> {
   const res = await fetch(`${API_URL}/api/onboard`, {
     method: 'POST',
     headers: {

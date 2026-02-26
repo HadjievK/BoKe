@@ -33,7 +33,7 @@ class AvailabilitySlot(BaseModel):
 
 # ============ Service Provider Models ============
 
-class BarberBase(BaseModel):
+class ProviderBase(BaseModel):
     name: str
     business_name: str
     service_type: str
@@ -44,11 +44,11 @@ class BarberBase(BaseModel):
     avatar_url: Optional[str] = None
 
 
-class BarberCreate(BarberBase):
+class ProviderCreate(ProviderBase):
     services: List[ServiceInline] = []
 
 
-class BarberPublic(BarberBase):
+class ProviderPublic(ProviderBase):
     id: UUID
     slug: str
     theme_config: ThemeConfig
@@ -62,7 +62,7 @@ class BarberPublic(BarberBase):
 class ServicePublic(BaseModel):
     """Service model for API responses (compatibility layer)"""
     id: str  # Will be "provider_id-index"
-    barber_id: UUID
+    provider_id: UUID
     name: str
     duration: int
     price: float
@@ -75,7 +75,7 @@ class ServicePublic(BaseModel):
         from_attributes = True
 
 
-class BarberWithServices(BarberPublic):
+class ProviderWithServices(ProviderPublic):
     services: List[ServicePublic] = []
 
 
@@ -83,7 +83,14 @@ class OnboardingResponse(BaseModel):
     slug: str
     pin: str
     public_url: str
-    barber: BarberPublic
+    provider: ProviderPublic
+
+
+# Backward compatibility aliases
+BarberBase = ProviderBase
+BarberCreate = ProviderCreate
+BarberPublic = ProviderPublic
+BarberWithServices = ProviderWithServices
 
 
 # ============ Customer Models ============
@@ -119,7 +126,7 @@ class AppointmentCreate(BaseModel):
 
 class AppointmentPublic(BaseModel):
     id: UUID
-    barber_id: UUID  # Actually provider_id
+    provider_id: UUID
     customer_id: UUID
     service_id: str
     appointment_date: date

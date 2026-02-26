@@ -3,24 +3,32 @@
   "builds": [
     {
       "src": "frontend/package.json",
-      "use": "@vercel/next"
+      "use": "@vercel/next",
+      "config": {
+        "zeroConfig": true
+      }
     },
     {
-      "src": "api/index.py",
+      "src": "api/*.py",
       "use": "@vercel/python"
     }
   ],
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "api/index.py"
+      "dest": "/api/index.py"
+    },
+    {
+      "handle": "filesystem"
     },
     {
       "src": "/(.*)",
-      "dest": "frontend/$1"
+      "dest": "/frontend/$1"
     }
   ],
   "env": {
-    "PYTHONPATH": "/var/task/backend"
+    "PYTHONPATH": "/var/task/backend",
+    "DATABASE_URL": "@database_url",
+    "ALLOWED_ORIGINS": "http://localhost:3000,https://boke-78g2pyah7-kristiyan-hadjievs-projects.vercel.app,https://boke-brown-ten.vercel.app"
   }
 }

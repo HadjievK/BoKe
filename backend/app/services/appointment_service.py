@@ -164,7 +164,7 @@ def create_appointment(
     # Build service object for response
     service_obj = ServicePublic(
         id=appointment_data.service_id,
-        barber_id=provider_id,
+        provider_id=provider_id,
         name=service['name'],
         duration=service['duration'],
         price=service['price'],
@@ -177,7 +177,7 @@ def create_appointment(
     # Build response
     appointment_with_details = AppointmentWithDetails(
         id=appointment['id'],
-        barber_id=appointment['provider_id'],
+        provider_id=appointment['provider_id'],
         customer_id=appointment['customer_id'],
         service_id=appointment_data.service_id,
         appointment_date=appointment['appointment_date'],
@@ -194,7 +194,7 @@ def create_appointment(
     return BookingConfirmation(appointment=appointment_with_details)
 
 
-def get_appointments_for_barber(
+def get_appointments_for_provider(
     provider_id: UUID,
     start_date: Optional[date] = None,
     end_date: Optional[date] = None
@@ -240,7 +240,7 @@ def get_appointments_for_barber(
 
         service = ServicePublic(
             id=f"{provider_id}-0",  # Dummy ID
-            barber_id=provider_id,
+            provider_id=provider_id,
             name=row['service_name'],
             duration=row['service_duration'],
             price=row['service_price'],
@@ -252,7 +252,7 @@ def get_appointments_for_barber(
 
         appointment = AppointmentWithDetails(
             id=row['id'],
-            barber_id=row['provider_id'],
+            provider_id=row['provider_id'],
             customer_id=row['customer_id'],
             service_id=f"{provider_id}-0",
             appointment_date=row['appointment_date'],

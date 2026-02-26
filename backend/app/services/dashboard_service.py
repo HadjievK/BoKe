@@ -8,7 +8,7 @@ from app.models.schemas import (
     DashboardData, DashboardStats,
     AppointmentWithDetails, CustomerPublic
 )
-from app.services.appointment_service import get_appointments_for_barber
+from app.services.appointment_service import get_appointments_for_provider
 
 
 def get_dashboard_data(provider_id: UUID) -> DashboardData:
@@ -62,7 +62,7 @@ def get_dashboard_data(provider_id: UUID) -> DashboardData:
     )
 
     # Get today's appointments with details
-    appointments = get_appointments_for_barber(
+    appointments = get_appointments_for_provider(
         provider_id,
         start_date=today,
         end_date=today
@@ -92,7 +92,7 @@ def get_dashboard_data(provider_id: UUID) -> DashboardData:
     )
 
 
-def get_customers_for_barber(provider_id: UUID) -> List[CustomerPublic]:
+def get_customers_for_provider(provider_id: UUID) -> List[CustomerPublic]:
     """
     Get all unique customers who have booked with this provider
     """
