@@ -11,10 +11,5 @@ sys.path.insert(0, str(backend_path))
 from app.main import app
 from mangum import Mangum
 
-# Create Mangum handler for AWS Lambda/Vercel
+# Create Mangum handler for Vercel serverless
 handler = Mangum(app, lifespan="off")
-
-# For local testing
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)

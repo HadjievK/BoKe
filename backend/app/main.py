@@ -7,7 +7,6 @@ import os
 from dotenv import load_dotenv
 
 from app.routes import onboarding, public, dashboard
-from app.database.connection import init_pool
 
 load_dotenv()
 
@@ -62,12 +61,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# Initialize database connection pool on startup
-@app.on_event("startup")
-async def startup_event():
-    init_pool()
-    print("[OK] Database connection pool initialized")
 
 # Include routers
 app.include_router(onboarding.router, prefix="/api", tags=["Onboarding"])

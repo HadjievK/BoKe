@@ -1,4 +1,6 @@
-"""Database connection management - Optimized for serverless"""
+"""Database connection management - SERVERLESS VERSION
+Use this for Vercel deployment (no connection pooling)
+"""
 import os
 from contextlib import contextmanager
 import psycopg2
@@ -7,25 +9,22 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+# For serverless, use the connection string with PgBouncer
+# Get this from Supabase: Settings > Database > Connection Pooling
 DATABASE_URL = os.getenv("DATABASE_URL")
+
+
+def get_connection():
+    """Get a new database connection (no pooling for serverless)"""
+    return psycopg2.connect(DATABASE_URL)
 
 
 @contextmanager
 def get_db():
-    """
-    Context manager for database connections
-
-    Opens a new connection for each request (serverless-friendly).
-    Using Supabase connection pooler (port 6543) which handles pooling.
-    """
+    """Context manager for database connections"""
     conn = None
     try:
-        # Direct connection - Supabase pooler handles connection reuse
-        conn = psycopg2.connect(
-            DATABASE_URL,
-            connect_timeout=10,
-            options='-c statement_timeout=30000'  # 30 second timeout
-        )
+        conn = get_connection()
         yield conn
         conn.commit()
     except Exception as e:
@@ -34,7 +33,7 @@ def get_db():
         raise e
     finally:
         if conn:
-            conn.close()  # Close immediately in serverless
+            conn.close()
 
 
 def execute_query(query: str, params: tuple = None, fetch_one: bool = False, fetch_all: bool = False):
