@@ -28,7 +28,6 @@
   ],
   "env": {
     "PYTHONPATH": "/var/task/backend",
-    "DATABASE_URL": "@database_url",
-    "ALLOWED_ORIGINS": "http://localhost:3000,https://boke-78g2pyah7-kristiyan-hadjievs-projects.vercel.app,https://boke-brown-ten.vercel.app"
+    "ALLOWED_ORIGINS": "http://localhost:3000,https://boke-78g2pyah7-kristiyan-hadjievs-projects.vercel.app,https://boke-brown-ten.vercel.app,https://*.vercel.app"
   }
 }
