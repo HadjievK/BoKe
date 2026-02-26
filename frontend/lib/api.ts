@@ -1,7 +1,8 @@
 // API client functions
 
 // Use relative URL in production (deployed on same domain), localhost in development
-const API_URL = process.env.NEXT_PUBLIC_API_URL || (typeof window !== 'undefined' && window.location.origin.includes('vercel.app') ? '' : 'http://localhost:8000')
+const API_URL = process.env.NEXT_PUBLIC_API_URL ||
+  (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:8000')
 
 import type {
   ProviderWithServices,
