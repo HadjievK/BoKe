@@ -1,0 +1,79 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap');
+
+@layer base {
+  :root {
+    --gold: #B8860B;
+    --gold-dark: #8B6914;
+    --gold-light: #D4AF37;
+    --cream: #F8F5F0;
+    --cream-dark: #E8E0D5;
+    --ink: #111111;
+    --ink-light: #333333;
+    --success: #2D7A4F;
+    --success-light: #40916C;
+  }
+
+  body {
+    @apply font-body text-ink bg-cream;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-gold text-white px-6 py-3 rounded-xl font-medium
+           hover:bg-gold-dark transition-colors duration-200
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply bg-white text-ink px-6 py-3 rounded-xl font-medium
+           border-2 border-ink hover:bg-ink hover:text-white
+           transition-all duration-200;
+  }
+
+  .input-field {
+    @apply w-full px-4 py-3 rounded-xl border-2 border-cream-dark
+           focus:border-gold focus:outline-none transition-colors
+           bg-white text-ink;
+  }
+
+  .card {
+    @apply bg-white rounded-2xl shadow-lg p-6;
+  }
+
+  .time-slot {
+    @apply px-4 py-3 rounded-xl border-2 text-center font-medium
+           transition-all duration-200 cursor-pointer;
+  }
+
+  .time-slot-available {
+    @apply border-cream-dark hover:border-gold hover:bg-gold hover:text-white;
+  }
+
+  .time-slot-unavailable {
+    @apply border-cream-dark text-gray-400 cursor-not-allowed opacity-50;
+  }
+
+  .time-slot-selected {
+    @apply border-gold bg-gold text-white;
+  }
+
+  .service-card {
+    @apply card hover:shadow-xl transition-shadow cursor-pointer
+           border-2 border-transparent hover:border-gold;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
