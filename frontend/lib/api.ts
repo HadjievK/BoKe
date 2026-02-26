@@ -1,8 +1,10 @@
 // API client functions
 
-// Use relative URL in production (deployed on same domain), localhost in development
-const API_URL = process.env.NEXT_PUBLIC_API_URL ||
-  (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:8000')
+// In production, use relative URLs (same domain)
+// In development, you need to run the backend locally on port 8000
+const API_URL = process.env.NODE_ENV === 'production'
+  ? ''
+  : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000')
 
 import type {
   ProviderWithServices,
