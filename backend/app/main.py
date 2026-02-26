@@ -1,9 +1,12 @@
 """Main FastAPI application"""
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 import os
+import traceback
+import sys
 from dotenv import load_dotenv
 
 from app.routes import onboarding, public, dashboard
@@ -15,6 +18,21 @@ app = FastAPI(
     description="Multi-tenant booking platform for service providers",
     version="1.0.0"
 )
+
+# Global exception handler
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    """Catch all unhandled exceptions and return JSON"""
+    print(f"UNHANDLED EXCEPTION: {str(exc)}", file=sys.stderr)
+    print(f"Traceback: {traceback.format_exc()}", file=sys.stderr)
+
+    return JSONResponse(
+        status_code=500,
+        content={
+            "detail": f"Internal server error: {str(exc)}",
+            "type": type(exc).__name__
+        }
+    )
 
 # CORS configuration
 allowed_origins_str = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000")
