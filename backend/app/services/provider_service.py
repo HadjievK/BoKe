@@ -3,6 +3,7 @@ import re
 import random
 from uuid import UUID
 from typing import Optional, List
+from psycopg2.extras import RealDictRow
 import json
 
 from app.database.connection import execute_query

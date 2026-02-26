@@ -1,8 +1,8 @@
 """Database connection management - Optimized for serverless"""
 import os
 from contextlib import contextmanager
-import psycopg
-from psycopg.rows import dict_row
+import psycopg2
+from psycopg2.extras import RealDictCursor
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -21,7 +21,7 @@ def get_db():
     conn = None
     try:
         # Direct connection - Supabase pooler handles connection reuse
-        conn = psycopg.connect(
+        conn = psycopg2.connect(
             DATABASE_URL,
             connect_timeout=10,
             options='-c statement_timeout=30000'  # 30 second timeout
@@ -40,7 +40,7 @@ def get_db():
 def execute_query(query: str, params: tuple = None, fetch_one: bool = False, fetch_all: bool = False):
     """Execute a query and return results"""
     with get_db() as conn:
-        with conn.cursor(row_factory=dict_row) as cursor:
+        with conn.cursor(cursor_factory=RealDictCursor) as cursor:
             cursor.execute(query, params or ())
 
             if fetch_one:
