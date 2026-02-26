@@ -31,6 +31,6 @@
   ],
   "env": {
     "PYTHONPATH": "/var/task/backend",
-    "ALLOWED_ORIGINS": "http://localhost:3000,https://*.vercel.app"
+    "ALLOWED_ORIGINS": "https://*.vercel.app"
   }
 }
