@@ -16,9 +16,13 @@ export default function DashboardPage() {
   const [error, setError] = useState('')
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null)
   const [selectedDate, setSelectedDate] = useState(new Date())
+  const [calendarView, setCalendarView] = useState<'day' | 'week' | 'month' | 'year'>('week')
+  const [currentMonth, setCurrentMonth] = useState(new Date())
+  const [currentYear, setCurrentYear] = useState(new Date().getFullYear())
 
   // Settings modal states
   const [showSettings, setShowSettings] = useState(false)
+  const [showCalendarModal, setShowCalendarModal] = useState(false)
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [location, setLocation] = useState('')
@@ -83,6 +87,28 @@ export default function DashboardPage() {
     setPassword('')
     setDashboardData(null)
     sessionStorage.removeItem(`password_${slug}`)
+  }
+
+  const getDaysInMonth = (date: Date) => {
+    return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate()
+  }
+
+  const getFirstDayOfMonth = (date: Date) => {
+    return new Date(date.getFullYear(), date.getMonth(), 1).getDay()
+  }
+
+  const getMonthName = (date: Date) => {
+    return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+  }
+
+  const getWeekDays = (date: Date) => {
+    const start = new Date(date)
+    start.setDate(date.getDate() - date.getDay())
+    return Array.from({ length: 7 }, (_, i) => {
+      const day = new Date(start)
+      day.setDate(start.getDate() + i)
+      return day
+    })
   }
 
   // Password Entry Screen
@@ -158,7 +184,12 @@ export default function DashboardPage() {
               Bu<span className="text-[#C9993A]">Ke</span>
             </div>
             <div className="flex items-center gap-2 text-sm">
-              <button className="px-3 py-1.5 bg-white/10 rounded-md hover:bg-white/20 transition">📅 Calendar</button>
+              <button
+                onClick={() => setShowCalendarModal(true)}
+                className="px-3 py-1.5 bg-white/10 rounded-md hover:bg-white/20 transition"
+              >
+                📅 Calendar
+              </button>
               <button className="px-3 py-1.5 hover:bg-white/10 rounded-md transition">👥 Clients</button>
               <button className="px-3 py-1.5 hover:bg-white/10 rounded-md transition">📋 Services</button>
               <button className="px-3 py-1.5 hover:bg-white/10 rounded-md transition">💰 Earnings</button>
@@ -411,6 +442,268 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
+
+      {/* Calendar Modal */}
+      {showCalendarModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-6xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 bg-white border-b border-[rgba(28,24,18,0.08)] px-6 py-4 flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <h2 className="text-2xl font-bold text-[#1C1812]" style={{ fontFamily: 'Fraunces, serif' }}>
+                  Calendar
+                </h2>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setCalendarView('week')}
+                    className={`px-3 py-1.5 rounded-md text-sm font-medium transition ${
+                      calendarView === 'week'
+                        ? 'bg-[#1C1812] text-white'
+                        : 'bg-[#F5F0E8] text-[#1C1812] hover:bg-[#F5EDD8]'
+                    }`}
+                  >
+                    Week
+                  </button>
+                  <button
+                    onClick={() => setCalendarView('month')}
+                    className={`px-3 py-1.5 rounded-md text-sm font-medium transition ${
+                      calendarView === 'month'
+                        ? 'bg-[#1C1812] text-white'
+                        : 'bg-[#F5F0E8] text-[#1C1812] hover:bg-[#F5EDD8]'
+                    }`}
+                  >
+                    Month
+                  </button>
+                  <button
+                    onClick={() => setCalendarView('year')}
+                    className={`px-3 py-1.5 rounded-md text-sm font-medium transition ${
+                      calendarView === 'year'
+                        ? 'bg-[#1C1812] text-white'
+                        : 'bg-[#F5F0E8] text-[#1C1812] hover:bg-[#F5EDD8]'
+                    }`}
+                  >
+                    Year
+                  </button>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowCalendarModal(false)}
+                className="text-2xl text-[#6B6455] hover:text-[#1C1812] transition"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="p-6">
+              {/* Week View */}
+              {calendarView === 'week' && (
+                <div>
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-lg font-bold text-[#1C1812]" style={{ fontFamily: 'Fraunces, serif' }}>
+                      {getWeekDays(selectedDate)[0].toLocaleDateString('en-US', { month: 'long', day: 'numeric' })} - {getWeekDays(selectedDate)[6].toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                    </h3>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => {
+                          const newDate = new Date(selectedDate)
+                          newDate.setDate(newDate.getDate() - 7)
+                          setSelectedDate(newDate)
+                        }}
+                        className="px-3 py-1 bg-[#F5F0E8] rounded-md hover:bg-[#F5EDD8] transition"
+                      >
+                        ← Prev
+                      </button>
+                      <button
+                        onClick={() => setSelectedDate(new Date())}
+                        className="px-3 py-1 bg-[#F5F0E8] rounded-md hover:bg-[#F5EDD8] transition"
+                      >
+                        Today
+                      </button>
+                      <button
+                        onClick={() => {
+                          const newDate = new Date(selectedDate)
+                          newDate.setDate(newDate.getDate() + 7)
+                          setSelectedDate(newDate)
+                        }}
+                        className="px-3 py-1 bg-[#F5F0E8] rounded-md hover:bg-[#F5EDD8] transition"
+                      >
+                        Next →
+                      </button>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-7 gap-2">
+                    {getWeekDays(selectedDate).map((day, i) => (
+                      <div
+                        key={i}
+                        className={`p-4 rounded-lg border-2 min-h-[120px] ${
+                          day.toDateString() === new Date().toDateString()
+                            ? 'border-[#C9993A] bg-[#F5EDD8]'
+                            : 'border-[rgba(28,24,18,0.08)] bg-white'
+                        }`}
+                      >
+                        <div className="text-xs text-[#6B6455] font-medium mb-1">
+                          {day.toLocaleDateString('en-US', { weekday: 'short' })}
+                        </div>
+                        <div className={`text-2xl font-bold mb-2 ${
+                          day.toDateString() === new Date().toDateString()
+                            ? 'text-[#C9993A]'
+                            : 'text-[#1C1812]'
+                        }`} style={{ fontFamily: 'Fraunces, serif' }}>
+                          {day.getDate()}
+                        </div>
+                        <div className="text-xs text-[#6B6455]">
+                          {Math.floor(Math.random() * 5)} appointments
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Month View */}
+              {calendarView === 'month' && (
+                <div>
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-lg font-bold text-[#1C1812]" style={{ fontFamily: 'Fraunces, serif' }}>
+                      {getMonthName(currentMonth)}
+                    </h3>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => {
+                          const newMonth = new Date(currentMonth)
+                          newMonth.setMonth(newMonth.getMonth() - 1)
+                          setCurrentMonth(newMonth)
+                        }}
+                        className="px-3 py-1 bg-[#F5F0E8] rounded-md hover:bg-[#F5EDD8] transition"
+                      >
+                        ← Prev
+                      </button>
+                      <button
+                        onClick={() => setCurrentMonth(new Date())}
+                        className="px-3 py-1 bg-[#F5F0E8] rounded-md hover:bg-[#F5EDD8] transition"
+                      >
+                        Today
+                      </button>
+                      <button
+                        onClick={() => {
+                          const newMonth = new Date(currentMonth)
+                          newMonth.setMonth(newMonth.getMonth() + 1)
+                          setCurrentMonth(newMonth)
+                        }}
+                        className="px-3 py-1 bg-[#F5F0E8] rounded-md hover:bg-[#F5EDD8] transition"
+                      >
+                        Next →
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-7 gap-1 text-center mb-2">
+                    {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+                      <div key={day} className="text-sm font-semibold text-[#6B6455] py-2">
+                        {day}
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="grid grid-cols-7 gap-1">
+                    {Array.from({ length: getFirstDayOfMonth(currentMonth) }).map((_, i) => (
+                      <div key={`empty-${i}`} className="aspect-square" />
+                    ))}
+                    {Array.from({ length: getDaysInMonth(currentMonth) }, (_, i) => i + 1).map(day => {
+                      const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day)
+                      const isToday = date.toDateString() === new Date().toDateString()
+                      const hasAppointments = Math.random() > 0.5
+
+                      return (
+                        <button
+                          key={day}
+                          onClick={() => setSelectedDate(date)}
+                          className={`aspect-square p-2 rounded-lg transition flex flex-col items-center justify-center ${
+                            isToday
+                              ? 'bg-[#1C1812] text-white'
+                              : hasAppointments
+                              ? 'bg-[#F5EDD8] text-[#1C1812] hover:bg-[#E8C96A]'
+                              : 'bg-white border border-[rgba(28,24,18,0.08)] hover:bg-[#F5F0E8]'
+                          }`}
+                        >
+                          <div className="text-lg font-bold" style={{ fontFamily: 'Fraunces, serif' }}>
+                            {day}
+                          </div>
+                          {hasAppointments && !isToday && (
+                            <div className="w-1.5 h-1.5 rounded-full bg-[#C9993A] mt-1" />
+                          )}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Year View */}
+              {calendarView === 'year' && (
+                <div>
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-lg font-bold text-[#1C1812]" style={{ fontFamily: 'Fraunces, serif' }}>
+                      {currentYear}
+                    </h3>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setCurrentYear(currentYear - 1)}
+                        className="px-3 py-1 bg-[#F5F0E8] rounded-md hover:bg-[#F5EDD8] transition"
+                      >
+                        ← Prev
+                      </button>
+                      <button
+                        onClick={() => setCurrentYear(new Date().getFullYear())}
+                        className="px-3 py-1 bg-[#F5F0E8] rounded-md hover:bg-[#F5EDD8] transition"
+                      >
+                        This Year
+                      </button>
+                      <button
+                        onClick={() => setCurrentYear(currentYear + 1)}
+                        className="px-3 py-1 bg-[#F5F0E8] rounded-md hover:bg-[#F5EDD8] transition"
+                      >
+                        Next →
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-4 gap-4">
+                    {Array.from({ length: 12 }, (_, i) => {
+                      const monthDate = new Date(currentYear, i, 1)
+                      const monthName = monthDate.toLocaleDateString('en-US', { month: 'long' })
+                      const isCurrentMonth = i === new Date().getMonth() && currentYear === new Date().getFullYear()
+
+                      return (
+                        <button
+                          key={i}
+                          onClick={() => {
+                            setCurrentMonth(monthDate)
+                            setCalendarView('month')
+                          }}
+                          className={`p-4 rounded-lg border-2 transition ${
+                            isCurrentMonth
+                              ? 'border-[#C9993A] bg-[#F5EDD8]'
+                              : 'border-[rgba(28,24,18,0.08)] bg-white hover:bg-[#F5F0E8]'
+                          }`}
+                        >
+                          <div className={`text-lg font-bold mb-2 ${
+                            isCurrentMonth ? 'text-[#C9993A]' : 'text-[#1C1812]'
+                          }`} style={{ fontFamily: 'Fraunces, serif' }}>
+                            {monthName}
+                          </div>
+                          <div className="text-sm text-[#6B6455]">
+                            {Math.floor(Math.random() * 50 + 10)} appointments
+                          </div>
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Settings Modal */}
       {showSettings && (
