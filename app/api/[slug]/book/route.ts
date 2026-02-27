@@ -123,20 +123,24 @@ export async function POST(
         business_name: provider.business_name,
         slug: slug
       },
-      service: {
-        name: service.name,
+      appointment: {
+        service: {
+          name: service.name,
+          duration: service.duration,
+          price: service.price
+        },
+        appointment_date,
+        appointment_time,
         duration: service.duration,
-        price: service.price
+        price: service.price,
+        status: 'confirmed',
+        created_at: appointment.created_at
       },
-      appointment_date,
-      appointment_time,
       customer: {
         first_name: customer.first_name,
         last_name: customer.last_name,
         email: customer.email
-      },
-      status: 'confirmed',
-      created_at: appointment.created_at
+      }
     });
 
   } catch (error: any) {
