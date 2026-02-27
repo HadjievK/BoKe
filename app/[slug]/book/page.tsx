@@ -143,7 +143,7 @@ export default function BookingPage() {
     )
   }
 
-  if (!barber) return null
+  if (!provider) return null
 
   // Success screen
   if (step === 'success' && confirmation) {
