@@ -10,17 +10,17 @@ export default function DashboardPage() {
   const params = useParams()
   const slug = params.slug as string
 
-  const [password, setPin] = useState('')
+  const [password, setPassword] = useState('')
   const [authenticated, setAuthenticated] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null)
 
   useEffect(() => {
-    // Check for stored PIN (simple session storage for MVP)
+    // Check for stored password (simple session storage for MVP)
     const stored = sessionStorage.getItem(`password_${slug}`)
     if (stored) {
-      setPin(stored)
+      setPassword(stored)
       fetchDashboard(stored)
     }
   }, [slug])
@@ -43,16 +43,16 @@ export default function DashboardPage() {
     }
   }
 
-  const handlePinSubmit = (e: React.FormEvent) => {
+  const handlePasswordSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (password.length === 4) {
+    if (password.length >= 6) {
       fetchDashboard(password)
     }
   }
 
   const handleLogout = () => {
     setAuthenticated(false)
-    setPin('')
+    setPassword('')
     setDashboardData(null)
     sessionStorage.removeItem(`password_${slug}`)
   }
