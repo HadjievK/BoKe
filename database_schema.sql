@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS appointments (
   id SERIAL PRIMARY KEY,
   provider_id INTEGER NOT NULL REFERENCES service_providers(id) ON DELETE CASCADE,
   customer_id INTEGER NOT NULL REFERENCES customers(id) ON DELETE CASCADE,
-  service_id VARCHAR(10) NOT NULL,
+  service_id VARCHAR(50) NOT NULL,
   appointment_date DATE NOT NULL,
   appointment_time TIME NOT NULL,
   duration INTEGER NOT NULL,
