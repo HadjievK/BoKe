@@ -272,6 +272,7 @@ export default function BookingPage() {
         {/* Step 2: Select Date & Time */}
         {step === 'datetime' && selectedService && (
           <div>
+            {/* Selected Service Summary */}
             <div className="card mb-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -289,32 +290,48 @@ export default function BookingPage() {
               </div>
             </div>
 
-            <div className="card mb-6">
-              <h2 className="text-2xl font-bold mb-6">Select Date</h2>
-              <CalendarPicker
-                selectedDate={selectedDate}
-                onDateSelect={handleDateSelect}
-              />
-            </div>
+            {/* Calendar and Time Slots Side by Side */}
+            <div className="grid lg:grid-cols-2 gap-6">
+              {/* Calendar Section */}
+              <div className="card">
+                <h2 className="text-2xl font-bold mb-6">Select Date</h2>
+                <CalendarPicker
+                  selectedDate={selectedDate}
+                  onDateSelect={handleDateSelect}
+                />
+              </div>
 
-            {selectedDate && (
+              {/* Time Slots Section */}
               <div className="card">
                 <h2 className="text-2xl font-bold mb-6">
-                  Available Times for {formatDate(selectedDate)}
+                  {selectedDate ? `Available Times` : 'Select a Date'}
                 </h2>
-                {loadingSlots ? (
-                  <div className="text-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gold mx-auto"></div>
+                {!selectedDate ? (
+                  <div className="text-center py-12 text-muted-foreground">
+                    <svg className="w-16 h-16 mx-auto mb-4 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <p className="text-sm">Choose a date from the calendar</p>
+                  </div>
+                ) : loadingSlots ? (
+                  <div className="text-center py-12">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gold mx-auto mb-4"></div>
+                    <p className="text-sm text-muted-foreground">Loading available times...</p>
                   </div>
                 ) : (
-                  <TimeSlotGrid
-                    slots={timeSlots}
-                    selectedTime={selectedTime}
-                    onTimeSelect={handleTimeSelect}
-                  />
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      {formatDate(selectedDate)}
+                    </p>
+                    <TimeSlotGrid
+                      slots={timeSlots}
+                      selectedTime={selectedTime}
+                      onTimeSelect={handleTimeSelect}
+                    />
+                  </div>
                 )}
               </div>
-            )}
+            </div>
           </div>
         )}
 

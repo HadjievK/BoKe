@@ -84,6 +84,23 @@
   .font-body {
     font-family: 'Figtree', sans-serif;
   }
+
+  /* Time Slot Styles */
+  .time-slot {
+    @apply px-4 py-3 rounded-lg border-2 text-sm font-medium transition-all duration-200;
+  }
+
+  .time-slot-available {
+    @apply bg-background border-border text-foreground hover:border-gold hover:bg-gold-light cursor-pointer;
+  }
+
+  .time-slot-selected {
+    @apply bg-gold border-gold text-white cursor-pointer;
+  }
+
+  .time-slot-unavailable {
+    @apply bg-muted/10 border-border/50 text-muted cursor-not-allowed opacity-50;
+  }
 }
 
 @keyframes float {
