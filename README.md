@@ -21,17 +21,18 @@ User Request
     ↓
 Vercel Edge Network
     ↓
-├── Frontend (Next.js 14)
-│   ├── Landing Page (/)
-│   ├── Provider Profile (/sally-nails)
-│   ├── Booking Page (/sally-nails/book)
-│   └── Dashboard (/dashboard/sally-nails?pin=1234)
-│
-└── Backend (FastAPI Serverless)
-    ├── Registration API (/api/onboard)
-    ├── Booking API (/api/{slug}/book)
-    └── Dashboard API (/api/dashboard/{slug})
-    ↓
+Next.js 14 App (Frontend + Backend)
+    ├── Frontend Pages
+    │   ├── Landing Page (/)
+    │   ├── Provider Profile (/sally-nails)
+    │   ├── Booking Page (/sally-nails/book)
+    │   └── Dashboard (/dashboard/sally-nails?pin=1234)
+    │
+    └── API Routes (Next.js Serverless)
+        ├── /api/onboard - Registration
+        ├── /api/{slug}/book - Booking
+        └── /api/dashboard/{slug} - Dashboard
+        ↓
 Supabase PostgreSQL
     └── Transaction Pooler (IPv4-compatible)
         └── 3 Tables: service_providers, customers, appointments
@@ -40,14 +41,15 @@ Supabase PostgreSQL
 ### Tech Stack
 
 - **Frontend**: Next.js 14 (App Router), TypeScript, Tailwind CSS
-- **Backend**: FastAPI (Python), Pydantic
+- **Backend**: Next.js API Routes (TypeScript)
 - **Database**: Supabase PostgreSQL (Transaction Pooler - port 6543)
-- **Hosting**: Vercel (Frontend + Backend serverless functions)
+- **Hosting**: Vercel (Everything in one deployment)
 - **Cost**: $0/month (free tier)
 
 ### Key Design Decisions
 
-✅ **No Connection Pool** - Each serverless function opens/closes DB connection
+✅ **Single Deployment** - Frontend + Backend in one Next.js app
+✅ **No Separate Python Service** - Pure TypeScript/JavaScript stack
 ✅ **Supabase Pooler** - Handles connection reuse (IPv4-compatible for Vercel)
 ✅ **JSONB Storage** - Services and availability stored as JSON (no joins)
 ✅ **Slug-based Multi-tenancy** - Each provider gets unique route
@@ -66,25 +68,18 @@ BoKe/
 │   │   │   ├── page.tsx     # Provider profile
 │   │   │   └── book/
 │   │   │       └── page.tsx # Booking form
-│   │   └── dashboard/
-│   │       └── [slug]/
-│   │           └── page.tsx # Dashboard (PIN-protected)
+│   │   ├── dashboard/
+│   │   │   └── [slug]/
+│   │   │       └── page.tsx # Dashboard (PIN-protected)
+│   │   └── api/             # API Routes (Backend)
+│   │       ├── onboard/
+│   │       │   └── route.ts # Registration endpoint
+│   │       └── health/
+│   │           └── route.ts # Health check
 │   └── lib/
+│       ├── db.ts            # PostgreSQL connection
 │       ├── api.ts           # API client
 │       └── types.ts         # TypeScript types
-│
-├── backend/                  # FastAPI App
-│   └── app/
-│       ├── main.py          # FastAPI app + CORS
-│       ├── routes/          # API endpoints
-│       ├── services/        # Business logic
-│       ├── models/          # Pydantic schemas
-│       └── database/
-│           ├── schema_v2.sql         # Database schema
-│           └── connection.py         # DB connection (serverless-optimized)
-│
-├── api/
-│   └── index.py             # Vercel serverless handler (Mangum)
 │
 └── vercel.json              # Vercel deployment config
 ```
@@ -138,51 +133,39 @@ appointments (
 
 ### Prerequisites
 - Node.js 20+
-- Python 3.12+
 - Supabase account (free tier)
 
 ### 1. Clone & Install
 
 ```bash
 git clone https://github.com/HadjievK/BoKe.git
-cd BoKe
-
-# Install frontend
-cd frontend
+cd BoKe/frontend
 npm install
-
-# Install backend
-cd ../backend
-pip install -r requirements.txt
 ```
 
 ### 2. Setup Database
 
 1. Create Supabase project at https://supabase.com
-2. Run SQL from `backend/app/database/schema_v2.sql`
+2. Go to SQL Editor and create the database schema
 3. Copy **Transaction Pooler** connection string (port 6543)
 
 ### 3. Configure Environment
 
+Create `frontend/.env.local`:
+
 ```bash
-# backend/.env
 DATABASE_URL=postgresql://postgres.xxx:password@aws-1-eu-central-1.pooler.supabase.com:6543/postgres
-ALLOWED_ORIGINS=http://localhost:3000,http://localhost:3001
+NEXT_PUBLIC_API_URL=http://localhost:3000
 ```
 
 ### 4. Run Locally
 
 ```bash
-# Terminal 1 - Backend (port 8000)
-cd backend
-python -m uvicorn app.main:app --reload --port 8000
-
-# Terminal 2 - Frontend (port 3001)
 cd frontend
-npm run dev -- -p 3001
+npm run dev
 ```
 
-Visit: http://localhost:3001
+Visit: http://localhost:3000
 
 ---
 
@@ -197,17 +180,24 @@ npm install -g vercel
 # Login
 vercel login
 
-# Deploy
+# Deploy from frontend directory
+cd frontend
 vercel --prod
 ```
 
-### Set Environment Variable
+### Set Environment Variables
 
 Go to Vercel Dashboard → Project Settings → Environment Variables:
 
 ```
 DATABASE_URL = postgresql://postgres.xxx:password@aws-1-eu-central-1.pooler.supabase.com:6543/postgres
 ```
+
+### Update Root Directory
+
+In Vercel Dashboard → Settings → General:
+- **Root Directory**: `frontend`
+- Click **Save**
 
 **That's it!** ✅ Your app is live.
 
@@ -217,24 +207,23 @@ DATABASE_URL = postgresql://postgres.xxx:password@aws-1-eu-central-1.pooler.supa
 
 ### Public (No Auth)
 - `POST /api/onboard` - Register new provider
+- `GET /api/health` - Health check
+
+### Coming Soon
 - `GET /api/provider/{slug}` - Get provider profile
 - `GET /api/{slug}/availability?date=2024-01-15` - Get available slots
 - `POST /api/{slug}/book` - Book appointment
-
-### Protected (PIN Required)
 - `GET /api/dashboard/{slug}?pin=1234` - Get dashboard data
-- `GET /api/dashboard/{slug}/appointments?pin=1234` - Get appointments
-- `GET /api/dashboard/{slug}/customers?pin=1234` - Get customers
 
 ---
 
 ## 🔒 Security
 
 - ✅ PIN-based dashboard authentication (4-digit)
-- ✅ CORS restricted to allowed origins
 - ✅ SQL injection prevention (parameterized queries)
 - ✅ Unique constraint prevents double-booking
 - ✅ Customer email deduplication
+- ✅ Environment variables for sensitive data
 
 ---
 
