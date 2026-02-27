@@ -1,291 +1,141 @@
-# 🗓️ BuKe - Simple Booking Platform
+# BuKe - Modern Booking Platform
 
-**Multi-tenant booking platform where service providers (nail artists, barbers, dentists, etc.) create profiles and share booking links with customers.**
+Beautiful, simple booking pages for service professionals. Barbers, dentists, trainers, and more can create their booking page in 5 minutes.
 
-## 🎯 How It Works
-
-1. **Service Provider** visits landing page → Creates account
-2. Gets unique URL: `boke.app/sally-nails`
-3. Shares link on Instagram/social media
-4. **Customers** click link → Book services
-5. **Provider** checks dashboard with PIN → Sees bookings
-
----
-
-## 🏗️ Architecture
-
-### Simple Stack (100% Serverless - FREE)
-
-```
-User Request
-    ↓
-Vercel Edge Network
-    ↓
-Next.js 14 App (Frontend + Backend)
-    ├── Frontend Pages
-    │   ├── Landing Page (/)
-    │   ├── Provider Profile (/sally-nails)
-    │   ├── Booking Page (/sally-nails/book)
-    │   └── Dashboard (/dashboard/sally-nails?pin=1234)
-    │
-    └── API Routes (Next.js Serverless)
-        ├── /api/onboard - Registration
-        ├── /api/{slug}/book - Booking
-        └── /api/dashboard/{slug} - Dashboard
-        ↓
-Supabase PostgreSQL
-    └── Transaction Pooler (IPv4-compatible)
-        └── 3 Tables: service_providers, customers, appointments
-```
-
-### Tech Stack
-
-- **Frontend**: Next.js 14 (App Router), TypeScript, Tailwind CSS, React-Day-Picker
-- **Backend**: Next.js API Routes (TypeScript)
-- **Database**: Supabase PostgreSQL (Transaction Pooler - port 6543)
-- **Hosting**: Vercel (Everything in one deployment)
-- **Theme**: Light/Dark mode with system preference detection
-- **Cost**: $0/month (free tier)
-
-### Key Design Decisions
-
-✅ **Single Deployment** - Frontend + Backend in one Next.js app
-✅ **No Separate Python Service** - Pure TypeScript/JavaScript stack
-✅ **Supabase Pooler** - Handles connection reuse (IPv4-compatible for Vercel)
-✅ **JSONB Storage** - Services and availability stored as JSON (no joins)
-✅ **Slug-based Multi-tenancy** - Each provider gets unique route
-✅ **PIN Authentication** - Simple 4-digit PIN for dashboard access
-✅ **Theme System** - Light/Dark mode with smooth transitions and system detection
-✅ **React-Day-Picker** - Professional calendar with accessibility (ARIA, keyboard nav)
-
----
-
-## 📂 Project Structure
-
-```
-BoKe/
-├── frontend/                 # Next.js 14 App
-│   ├── app/
-│   │   ├── page.tsx         # Landing page (registration)
-│   │   ├── [slug]/
-│   │   │   ├── page.tsx     # Provider profile
-│   │   │   └── book/
-│   │   │       └── page.tsx # Booking form
-│   │   ├── dashboard/
-│   │   │   └── [slug]/
-│   │   │       └── page.tsx # Dashboard (PIN-protected)
-│   │   └── api/             # API Routes (Backend)
-│   │       ├── onboard/
-│   │       │   └── route.ts # Registration endpoint
-│   │       └── health/
-│   │           └── route.ts # Health check
-│   └── lib/
-│       ├── db.ts            # PostgreSQL connection
-│       ├── api.ts           # API client
-│       └── types.ts         # TypeScript types
-│
-└── vercel.json              # Vercel deployment config
-```
-
----
-
-## 🗄️ Database Schema
-
-```sql
--- 3 Simple Tables
-
-service_providers (
-  id UUID PRIMARY KEY,
-  slug TEXT UNIQUE,              -- "sally-nails"
-  name TEXT,                     -- "Sally"
-  business_name TEXT,            -- "Sally's Nails"
-  service_type TEXT,             -- "nail_artist"
-  email TEXT UNIQUE,
-  phone TEXT,
-  pin TEXT,                      -- "1234"
-  services JSONB,                -- [{"name": "Manicure", "price": 30, ...}]
-  availability JSONB,            -- [{"day": 0, "start": "09:00", ...}]
-  theme_config JSONB
-)
-
-customers (
-  id UUID PRIMARY KEY,
-  email TEXT UNIQUE,
-  first_name TEXT,
-  last_name TEXT,
-  phone TEXT
-)
-
-appointments (
-  id UUID PRIMARY KEY,
-  provider_id UUID → service_providers(id),
-  customer_id UUID → customers(id),
-  service_id TEXT,               -- "provider-id-0"
-  appointment_date DATE,
-  appointment_time TIME,
-  duration INT,
-  price DECIMAL,
-  status TEXT,                   -- "confirmed", "cancelled", "completed"
-  UNIQUE(provider_id, appointment_date, appointment_time)  -- Prevent double-booking
-)
-```
-
----
-
-## 🚀 Local Development
-
-### Prerequisites
-- Node.js 20+
-- Supabase account (free tier)
-
-### 1. Clone & Install
+## Quick Start
 
 ```bash
-git clone https://github.com/HadjievK/BoKe.git
-cd BoKe/frontend
+# Install dependencies
 npm install
-```
 
-### 2. Setup Database
+# Set up environment variables
+cp .env.example .env.local
+# Add your database credentials
 
-1. Create Supabase project at https://supabase.com
-2. Go to SQL Editor and create the database schema
-3. Copy **Transaction Pooler** connection string (port 6543)
-
-### 3. Configure Environment
-
-Create `frontend/.env.local`:
-
-```bash
-DATABASE_URL=postgresql://postgres.xxx:password@aws-1-eu-central-1.pooler.supabase.com:6543/postgres
-NEXT_PUBLIC_API_URL=http://localhost:3000
-```
-
-### 4. Run Locally
-
-```bash
-cd frontend
+# Run development server
 npm run dev
 ```
 
-Visit: http://localhost:3000
+Visit [http://localhost:3000](http://localhost:3000)
 
----
+## Tech Stack
 
-## 🌐 Deployment (Vercel)
+- **Framework**: Next.js 15 (App Router)
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS
+- **Database**: PostgreSQL (Supabase)
+- **Calendar**: React-Day-Picker v9
+- **Deployment**: Vercel
 
-### One-Click Deploy
+## Features
+
+- 🎨 Beautiful, theme-customizable provider pages
+- 📅 Integrated calendar and booking flow (no page transitions)
+- 🔐 Password-protected provider dashboards
+- 📊 Real-time appointment management
+- 📱 Fully responsive design
+- ♿ Accessible components
+- 🌙 Light/Dark mode support
+
+## Project Structure
+
+```
+BoKe/
+├── app/                      # Next.js 15 app directory
+│   ├── [slug]/              # Dynamic provider pages
+│   │   ├── page.tsx         # Provider home & booking (all-in-one)
+│   │   └── book/            # Legacy separate booking page
+│   ├── dashboard/           # Provider dashboards
+│   ├── api/                 # API routes
+│   └── page.tsx             # Landing & onboarding
+├── components/              # Reusable React components
+│   ├── booking/             # Booking flow components
+│   └── ThemeToggle.tsx      # Theme switcher
+├── lib/                     # Utilities and types
+│   ├── api.ts              # API client functions
+│   ├── db.ts               # Database connection
+│   ├── types.ts            # TypeScript types
+│   └── utils.ts            # Utility functions
+└── docs/                    # Documentation
+    ├── database_schema.sql  # Database structure
+    └── *.md                # Technical documentation
+```
+
+## Environment Variables
+
+Create a `.env.local` file with:
+
+```env
+# Database (Supabase PostgreSQL)
+POSTGRES_URL="postgresql://..."
+POSTGRES_PRISMA_URL="postgresql://..."
+POSTGRES_URL_NO_SSL="postgresql://..."
+POSTGRES_URL_NON_POOLING="postgresql://..."
+POSTGRES_USER="..."
+POSTGRES_HOST="..."
+POSTGRES_PASSWORD="..."
+POSTGRES_DATABASE="..."
+```
+
+## Database Setup
+
+1. Create a Supabase project or PostgreSQL database
+2. Run the schema in `docs/database_schema.sql`
+3. Update your `.env.local` with connection strings
+
+## Key Features Explained
+
+### Single-Page Booking Flow
+The entire booking experience happens on one page without routing:
+1. Customer selects a service → calendar appears below
+2. Picks a date → time slots appear
+3. Picks a time → customer form appears
+4. Submits → success confirmation
+5. "Book Another" resets the flow
+
+### Provider Dashboard
+- Password-protected access via `/dashboard/[slug]`
+- View today's appointments
+- Week/month calendar views
+- Customer management
+- Settings (services, location, availability)
+
+### Theme System
+- Each provider can customize colors
+- CSS variables for easy theming
+- Persisted in database
+- Real-time theme switching
+
+## Development
 
 ```bash
-# Install Vercel CLI
-npm install -g vercel
+# Run development server
+npm run dev
 
-# Login
-vercel login
+# Build for production
+npm run build
 
-# Deploy from frontend directory
-cd frontend
-vercel --prod
+# Run production build
+npm start
+
+# Lint code
+npm run lint
 ```
 
-### Set Environment Variables
+## Deployment
 
-Go to Vercel Dashboard → Project Settings → Environment Variables:
+Deployed on Vercel with automatic deployments on push to `main`.
 
-```
-DATABASE_URL = postgresql://postgres.xxx:password@aws-1-eu-central-1.pooler.supabase.com:6543/postgres
-```
+**Live URL**: [https://boke-brown-ten.vercel.app](https://boke-brown-ten.vercel.app)
 
-### Update Root Directory
+## Documentation
 
-In Vercel Dashboard → Settings → General:
-- **Root Directory**: `frontend`
-- Click **Save**
+See `/docs` folder for detailed documentation:
+- Database schema and setup
+- Theme system guide
+- Booking flow implementation
+- Deployment guide
 
-**That's it!** ✅ Your app is live.
+## License
 
----
-
-## 📋 API Endpoints
-
-### Public (No Auth)
-- `POST /api/onboard` - Register new provider
-- `POST /api/signin` - Sign in existing provider
-- `GET /api/health` - Health check
-- `GET /api/provider/{slug}` - Get provider profile with services
-- `GET /api/{slug}/availability?date=YYYY-MM-DD&service_id=0` - Get available time slots
-- `POST /api/{slug}/book` - Book appointment
-
-### Dashboard (PIN Auth)
-- `GET /api/dashboard/{slug}` - Get dashboard data
-- `GET /api/dashboard/{slug}/appointments?start_date=...&end_date=...` - Get appointments by date range
-- `GET /api/dashboard/{slug}/customers` - Get customer list
-- `PATCH /api/provider/{slug}/settings` - Update provider settings
-
----
-
-## 🔒 Security
-
-- ✅ PIN-based dashboard authentication (4-digit)
-- ✅ SQL injection prevention (parameterized queries)
-- ✅ Unique constraint prevents double-booking
-- ✅ Customer email deduplication
-- ✅ Environment variables for sensitive data
-
----
-
-## 💡 Why Serverless?
-
-**Perfect for booking platforms:**
-
-| Traditional Server | Vercel Serverless |
-|-------------------|-------------------|
-| 💰 $5-20/month | 💰 $0/month (free tier) |
-| 🏃 24/7 running | ⚡ Runs on-demand |
-| 🔧 Manual scaling | 📈 Auto-scales |
-| 🛠️ Server management | ✅ Zero maintenance |
-
-**Traffic Pattern**: Provider creates profile (rare) → Customers book (occasional) → Dashboard checks (periodic)
-
-**Cost Example**: 10 providers, 100 bookings/month = ~1000 API calls = **FREE**
-
----
-
-## 🎨 Customization
-
-Each provider can have:
-- Custom slug (`/sally-nails`)
-- Custom services (stored in JSONB)
-- Custom availability schedule
-- Theme preferences (light/dark mode)
-- Personalized business profile
-
----
-
-## ✨ Features
-
-### For Customers
-- 📅 **Full Month Calendar** - Professional date picker with keyboard navigation
-- ♿ **Accessible** - ARIA labels, screen reader support, keyboard shortcuts
-- 🎨 **Theme Support** - Light/Dark mode with smooth transitions
-- 📱 **Mobile Responsive** - Works seamlessly on all devices
-- ⚡ **Real-time Availability** - See available time slots instantly
-
-### For Providers
-- 📊 **Dashboard** - View appointments by day/week/month/year
-- 🔔 **Auto-refresh** - Dashboard syncs every 30 seconds
-- 🎨 **Theme Toggle** - Choose your preferred color scheme
-- 📋 **Customer Management** - Track customer details and history
-- 🔒 **PIN Protection** - Secure dashboard access
-
----
-
-## 📝 License
-
-MIT
-
----
-
-## 🙋 Support
-
-Issues: https://github.com/HadjievK/BoKe/issues
+Proprietary - All rights reserved
