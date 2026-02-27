@@ -24,10 +24,14 @@ module.exports = {
           light: 'hsl(var(--gold-light))',
           dark: 'hsl(var(--gold-dark))',
         },
-        cream: 'hsl(var(--cream))',
+        cream: {
+          DEFAULT: 'hsl(var(--cream))',
+          dark: 'hsl(var(--cream-dark))',
+        },
         ink: {
           DEFAULT: 'hsl(var(--ink))',
           light: 'hsl(var(--ink-light))',
+          foreground: 'hsl(var(--ink-foreground))',
         },
       },
       fontFamily: {

@@ -19,10 +19,15 @@
 - Expected: Service pre-selected
 
 #### 3. **Select Date**
-- Expected: Calendar shows current month
-- Expected: Can navigate between months
+- Expected: Full month calendar view (not 7-day grid)
+- Expected: Can navigate between months using prev/next buttons
+- Expected: Past dates are disabled/grayed out
+- Expected: Dates without availability are disabled
+- Expected: Today's date is highlighted
+- Expected: Keyboard navigation works (Tab to focus, arrow keys to navigate, Enter to select)
 - Action: Click a future date
-- Expected: Date selected, time slots fetch
+- Expected: Date selected with gold background
+- Expected: Time slots fetch automatically
 
 #### 4. **API: Fetch Available Time Slots**
 ```
@@ -117,7 +122,7 @@ Expected Response:
 
 2. **Past Date Selection**
    - Try to select date in the past
-   - Expected: No available slots or disabled
+   - Expected: Date is disabled and cannot be selected
 
 3. **Invalid Service ID**
    - Try to book with non-existent service
@@ -131,10 +136,28 @@ Expected Response:
    - Simulate DB failure
    - Expected: 500 error with message
 
+6. **Theme Switching**
+   - Switch between light/dark mode while on booking page
+   - Expected: Calendar colors update smoothly, no layout shift
+
+7. **Keyboard Navigation**
+   - Tab to calendar, use arrow keys to navigate dates
+   - Press Enter to select date
+   - Expected: Full keyboard accessibility works
+
+8. **Mobile Responsiveness**
+   - View calendar on mobile device or narrow viewport
+   - Expected: Calendar remains usable, cells don't overflow
+
 ### Success Criteria:
-✅ Customer can view available slots
+✅ Customer can view full month calendar
+✅ Customer can navigate between months
+✅ Customer can view available slots for selected date
 ✅ Customer can book appointment
 ✅ Appointment appears in dashboard immediately
 ✅ Calendar syncs within 30 seconds
 ✅ No double bookings allowed
 ✅ Error handling works correctly
+✅ Theme switching works smoothly
+✅ Keyboard navigation is fully functional
+✅ Calendar is mobile responsive

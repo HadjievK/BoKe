@@ -22,10 +22,35 @@
     --gold-dark: 40 70% 38%;
 
     --cream: 38 50% 96%;
+    --cream-dark: 38 40% 88%;
     --ink: 30 10% 15%;
     --ink-light: 30 8% 35%;
+    --ink-foreground: 0 0% 96%;
 
     --radius: 0.75rem;
+  }
+
+  .dark {
+    --background: 30 10% 12%;
+    --foreground: 0 0% 95%;
+
+    --card: 30 10% 15%;
+    --card-foreground: 0 0% 95%;
+
+    --muted: 0 0% 35%;
+    --muted-foreground: 0 0% 65%;
+
+    --border: 30 8% 22%;
+
+    --gold: 40 70% 55%;
+    --gold-light: 40 30% 20%;
+    --gold-dark: 40 75% 65%;
+
+    --cream: 30 15% 18%;
+    --cream-dark: 30 12% 22%;
+    --ink: 0 0% 95%;
+    --ink-light: 0 0% 75%;
+    --ink-foreground: 30 10% 12%;
   }
 
   * {
@@ -38,10 +63,17 @@
   body {
     font-family: 'Figtree', sans-serif;
     @apply bg-background text-foreground antialiased;
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
 
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Fraunces', serif;
+  }
+
+  * {
+    transition-property: background-color, border-color, color, fill, stroke;
+    transition-timing-function: ease;
+    transition-duration: 0.2s;
   }
 }
 

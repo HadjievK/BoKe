@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation'
 import { getDashboardData } from '@/lib/api'
 import type { DashboardData } from '@/lib/types'
 import { formatDate, formatTime, formatCurrency } from '@/lib/utils'
+import ThemeToggle from '@/components/ThemeToggle'
 
 export default function DashboardPage() {
   const params = useParams()
@@ -229,36 +230,37 @@ export default function DashboardPage() {
   const todayDate = new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
 
   return (
-    <main className="min-h-screen bg-[#F5F0E8]">
+    <main className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-[#1C1812] text-white px-6 py-4">
+      <header className="bg-ink text-ink-foreground px-6 py-4 border-b border-border">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="text-2xl font-black" style={{ fontFamily: 'Fraunces, serif' }}>
-              Bu<span className="text-[#C9993A]">Ke</span>
+            <div className="text-2xl font-black font-display">
+              Bu<span className="text-gold">Ke</span>
             </div>
             <div className="flex items-center gap-2 text-sm">
               <button
                 onClick={() => setShowCalendarModal(true)}
-                className="px-3 py-1.5 bg-white/10 rounded-md hover:bg-white/20 transition"
+                className="px-3 py-1.5 bg-gold/10 rounded-md hover:bg-gold/20 transition"
               >
                 📅 Calendar
               </button>
-              <button className="px-3 py-1.5 hover:bg-white/10 rounded-md transition">👥 Clients</button>
-              <button className="px-3 py-1.5 hover:bg-white/10 rounded-md transition">📋 Services</button>
+              <button className="px-3 py-1.5 hover:bg-gold/10 rounded-md transition">👥 Clients</button>
+              <button className="px-3 py-1.5 hover:bg-gold/10 rounded-md transition">📋 Services</button>
               <button
                 onClick={() => setShowSettings(true)}
-                className="px-3 py-1.5 hover:bg-white/10 rounded-md transition"
+                className="px-3 py-1.5 hover:bg-gold/10 rounded-md transition"
               >
                 ⚙️ Settings
               </button>
             </div>
           </div>
           <div className="flex items-center gap-4">
-            <button className="text-sm hover:text-[#C9993A] transition">🔔</button>
+            <ThemeToggle />
+            <button className="text-sm hover:text-gold transition">🔔</button>
             <button
               onClick={handleLogout}
-              className="px-4 py-2 bg-[#C9993A] text-[#1C1812] rounded-md text-sm font-semibold hover:bg-[#E8C96A] transition"
+              className="px-4 py-2 bg-gold text-background rounded-md text-sm font-semibold hover:bg-gold-dark transition"
             >
               Logout
             </button>

@@ -9,6 +9,7 @@ import ServiceCard from '@/components/booking/ServiceCard'
 import CalendarPicker from '@/components/booking/CalendarPicker'
 import TimeSlotGrid from '@/components/booking/TimeSlotGrid'
 import CustomerForm from '@/components/booking/CustomerForm'
+import ThemeToggle from '@/components/ThemeToggle'
 
 type BookingStep = 'service' | 'datetime' | 'details' | 'confirm' | 'success'
 
@@ -210,21 +211,25 @@ export default function BookingPage() {
   }
 
   return (
-    <main className="min-h-screen bg-cream py-8 px-4">
+    <main className="min-h-screen bg-background py-8 px-4">
       <div className="container mx-auto max-w-4xl">
         {/* Header */}
-        <div className="text-center mb-8">
+        <div className="flex items-center justify-between mb-8">
           <button
             onClick={() => router.push(`/${slug}`)}
-            className="text-gold hover:text-gold-dark mb-4 inline-flex items-center gap-2"
+            className="text-gold hover:text-gold-dark inline-flex items-center gap-2"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
             Back to {provider.business_name}
           </button>
-          <h1 className="text-4xl font-bold mb-2">Book an Appointment</h1>
-          <p className="text-ink-light">Select a service and time that works for you</p>
+          <ThemeToggle />
+        </div>
+
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold font-display mb-2">Book an Appointment</h1>
+          <p className="text-muted-foreground">Select a service and time that works for you</p>
         </div>
 
         {/* Progress Steps */}

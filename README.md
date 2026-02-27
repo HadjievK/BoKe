@@ -40,10 +40,11 @@ Supabase PostgreSQL
 
 ### Tech Stack
 
-- **Frontend**: Next.js 14 (App Router), TypeScript, Tailwind CSS
+- **Frontend**: Next.js 14 (App Router), TypeScript, Tailwind CSS, React-Day-Picker
 - **Backend**: Next.js API Routes (TypeScript)
 - **Database**: Supabase PostgreSQL (Transaction Pooler - port 6543)
 - **Hosting**: Vercel (Everything in one deployment)
+- **Theme**: Light/Dark mode with system preference detection
 - **Cost**: $0/month (free tier)
 
 ### Key Design Decisions
@@ -54,6 +55,8 @@ Supabase PostgreSQL
 ✅ **JSONB Storage** - Services and availability stored as JSON (no joins)
 ✅ **Slug-based Multi-tenancy** - Each provider gets unique route
 ✅ **PIN Authentication** - Simple 4-digit PIN for dashboard access
+✅ **Theme System** - Light/Dark mode with smooth transitions and system detection
+✅ **React-Day-Picker** - Professional calendar with accessibility (ARIA, keyboard nav)
 
 ---
 
@@ -207,13 +210,17 @@ In Vercel Dashboard → Settings → General:
 
 ### Public (No Auth)
 - `POST /api/onboard` - Register new provider
+- `POST /api/signin` - Sign in existing provider
 - `GET /api/health` - Health check
-
-### Coming Soon
-- `GET /api/provider/{slug}` - Get provider profile
-- `GET /api/{slug}/availability?date=2024-01-15` - Get available slots
+- `GET /api/provider/{slug}` - Get provider profile with services
+- `GET /api/{slug}/availability?date=YYYY-MM-DD&service_id=0` - Get available time slots
 - `POST /api/{slug}/book` - Book appointment
-- `GET /api/dashboard/{slug}?pin=1234` - Get dashboard data
+
+### Dashboard (PIN Auth)
+- `GET /api/dashboard/{slug}` - Get dashboard data
+- `GET /api/dashboard/{slug}/appointments?start_date=...&end_date=...` - Get appointments by date range
+- `GET /api/dashboard/{slug}/customers` - Get customer list
+- `PATCH /api/provider/{slug}/settings` - Update provider settings
 
 ---
 
@@ -250,7 +257,26 @@ Each provider can have:
 - Custom slug (`/sally-nails`)
 - Custom services (stored in JSONB)
 - Custom availability schedule
-- Custom theme colors (future feature)
+- Theme preferences (light/dark mode)
+- Personalized business profile
+
+---
+
+## ✨ Features
+
+### For Customers
+- 📅 **Full Month Calendar** - Professional date picker with keyboard navigation
+- ♿ **Accessible** - ARIA labels, screen reader support, keyboard shortcuts
+- 🎨 **Theme Support** - Light/Dark mode with smooth transitions
+- 📱 **Mobile Responsive** - Works seamlessly on all devices
+- ⚡ **Real-time Availability** - See available time slots instantly
+
+### For Providers
+- 📊 **Dashboard** - View appointments by day/week/month/year
+- 🔔 **Auto-refresh** - Dashboard syncs every 30 seconds
+- 🎨 **Theme Toggle** - Choose your preferred color scheme
+- 📋 **Customer Management** - Track customer details and history
+- 🔒 **PIN Protection** - Secure dashboard access
 
 ---
 
