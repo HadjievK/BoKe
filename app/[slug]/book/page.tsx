@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
-import { getBarberProfile, getAvailability, bookAppointment } from '@/lib/api'
-import type { BarberWithServices, Service, Customer, BookingRequest } from '@/lib/types'
+import { getProviderProfile, getAvailability, bookAppointment } from '@/lib/api'
+import type { ProviderWithServices, Service, Customer, BookingRequest } from '@/lib/types'
 import { formatDate, formatTime, formatCurrency, formatDateISO } from '@/lib/utils'
 import ServiceCard from '@/components/booking/ServiceCard'
 import CalendarPicker from '@/components/booking/CalendarPicker'
@@ -19,7 +19,7 @@ export default function BookingPage() {
   const slug = params.slug as string
   const preSelectedServiceId = searchParams.get('service')
 
-  const [barber, setBarber] = useState<BarberWithServices | null>(null)
+  const [provider, setProvider] = useState<ProviderWithServices | null>(null)
   const [step, setStep] = useState<BookingStep>('service')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -34,10 +34,10 @@ export default function BookingPage() {
   const [confirmation, setConfirmation] = useState<any>(null)
 
   useEffect(() => {
-    async function fetchBarber() {
+    async function fetchProvider() {
       try {
-        const data = await getBarberProfile(slug)
-        setBarber(data)
+        const data = await getProviderProfile(slug)
+        setProvider(data)
 
         // Pre-select service if provided
         if (preSelectedServiceId) {
@@ -54,7 +54,7 @@ export default function BookingPage() {
       }
     }
 
-    fetchBarber()
+    fetchProvider()
   }, [slug, preSelectedServiceId])
 
   useEffect(() => {
@@ -221,7 +221,7 @@ export default function BookingPage() {
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
-            Back to {barber.business_name}
+            Back to {provider.business_name}
           </button>
           <h1 className="text-4xl font-bold mb-2">Book an Appointment</h1>
           <p className="text-ink-light">Select a service and time that works for you</p>
@@ -252,7 +252,7 @@ export default function BookingPage() {
           <div>
             <h2 className="text-2xl font-bold mb-6">Choose a Service</h2>
             <div className="grid md:grid-cols-2 gap-6">
-              {barber.services.map((service) => (
+              {provider.services.map((service) => (
                 <ServiceCard
                   key={service.id}
                   service={service}
