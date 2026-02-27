@@ -126,7 +126,17 @@ export async function GET(
       };
     });
 
-    return NextResponse.json(appointments);
+    // Calculate appointment counts by date
+    const appointmentsByDate: Record<string, number> = {};
+    appointmentsResult.rows.forEach((row) => {
+      const date = row.appointment_date;
+      appointmentsByDate[date] = (appointmentsByDate[date] || 0) + 1;
+    });
+
+    return NextResponse.json({
+      appointments,
+      appointments_by_date: appointmentsByDate
+    });
 
   } catch (error: any) {
     console.error('Appointments API error:', error);

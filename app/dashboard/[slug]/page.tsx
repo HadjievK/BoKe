@@ -19,6 +19,7 @@ export default function DashboardPage() {
   const [calendarView, setCalendarView] = useState<'day' | 'week' | 'month' | 'year'>('week')
   const [currentMonth, setCurrentMonth] = useState(new Date())
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear())
+  const [appointmentsByDate, setAppointmentsByDate] = useState<Record<string, number>>({})
 
   // Settings modal states
   const [showSettings, setShowSettings] = useState(false)
@@ -37,6 +38,24 @@ export default function DashboardPage() {
       fetchDashboard(stored)
     }
   }, [slug])
+
+  // Auto-refresh dashboard every 30 seconds
+  useEffect(() => {
+    if (!authenticated || !password) return
+
+    const interval = setInterval(() => {
+      fetchDashboard(password, true) // Silent refresh (no loading spinner)
+    }, 30000) // 30 seconds
+
+    return () => clearInterval(interval)
+  }, [authenticated, password, slug])
+
+  // Fetch calendar appointments when view/date changes
+  useEffect(() => {
+    if (authenticated && password && showCalendarModal) {
+      fetchCalendarAppointments()
+    }
+  }, [authenticated, password, showCalendarModal, calendarView, currentMonth, currentYear, selectedDate])
 
   useEffect(() => {
     // Load current settings when modal opens
@@ -57,8 +76,8 @@ export default function DashboardPage() {
     }
   }, [showSettings, slug])
 
-  const fetchDashboard = async (passwordValue: string) => {
-    setLoading(true)
+  const fetchDashboard = async (passwordValue: string, silent = false) => {
+    if (!silent) setLoading(true)
     setError('')
 
     try {
@@ -71,7 +90,42 @@ export default function DashboardPage() {
       setAuthenticated(false)
       sessionStorage.removeItem(`password_${slug}`)
     } finally {
-      setLoading(false)
+      if (!silent) setLoading(false)
+    }
+  }
+
+  const fetchCalendarAppointments = async () => {
+    if (!password) return
+
+    try {
+      let startDate, endDate
+
+      // Calculate date range based on calendar view
+      if (calendarView === 'week') {
+        const weekStart = getWeekDays(selectedDate)[0]
+        const weekEnd = getWeekDays(selectedDate)[6]
+        startDate = weekStart.toISOString().split('T')[0]
+        endDate = weekEnd.toISOString().split('T')[0]
+      } else if (calendarView === 'month') {
+        const year = currentMonth.getFullYear()
+        const month = currentMonth.getMonth()
+        startDate = new Date(year, month, 1).toISOString().split('T')[0]
+        endDate = new Date(year, month + 1, 0).toISOString().split('T')[0]
+      } else if (calendarView === 'year') {
+        startDate = `${currentYear}-01-01`
+        endDate = `${currentYear}-12-31`
+      }
+
+      const response = await fetch(
+        `/api/dashboard/${slug}/appointments?password=${encodeURIComponent(password)}&start_date=${startDate}&end_date=${endDate}`
+      )
+
+      if (response.ok) {
+        const data = await response.json()
+        setAppointmentsByDate(data.appointments_by_date || {})
+      }
+    } catch (err) {
+      console.error('Failed to fetch calendar appointments:', err)
     }
   }
 
@@ -577,7 +631,7 @@ export default function DashboardPage() {
                           {day.getDate()}
                         </div>
                         <div className="text-xs text-[#6B6455]">
-                          {Math.floor(Math.random() * 5)} appointments
+                          {appointmentsByDate[day.toISOString().split('T')[0]] || 0} appointments
                         </div>
                       </div>
                     ))}
@@ -636,8 +690,9 @@ export default function DashboardPage() {
                     ))}
                     {Array.from({ length: getDaysInMonth(currentMonth) }, (_, i) => i + 1).map(day => {
                       const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day)
+                      const dateStr = date.toISOString().split('T')[0]
                       const isToday = date.toDateString() === new Date().toDateString()
-                      const hasAppointments = Math.random() > 0.5
+                      const hasAppointments = (appointmentsByDate[dateStr] || 0) > 0
 
                       return (
                         <button
@@ -718,7 +773,10 @@ export default function DashboardPage() {
                             {monthName}
                           </div>
                           <div className="text-sm text-[#6B6455]">
-                            {Math.floor(Math.random() * 50 + 10)} appointments
+                            {Object.keys(appointmentsByDate).filter(date => {
+                              const d = new Date(date)
+                              return d.getFullYear() === currentYear && d.getMonth() === i
+                            }).reduce((sum, date) => sum + (appointmentsByDate[date] || 0), 0)} appointments
                           </div>
                         </button>
                       )
