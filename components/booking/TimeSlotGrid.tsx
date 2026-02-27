@@ -5,13 +5,24 @@ interface TimeSlotGridProps {
   slots: TimeSlot[]
   selectedTime: string | null
   onTimeSelect: (time: string) => void
+  loading?: boolean
 }
 
 export default function TimeSlotGrid({
   slots,
   selectedTime,
-  onTimeSelect
+  onTimeSelect,
+  loading = false
 }: TimeSlotGridProps) {
+  if (loading) {
+    return (
+      <div className="text-center py-8">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gold mx-auto mb-4"></div>
+        <p className="text-muted-foreground">Loading available times...</p>
+      </div>
+    )
+  }
+
   const availableSlots = slots.filter(slot => slot.available)
 
   if (slots.length === 0) {
