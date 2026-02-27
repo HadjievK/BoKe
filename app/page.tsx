@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { registerBarber } from '@/lib/api'
+import { registerProvider } from '@/lib/api'
 import type { OnboardingData } from '@/lib/types'
 
 const SERVICE_TYPES = [
@@ -82,7 +82,7 @@ export default function Home() {
         }))
       }
 
-      const response = await registerBarber(data)
+      const response = await registerProvider(data)
       router.push(`/success?slug=${response.slug}&dashboard=${response.dashboard_url}`)
     } catch (err: any) {
       setError(err.message || 'Failed to create profile')
