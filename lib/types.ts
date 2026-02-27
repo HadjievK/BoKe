@@ -127,7 +127,3 @@ export interface DashboardData {
   appointments: AppointmentWithDetails[]
   recent_customers: CustomerPublic[]
 }
-
-// Backward compatibility aliases
-export type Barber = Provider
-export type BarberWithServices = ProviderWithServices

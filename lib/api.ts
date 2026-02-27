@@ -154,7 +154,3 @@ export async function getCustomers(slug: string, password: string): Promise<Cust
 
   return res.json()
 }
-
-// Backward compatibility exports
-export const getBarberProfile = getProviderProfile
-export const registerBarber = registerProvider
