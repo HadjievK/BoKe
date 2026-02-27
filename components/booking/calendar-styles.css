@@ -1,5 +1,11 @@
 /* Custom styles for react-day-picker with theme integration */
 
+.calendar-wrapper {
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
 .rdp {
   --rdp-cell-size: 48px;
   --rdp-accent-color: hsl(var(--gold));
@@ -8,6 +14,7 @@
 
   margin: 0;
   font-family: 'Figtree', sans-serif;
+  width: 100%;
 }
 
 /* Caption (month/year header) */
@@ -57,10 +64,27 @@
 .rdp-table {
   width: 100%;
   border-collapse: collapse;
+  table-layout: fixed;
+}
+
+/* Table body and head */
+.rdp-tbody,
+.rdp-head {
+  display: table-row-group;
+}
+
+/* Table rows */
+.rdp-row {
+  display: table-row;
 }
 
 /* Header (weekday names) */
+.rdp-head_row {
+  display: table-row;
+}
+
 .rdp-head_cell {
+  display: table-cell;
   color: hsl(var(--muted-foreground));
   font-size: 0.875rem;
   font-weight: 500;
@@ -72,8 +96,10 @@
 
 /* Day cells */
 .rdp-cell {
+  display: table-cell;
   padding: 0.25rem;
   text-align: center;
+  vertical-align: middle;
 }
 
 .rdp-day {

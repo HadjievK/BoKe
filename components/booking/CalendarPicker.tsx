@@ -35,7 +35,7 @@ export default function CalendarPicker({
   }
 
   return (
-    <div className="calendar-wrapper">
+    <div className="calendar-wrapper w-full flex justify-center">
       <DayPicker
         mode="single"
         selected={selectedDate || undefined}
