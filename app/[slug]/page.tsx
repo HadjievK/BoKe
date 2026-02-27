@@ -130,10 +130,6 @@ export default function ProviderProfilePage() {
                 <span>{provider.location}</span>
               </div>
             )}
-            <div className="flex items-center gap-1.5">
-              <span>⭐</span>
-              <span>4.9 · New</span>
-            </div>
           </div>
         </div>
       </div>
@@ -160,14 +156,7 @@ export default function ProviderProfilePage() {
       {/* Body */}
       <div className="max-w-[680px] mx-auto px-8 py-7 pb-24">
         {/* Quick Info Cards */}
-        <div className="grid grid-cols-3 gap-3 mb-7">
-          <div className="bg-white border border-[#E8E2D9] rounded-xl p-4 text-center">
-            <div className="text-xl mb-1.5">⭐</div>
-            <div className="text-xl font-bold text-[#111111] mb-0.5" style={{ fontFamily: 'Playfair Display, serif' }}>
-              4.9
-            </div>
-            <div className="text-xs text-[#888888]">Rating</div>
-          </div>
+        <div className="grid grid-cols-2 gap-3 mb-7">
           <div className="bg-white border border-[#E8E2D9] rounded-xl p-4 text-center">
             <div className="text-xl mb-1.5">✂️</div>
             <div className="text-xl font-bold text-[#111111] mb-0.5" style={{ fontFamily: 'Playfair Display, serif' }}>
