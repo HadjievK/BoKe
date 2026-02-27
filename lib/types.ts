@@ -123,6 +123,12 @@ export interface DashboardStats {
 }
 
 export interface DashboardData {
+  provider: {
+    id: string
+    slug: string
+    name: string
+    business_name: string
+  }
   stats: DashboardStats
   appointments: AppointmentWithDetails[]
   recent_customers: CustomerPublic[]

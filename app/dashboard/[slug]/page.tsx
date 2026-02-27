@@ -224,9 +224,7 @@ export default function DashboardPage() {
     )
   }
 
-  const provider = dashboardData.appointments[0]?.customer
-    ? { first_name: dashboardData.appointments[0].customer.first_name, last_name: dashboardData.appointments[0].customer.last_name }
-    : { first_name: slug.charAt(0).toUpperCase() + slug.slice(1), last_name: '' }
+  const provider = dashboardData.provider
   const todayDate = new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
 
   return (
@@ -272,7 +270,7 @@ export default function DashboardPage() {
         {/* Greeting Section */}
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-[#1C1812] mb-1" style={{ fontFamily: 'Fraunces, serif' }}>
-            Good morning, {provider.first_name} ✨
+            Good morning, {provider.name.split(' ')[0]} ✨
           </h1>
           <p className="text-sm text-[#6B6455]">
             {todayDate} · {dashboardData.appointments.length} appointments today
@@ -427,11 +425,11 @@ export default function DashboardPage() {
             <div className="bg-[#1C1812] rounded-xl p-6 text-white">
               <div className="flex items-center gap-4 mb-6">
                 <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#C9993A] to-[#8A6830] flex items-center justify-center text-2xl font-bold" style={{ fontFamily: 'Fraunces, serif' }}>
-                  {provider.first_name.charAt(0)}
+                  {provider.name.charAt(0)}
                 </div>
                 <div className="flex-1">
                   <div className="font-bold text-lg" style={{ fontFamily: 'Fraunces, serif' }}>
-                    {provider.first_name} {provider.last_name}
+                    {provider.name}
                   </div>
                   <div className="text-sm text-white/60">slotcraft.app/{slug}</div>
                 </div>

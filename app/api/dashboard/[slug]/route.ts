@@ -156,6 +156,12 @@ export async function GET(
     const recent_customers: CustomerPublic[] = customersResult.rows;
 
     const dashboardData: DashboardData = {
+      provider: {
+        id: provider.id,
+        slug: provider.slug,
+        name: provider.name,
+        business_name: provider.business_name,
+      },
       stats,
       appointments,
       recent_customers,
