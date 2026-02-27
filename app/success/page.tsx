@@ -8,7 +8,7 @@ import Link from 'next/link'
 function SuccessContent() {
   const searchParams = useSearchParams()
   const slug = searchParams.get('slug')
-  const pin = searchParams.get('pin')
+  const dashboardUrl = searchParams.get('dashboard')
   const [copied, setCopied] = useState(false)
 
   const publicUrl = `https://buke.app/${slug}`
@@ -19,7 +19,7 @@ function SuccessContent() {
     setTimeout(() => setCopied(false), 2000)
   }
 
-  if (!slug || !pin) {
+  if (!slug) {
     return (
       <main className="min-h-screen bg-cream flex items-center justify-center p-4">
         <div className="card text-center">
@@ -71,19 +71,19 @@ function SuccessContent() {
           </div>
         </div>
 
-        {/* PIN */}
+        {/* Password Reminder */}
         <div className="bg-gold/10 border-2 border-gold rounded-xl p-6 mb-8">
           <div className="flex items-center justify-center gap-2 mb-2">
             <svg className="w-5 h-5 text-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
             </svg>
-            <label className="text-sm font-medium text-ink">Dashboard PIN (Save This!)</label>
+            <label className="text-sm font-medium text-ink">Dashboard Access</label>
           </div>
-          <div className="text-4xl font-bold font-mono tracking-widest text-gold mb-2">
-            {pin}
+          <div className="text-lg font-semibold text-gold mb-2">
+            Password Created ✓
           </div>
           <p className="text-xs text-ink-light">
-            You'll need this PIN to access your dashboard
+            Use the password you just created to access your dashboard
           </p>
         </div>
 
@@ -113,7 +113,7 @@ function SuccessContent() {
             </li>
             <li className="flex items-start gap-2">
               <span className="text-gold">2.</span>
-              <span>Save your PIN somewhere safe - you'll need it to view your appointments</span>
+              <span>Use your password to access your dashboard and view appointments</span>
             </li>
             <li className="flex items-start gap-2">
               <span className="text-gold">3.</span>

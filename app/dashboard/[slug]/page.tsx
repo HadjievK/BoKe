@@ -10,7 +10,7 @@ export default function DashboardPage() {
   const params = useParams()
   const slug = params.slug as string
 
-  const [pin, setPin] = useState('')
+  const [password, setPin] = useState('')
   const [authenticated, setAuthenticated] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -18,26 +18,26 @@ export default function DashboardPage() {
 
   useEffect(() => {
     // Check for stored PIN (simple session storage for MVP)
-    const stored = sessionStorage.getItem(`pin_${slug}`)
+    const stored = sessionStorage.getItem(`password_${slug}`)
     if (stored) {
       setPin(stored)
       fetchDashboard(stored)
     }
   }, [slug])
 
-  const fetchDashboard = async (pinValue: string) => {
+  const fetchDashboard = async (passwordValue: string) => {
     setLoading(true)
     setError('')
 
     try {
-      const data = await getDashboardData(slug, pinValue)
+      const data = await getDashboardData(slug, passwordValue)
       setDashboardData(data)
       setAuthenticated(true)
-      sessionStorage.setItem(`pin_${slug}`, pinValue)
+      sessionStorage.setItem(`password_${slug}`, passwordValue)
     } catch (err: any) {
       setError(err.message)
       setAuthenticated(false)
-      sessionStorage.removeItem(`pin_${slug}`)
+      sessionStorage.removeItem(`password_${slug}`)
     } finally {
       setLoading(false)
     }
@@ -45,8 +45,8 @@ export default function DashboardPage() {
 
   const handlePinSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (pin.length === 4) {
-      fetchDashboard(pin)
+    if (password.length === 4) {
+      fetchDashboard(password)
     }
   }
 
@@ -54,10 +54,10 @@ export default function DashboardPage() {
     setAuthenticated(false)
     setPin('')
     setDashboardData(null)
-    sessionStorage.removeItem(`pin_${slug}`)
+    sessionStorage.removeItem(`password_${slug}`)
   }
 
-  // PIN Entry Screen
+  // Password Entry Screen
   if (!authenticated) {
     return (
       <main className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center p-4">
@@ -69,20 +69,19 @@ export default function DashboardPage() {
               </svg>
             </div>
             <h1 className="text-3xl font-bold text-white mb-2">Dashboard Access</h1>
-            <p className="text-gray-400">Enter your 4-digit PIN to continue</p>
+            <p className="text-gray-400">Enter your password to continue</p>
           </div>
 
-          <form onSubmit={handlePinSubmit}>
+          <form onSubmit={handlePasswordSubmit}>
             <div className="mb-6">
               <input
                 type="password"
-                inputMode="numeric"
-                maxLength={4}
-                value={pin}
-                onChange={(e) => setPin(e.target.value.replace(/\D/g, ''))}
-                className="w-full px-6 py-4 bg-gray-700 border-2 border-gray-600 rounded-xl text-center text-3xl font-mono tracking-widest text-white focus:border-gold focus:outline-none"
-                placeholder="••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full px-6 py-4 bg-gray-700 border-2 border-gray-600 rounded-xl text-white focus:border-gold focus:outline-none"
+                placeholder="Enter your password"
                 autoFocus
+                minLength={6}
               />
             </div>
 
@@ -94,7 +93,7 @@ export default function DashboardPage() {
 
             <button
               type="submit"
-              disabled={pin.length !== 4 || loading}
+              disabled={password.length < 6 || loading}
               className="w-full bg-gold hover:bg-gold-dark text-white font-semibold py-4 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Verifying...' : 'Access Dashboard'}
@@ -109,7 +108,7 @@ export default function DashboardPage() {
     return (
       <main className="min-h-screen bg-gray-900 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gold mx-auto mb-4"></div>
+          <div className="animate-spassword rounded-full h-12 w-12 border-b-2 border-gold mx-auto mb-4"></div>
           <p className="text-gray-400">Loading dashboard...</p>
         </div>
       </main>

@@ -105,14 +105,14 @@ export async function registerProvider(data: OnboardingData): Promise<Onboarding
 }
 
 
-// ============ Dashboard API (PIN-protected) ============
+// ============ Dashboard API (Password-protected) ============
 
-export async function getDashboardData(slug: string, pin: string): Promise<DashboardData> {
-  const res = await fetch(`${API_URL}/api/dashboard/${slug}?pin=${pin}`)
+export async function getDashboardData(slug: string, password: string): Promise<DashboardData> {
+  const res = await fetch(`${API_URL}/api/dashboard/${slug}?password=${password}`)
 
   if (!res.ok) {
     if (res.status === 401) {
-      throw new Error('Invalid PIN')
+      throw new Error('Invalid password')
     }
     throw new Error('Failed to fetch dashboard data')
   }
@@ -122,11 +122,11 @@ export async function getDashboardData(slug: string, pin: string): Promise<Dashb
 
 export async function getAppointments(
   slug: string,
-  pin: string,
+  password: string,
   startDate?: string,
   endDate?: string
 ): Promise<AppointmentWithDetails[]> {
-  const params = new URLSearchParams({ pin })
+  const params = new URLSearchParams({ password })
   if (startDate) params.append('start_date', startDate)
   if (endDate) params.append('end_date', endDate)
 
@@ -134,7 +134,7 @@ export async function getAppointments(
 
   if (!res.ok) {
     if (res.status === 401) {
-      throw new Error('Invalid PIN')
+      throw new Error('Invalid password')
     }
     throw new Error('Failed to fetch appointments')
   }
@@ -142,12 +142,12 @@ export async function getAppointments(
   return res.json()
 }
 
-export async function getCustomers(slug: string, pin: string): Promise<CustomerPublic[]> {
-  const res = await fetch(`${API_URL}/api/dashboard/${slug}/customers?pin=${pin}`)
+export async function getCustomers(slug: string, password: string): Promise<CustomerPublic[]> {
+  const res = await fetch(`${API_URL}/api/dashboard/${slug}/customers?password=${password}`)
 
   if (!res.ok) {
     if (res.status === 401) {
-      throw new Error('Invalid PIN')
+      throw new Error('Invalid password')
     }
     throw new Error('Failed to fetch customers')
   }

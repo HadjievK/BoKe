@@ -32,12 +32,18 @@ async function ensureUniqueSlug(baseSlug: string): Promise<string> {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { name, business_name, service_type, email, phone, location, bio, services } = body;
+    const { name, business_name, service_type, email, phone, location, bio, services, password } = body;
 
-    // Generate slug and PIN
+    if (!password || password.length < 6) {
+      return NextResponse.json(
+        { detail: 'Password must be at least 6 characters' },
+        { status: 400 }
+      );
+    }
+
+    // Generate slug
     const baseSlug = generateSlug(business_name);
     const slug = await ensureUniqueSlug(baseSlug);
-    const pin = generatePin();
 
     // Prepare services as JSONB
     const servicesJson = JSON.stringify(
@@ -66,7 +72,7 @@ export async function POST(request: NextRequest) {
       `
       INSERT INTO service_providers (
         slug, name, business_name, service_type, email, phone,
-        location, bio, pin, services, availability
+        location, bio, password, services, availability
       )
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10::jsonb, $11::jsonb)
       RETURNING id, slug, name, business_name, service_type, email, phone,
@@ -81,7 +87,7 @@ export async function POST(request: NextRequest) {
         phone,
         location,
         bio,
-        pin,
+        password,
         servicesJson,
         availabilityJson,
       ]
@@ -91,8 +97,8 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       slug,
-      pin,
       public_url: `https://boke-brown-ten.vercel.app/${slug}`,
+      dashboard_url: `https://boke-brown-ten.vercel.app/dashboard/${slug}`,
       provider,
     });
   } catch (error: any) {

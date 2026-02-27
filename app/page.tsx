@@ -34,6 +34,7 @@ export default function Home() {
   const [businessName, setBusinessName] = useState('')
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
+  const [password, setPassword] = useState('')
   const [location, setLocation] = useState('')
   const [bio, setBio] = useState('')
   const [services, setServices] = useState<Service[]>([
@@ -69,6 +70,7 @@ export default function Home() {
         service_type: serviceType,
         email,
         phone,
+        password,
         location,
         bio,
         services: services.map(s => ({
@@ -81,7 +83,7 @@ export default function Home() {
       }
 
       const response = await registerBarber(data)
-      router.push(`/success?slug=${response.slug}&pin=${response.pin}`)
+      router.push(`/success?slug=${response.slug}&dashboard=${response.dashboard_url}`)
     } catch (err: any) {
       setError(err.message || 'Failed to create profile')
     } finally {
@@ -390,6 +392,19 @@ export default function Home() {
               className="w-full bg-white border-[1.5px] border-[rgba(28,24,18,0.12)] rounded-lg pl-9 pr-3.5 py-3 text-sm focus:border-[#C9993A] focus:shadow-[0_0_0_3px_rgba(201,153,58,0.1)] outline-none transition"
             />
           </div>
+        </div>
+
+        <div className="relative mb-3.5">
+          <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-[#B8AFA3]">🔐</span>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Create a password (min. 6 characters)"
+            minLength={6}
+            className="w-full bg-white border-[1.5px] border-[rgba(28,24,18,0.12)] rounded-lg pl-9 pr-3.5 py-3 text-sm focus:border-[#C9993A] focus:shadow-[0_0_0_3px_rgba(201,153,58,0.1)] outline-none transition"
+            required
+          />
         </div>
 
         <div className="relative mb-3.5">

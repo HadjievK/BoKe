@@ -9,24 +9,24 @@ export async function GET(
   try {
     const { slug } = await params;
     const { searchParams } = new URL(request.url);
-    const pin = searchParams.get('pin');
+    const password = searchParams.get('password');
 
-    if (!pin) {
+    if (!password) {
       return NextResponse.json(
-        { detail: 'PIN is required' },
+        { detail: 'Password is required' },
         { status: 400 }
       );
     }
 
-    // Verify PIN and get provider
+    // Verify password and get provider
     const providerResult = await pool.query(
-      'SELECT id FROM service_providers WHERE slug = $1 AND pin = $2',
-      [slug, pin]
+      'SELECT id FROM service_providers WHERE slug = $1 AND password = $2',
+      [slug, password]
     );
 
     if (providerResult.rows.length === 0) {
       return NextResponse.json(
-        { detail: 'Invalid PIN' },
+        { detail: 'Invalid password' },
         { status: 401 }
       );
     }

@@ -96,6 +96,7 @@ export interface OnboardingData {
   service_type: string
   email: string
   phone: string
+  password: string
   location?: string
   bio?: string
   services: {
@@ -109,8 +110,8 @@ export interface OnboardingData {
 
 export interface OnboardingResponse {
   slug: string
-  pin: string
   public_url: string
+  dashboard_url: string
   provider: Provider
 }
 
