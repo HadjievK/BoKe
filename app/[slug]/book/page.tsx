@@ -130,7 +130,7 @@ export default function BookingPage() {
     )
   }
 
-  if (error && !barber) {
+  if (error && !provider) {
     return (
       <main className="min-h-screen bg-cream flex items-center justify-center p-4">
         <div className="card text-center max-w-md">
