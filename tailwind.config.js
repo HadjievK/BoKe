@@ -8,31 +8,38 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        border: 'hsl(var(--border))',
+        background: 'hsl(var(--background))',
+        foreground: 'hsl(var(--foreground))',
+        card: {
+          DEFAULT: 'hsl(var(--card))',
+          foreground: 'hsl(var(--card-foreground))',
+        },
+        muted: {
+          DEFAULT: 'hsl(var(--muted))',
+          foreground: 'hsl(var(--muted-foreground))',
+        },
         gold: {
-          DEFAULT: '#B8860B',
-          dark: '#8B6914',
-          light: '#D4AF37',
+          DEFAULT: 'hsl(var(--gold))',
+          light: 'hsl(var(--gold-light))',
+          dark: 'hsl(var(--gold-dark))',
         },
-        cream: {
-          DEFAULT: '#F8F5F0',
-          dark: '#E8E0D5',
-        },
+        cream: 'hsl(var(--cream))',
         ink: {
-          DEFAULT: '#111111',
-          light: '#333333',
-        },
-        success: {
-          DEFAULT: '#2D7A4F',
-          light: '#40916C',
+          DEFAULT: 'hsl(var(--ink))',
+          light: 'hsl(var(--ink-light))',
         },
       },
       fontFamily: {
-        display: ['Playfair Display', 'serif'],
-        body: ['Outfit', 'sans-serif'],
+        display: ['Fraunces', 'serif'],
+        body: ['Figtree', 'sans-serif'],
+        sans: ['Figtree', 'sans-serif'],
+        serif: ['Fraunces', 'serif'],
       },
       borderRadius: {
-        'xl': '1rem',
-        '2xl': '1.5rem',
+        lg: 'var(--radius)',
+        md: 'calc(var(--radius) - 2px)',
+        sm: 'calc(var(--radius) - 4px)',
       },
     },
   },

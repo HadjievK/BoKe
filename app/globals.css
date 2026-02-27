@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;0,9..144,900;1,9..144,300&family=Figtree:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,500;1,9..144,600&family=Figtree:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,31 +6,38 @@
 
 @layer base {
   :root {
-    --cream: #F5F0E8;
-    --warm-white: #FDFAF5;
-    --ink: #1C1812;
-    --ink-muted: #6B6455;
-    --ink-faint: #B8AFA3;
-    --gold: #C9993A;
-    --gold-light: #E8C96A;
-    --gold-pale: #F5EDD8;
-    --rust: #C45C3A;
-    --sage: #4A7C59;
-    --radius: 14px;
-    --radius-sm: 8px;
+    --background: 0 0% 96%;
+    --foreground: 0 0% 9%;
+
+    --card: 0 0% 98%;
+    --card-foreground: 0 0% 9%;
+
+    --muted: 0 0% 63%;
+    --muted-foreground: 0 0% 45%;
+
+    --border: 0 0% 83%;
+
+    --gold: 40 65% 50%;
+    --gold-light: 40 60% 95%;
+    --gold-dark: 40 70% 38%;
+
+    --cream: 38 50% 96%;
+    --ink: 30 10% 15%;
+    --ink-light: 30 8% 35%;
+
+    --radius: 0.75rem;
   }
 
   * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    @apply border-border;
   }
 
   body {
     font-family: 'Figtree', sans-serif;
-    background: var(--warm-white);
-    color: var(--ink);
-    overflow-x: hidden;
+    @apply bg-background text-foreground antialiased;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -39,39 +46,37 @@
 }
 
 @layer utilities {
-  .text-balance {
-    text-wrap: balance;
+  .font-display {
+    font-family: 'Fraunces', serif;
   }
-
-  .bg-gradient-radial {
-    background-image: radial-gradient(ellipse 80% 50% at 20% -10%, rgba(201,153,58,0.12) 0%, transparent 60%), radial-gradient(ellipse 60% 40% at 90% 80%, rgba(201,153,58,0.08) 0%, transparent 55%);
+  .font-body {
+    font-family: 'Figtree', sans-serif;
   }
 }
 
 @keyframes float {
-  0%, 100% { transform: translateY(0px) rotate(-1deg); }
-  50% { transform: translateY(-12px) rotate(-1deg); }
-}
-
-@keyframes float2 {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-12px) rotate(1deg); }
 }
 
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(20px); }
+  from { opacity: 0; transform: translateY(30px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-.animate-in {
-  animation: slideUp 0.5s ease both;
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-.delay-1 { animation-delay: 0.1s; }
-.delay-2 { animation-delay: 0.2s; }
-.delay-3 { animation-delay: 0.3s; }
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.8s ease-out forwards;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.6s ease-out forwards;
+}
