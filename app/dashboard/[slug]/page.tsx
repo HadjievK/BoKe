@@ -223,6 +223,41 @@ export default function DashboardPage() {
           </p>
         </div>
 
+        {/* Public Booking Link */}
+        <div className="bg-gradient-to-r from-[#C9993A] to-[#8A6830] rounded-xl p-6 mb-6 text-white">
+          <div className="flex items-center justify-between">
+            <div className="flex-1">
+              <div className="text-sm font-medium mb-2 opacity-90">Your Public Booking Page</div>
+              <div className="flex items-center gap-3">
+                <div className="text-lg font-bold bg-white/20 px-4 py-2 rounded-lg backdrop-blur-sm" style={{ fontFamily: 'Fraunces, serif' }}>
+                  {typeof window !== 'undefined' ? window.location.origin : ''}/{slug}
+                </div>
+                <button
+                  onClick={() => {
+                    const url = `${window.location.origin}/${slug}`
+                    navigator.clipboard.writeText(url)
+                    alert('Link copied to clipboard! 📋')
+                  }}
+                  className="px-4 py-2 bg-white text-[#1C1812] font-semibold rounded-lg hover:bg-[#F5F0E8] transition"
+                >
+                  📋 Copy Link
+                </button>
+                <a
+                  href={`/${slug}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-4 py-2 bg-white/20 backdrop-blur-sm font-semibold rounded-lg hover:bg-white/30 transition"
+                >
+                  👁️ Preview
+                </a>
+              </div>
+            </div>
+          </div>
+          <p className="text-sm mt-3 opacity-80">
+            Share this link with your customers so they can book appointments with you
+          </p>
+        </div>
+
         {/* Stats Cards */}
         <div className="grid grid-cols-3 gap-4 mb-6">
           <div className="bg-white rounded-xl p-6 border border-[rgba(28,24,18,0.08)]">
