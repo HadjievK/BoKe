@@ -115,7 +115,9 @@ export default function DashboardPage() {
     )
   }
 
-  const provider = dashboardData.appointments[0]?.customer || { first_name: 'Provider', last_name: '' }
+  const provider = dashboardData.appointments[0]?.customer
+    ? { first_name: dashboardData.appointments[0].customer.first_name, last_name: dashboardData.appointments[0].customer.last_name }
+    : { first_name: slug.charAt(0).toUpperCase() + slug.slice(1), last_name: '' }
   const todayDate = new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
 
   return (
