@@ -58,7 +58,12 @@ export default function Home() {
   }
 
   const removeService = (index: number) => {
+    if (services.length <= 1) {
+      setError('You must have at least one service')
+      return
+    }
     setServices(services.filter((_, i) => i !== index))
+    setError('') // Clear error when successfully removing
   }
 
   const addService = () => {
@@ -68,6 +73,21 @@ export default function Home() {
   const handleSubmit = async () => {
     setError('')
     setLoading(true)
+
+    // Validate at least one service
+    if (services.length === 0) {
+      setError('You must add at least one service')
+      setLoading(false)
+      return
+    }
+
+    // Validate all services have required fields
+    const invalidService = services.find(s => !s.name || !s.duration || !s.price)
+    if (invalidService) {
+      setError('All services must have a name, duration, and price')
+      setLoading(false)
+      return
+    }
 
     try {
       const data: OnboardingData = {
@@ -393,7 +413,10 @@ export default function Home() {
 
           {/* Services */}
           <div>
-            <label className="block text-sm font-semibold mb-3">Services</label>
+            <label className="block text-sm font-semibold mb-3">
+              Services <span className="text-red-500">*</span>
+              <span className="text-xs text-muted-foreground font-normal ml-2">(At least one required)</span>
+            </label>
             <div className="space-y-3">
               {services.map((service, index) => (
                 <div key={index} className="flex gap-3">
@@ -420,7 +443,13 @@ export default function Home() {
                   />
                   <button
                     onClick={() => removeService(index)}
-                    className="px-4 py-3 rounded-xl border border-border hover:bg-foreground/5 transition"
+                    disabled={services.length === 1}
+                    className={`px-4 py-3 rounded-xl border border-border transition ${
+                      services.length === 1
+                        ? 'opacity-50 cursor-not-allowed'
+                        : 'hover:bg-foreground/5'
+                    }`}
+                    title={services.length === 1 ? 'Cannot remove the last service' : 'Remove service'}
                   >
                     🗑️
                   </button>

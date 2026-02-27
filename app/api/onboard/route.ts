@@ -41,6 +41,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Validate at least one service
+    if (!services || !Array.isArray(services) || services.length === 0) {
+      return NextResponse.json(
+        { detail: 'At least one service is required' },
+        { status: 400 }
+      );
+    }
+
+    // Validate all services have required fields
+    const invalidService = services.find((s: any) => !s.name || !s.duration || !s.price);
+    if (invalidService) {
+      return NextResponse.json(
+        { detail: 'All services must have a name, duration, and price' },
+        { status: 400 }
+      );
+    }
+
     // Generate slug
     const baseSlug = generateSlug(business_name);
     const slug = await ensureUniqueSlug(baseSlug);
