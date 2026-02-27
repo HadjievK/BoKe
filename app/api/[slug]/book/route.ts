@@ -93,18 +93,21 @@ export async function POST(
     // Create appointment
     const appointmentResult = await pool.query(
       `INSERT INTO appointments (
-        provider_id, customer_id, service_id, appointment_date, appointment_time,
-        duration, price, customer_notes, status
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        provider_id, customer_id, service_id, service_name, appointment_date, appointment_time,
+        duration, service_duration, price, service_price, customer_notes, status
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
       RETURNING id, created_at`,
       [
         providerId,
         customerId,
         service_id,
+        service.name,  // service_name
         appointment_date,
         appointment_time,
-        service.duration,
-        service.price,
+        service.duration,  // duration
+        service.duration,  // service_duration (duplicate for compatibility)
+        service.price,     // price
+        service.price,     // service_price (duplicate for compatibility)
         customer.notes || null,
         'confirmed'
       ]
