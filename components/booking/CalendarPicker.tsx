@@ -1,5 +1,5 @@
 import { DayPicker } from 'react-day-picker'
-import 'react-day-picker/dist/style.css'
+import 'react-day-picker/style.css'
 import './calendar-styles.css'
 import { formatDateISO } from '@/lib/utils'
 

@@ -393,7 +393,6 @@ export default function ProviderProfilePage() {
                     <CalendarPicker
                       selectedDate={selectedDate}
                       onDateSelect={handleDateSelect}
-                      minDate={new Date()}
                     />
                   </div>
 

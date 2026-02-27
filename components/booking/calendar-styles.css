@@ -1,4 +1,4 @@
-/* Custom styles for react-day-picker with theme integration */
+/* Custom styles for react-day-picker v9 with theme integration */
 
 .calendar-wrapper {
   width: 100%;
@@ -6,19 +6,25 @@
   margin: 0 auto;
 }
 
-.rdp {
-  --rdp-cell-size: 48px;
+/* Root element - v9 uses .rdp-root */
+.rdp-root {
   --rdp-accent-color: hsl(var(--gold));
-  --rdp-background-color: hsl(var(--background));
-  --rdp-outline: 2px solid hsl(var(--gold));
+  --rdp-accent-background-color: hsl(var(--gold-light));
+  --rdp-day-height: 48px;
+  --rdp-day-width: 48px;
 
   margin: 0;
   font-family: 'Figtree', sans-serif;
   width: 100%;
 }
 
+/* Month container */
+.rdp-month {
+  width: 100%;
+}
+
 /* Caption (month/year header) */
-.rdp-caption {
+.rdp-month_caption {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -26,11 +32,7 @@
   color: hsl(var(--foreground));
   font-weight: 600;
   font-size: 1.125rem;
-}
-
-.rdp-caption_label {
   font-family: 'Fraunces', serif;
-  color: hsl(var(--foreground));
 }
 
 /* Navigation buttons */
@@ -39,87 +41,72 @@
   gap: 0.5rem;
 }
 
-.rdp-nav_button {
-  width: 36px;
-  height: 36px;
-  border-radius: 0.5rem;
-  border: 1px solid hsl(var(--border));
-  background: hsl(var(--background));
-  color: hsl(var(--foreground));
-  cursor: pointer;
-  transition: all 0.2s ease;
+.rdp-button_next,
+.rdp-button_previous {
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 0.5rem !important;
+  border: 1px solid hsl(var(--border)) !important;
+  background: hsl(var(--background)) !important;
+  color: hsl(var(--foreground)) !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
 }
 
-.rdp-nav_button:hover:not(:disabled) {
-  background: hsl(var(--card));
-  border-color: hsl(var(--gold));
+.rdp-button_next:hover:not(:disabled),
+.rdp-button_previous:hover:not(:disabled) {
+  background: hsl(var(--card)) !important;
+  border-color: hsl(var(--gold)) !important;
 }
 
-.rdp-nav_button:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
+.rdp-button_next:disabled,
+.rdp-button_previous:disabled {
+  opacity: 0.3 !important;
+  cursor: not-allowed !important;
 }
 
-/* Table */
-.rdp-table {
-  width: 100%;
-  border-collapse: collapse;
-  table-layout: fixed;
+/* Week table */
+.rdp-weeks {
+  width: 100% !important;
 }
 
-/* Table body and head */
-.rdp-tbody,
-.rdp-head {
-  display: table-row-group;
+/* Weekday headers */
+.rdp-weekdays {
+  width: 100% !important;
 }
 
-/* Table rows */
-.rdp-row {
-  display: table-row;
+.rdp-weekday {
+  color: hsl(var(--muted-foreground)) !important;
+  font-size: 0.875rem !important;
+  font-weight: 500 !important;
+  text-align: center !important;
+  padding: 0.75rem 0.5rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
 }
 
-/* Header (weekday names) */
-.rdp-head_row {
-  display: table-row;
-}
-
-.rdp-head_cell {
-  display: table-cell;
-  color: hsl(var(--muted-foreground));
-  font-size: 0.875rem;
-  font-weight: 500;
-  text-align: center;
-  padding: 0.75rem 0.5rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+/* Week rows */
+.rdp-week {
+  width: 100% !important;
 }
 
 /* Day cells */
-.rdp-cell {
-  display: table-cell;
-  padding: 0.25rem;
-  text-align: center;
-  vertical-align: middle;
-}
-
 .rdp-day {
-  width: 100%;
-  height: var(--rdp-cell-size);
-  border-radius: 0.5rem;
-  border: 2px solid transparent;
-  background: hsl(var(--background));
-  color: hsl(var(--foreground));
-  font-size: 0.9375rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: var(--rdp-day-width) !important;
+  height: var(--rdp-day-height) !important;
+  border-radius: 0.5rem !important;
+  border: 2px solid transparent !important;
+  background: hsl(var(--background)) !important;
+  color: hsl(var(--foreground)) !important;
+  font-size: 0.9375rem !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  margin: 0.125rem !important;
 }
 
 .rdp-day:hover:not(.rdp-day_disabled):not(.rdp-day_selected) {
-  background: hsl(var(--cream));
-  border-color: hsl(var(--gold));
+  background: hsl(var(--cream)) !important;
+  border-color: hsl(var(--gold)) !important;
 }
 
 /* Selected date */
@@ -127,7 +114,7 @@
   background: hsl(var(--gold)) !important;
   color: hsl(var(--background)) !important;
   border-color: hsl(var(--gold)) !important;
-  font-weight: 600;
+  font-weight: 600 !important;
 }
 
 .rdp-day_selected:hover {
@@ -135,58 +122,56 @@
 }
 
 /* Today */
-.rdp-day_today {
-  font-weight: 600;
-  position: relative;
-}
-
 .rdp-day_today:not(.rdp-day_selected) {
-  background: hsl(var(--cream));
+  background: hsl(var(--cream)) !important;
+  font-weight: 600 !important;
 }
 
 /* Disabled dates */
 .rdp-day_disabled {
-  color: hsl(var(--muted));
-  opacity: 0.4;
-  cursor: not-allowed;
-  background: hsl(var(--background));
+  color: hsl(var(--muted)) !important;
+  opacity: 0.4 !important;
+  cursor: not-allowed !important;
+  background: hsl(var(--background)) !important;
 }
 
 .rdp-day_disabled:hover {
-  background: hsl(var(--background));
-  border-color: transparent;
+  background: hsl(var(--background)) !important;
+  border-color: transparent !important;
 }
 
 /* Outside month dates */
 .rdp-day_outside {
-  color: hsl(var(--muted));
-  opacity: 0.5;
+  color: hsl(var(--muted)) !important;
+  opacity: 0.5 !important;
 }
 
 /* Focus visible for accessibility */
 .rdp-day:focus-visible {
-  outline: var(--rdp-outline);
-  outline-offset: 2px;
-  z-index: 1;
+  outline: 2px solid hsl(var(--gold)) !important;
+  outline-offset: 2px !important;
+  z-index: 1 !important;
 }
 
 /* Responsive adjustments */
 @media (max-width: 640px) {
-  .rdp {
-    --rdp-cell-size: 42px;
+  .rdp-root {
+    --rdp-day-height: 42px;
+    --rdp-day-width: 42px;
   }
 
-  .rdp-caption {
+  .rdp-month_caption {
     font-size: 1rem;
     padding: 0.75rem;
   }
 
-  .rdp-head_cell {
-    font-size: 0.75rem;
-    padding: 0.5rem 0.25rem;
+  .rdp-weekday {
+    font-size: 0.75rem !important;
+    padding: 0.5rem 0.25rem !important;
   }
 
   .rdp-day {
-    font-size: 0.875rem;
+    font-size: 0.875rem !important;
   }
 }
+
