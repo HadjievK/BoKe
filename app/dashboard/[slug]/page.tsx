@@ -192,7 +192,6 @@ export default function DashboardPage() {
               </button>
               <button className="px-3 py-1.5 hover:bg-white/10 rounded-md transition">👥 Clients</button>
               <button className="px-3 py-1.5 hover:bg-white/10 rounded-md transition">📋 Services</button>
-              <button className="px-3 py-1.5 hover:bg-white/10 rounded-md transition">💰 Earnings</button>
               <button
                 onClick={() => setShowSettings(true)}
                 className="px-3 py-1.5 hover:bg-white/10 rounded-md transition"
@@ -220,34 +219,26 @@ export default function DashboardPage() {
             Good morning, {provider.first_name} ✨
           </h1>
           <p className="text-sm text-[#6B6455]">
-            {todayDate} · {dashboardData.appointments.length} appointments today · ${dashboardData.appointments.reduce((sum, a) => sum + a.price, 0)} expected
+            {todayDate} · {dashboardData.appointments.length} appointments today
           </p>
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-3 gap-4 mb-6">
           <div className="bg-white rounded-xl p-6 border border-[rgba(28,24,18,0.08)]">
             <div className="text-sm text-[#6B6455] mb-2">TODAY</div>
             <div className="text-4xl font-bold text-[#1C1812] mb-1" style={{ fontFamily: 'Fraunces, serif' }}>
               {dashboardData.stats.today_appointments}
             </div>
-            <div className="text-xs text-[#6B6455]">↑ 2 more than yesterday</div>
+            <div className="text-xs text-[#6B6455]">appointments</div>
           </div>
 
           <div className="bg-white rounded-xl p-6 border border-[rgba(28,24,18,0.08)]">
-            <div className="text-sm text-[#6B6455] mb-2">REVENUE TODAY</div>
+            <div className="text-sm text-[#6B6455] mb-2">THIS WEEK</div>
             <div className="text-4xl font-bold text-[#1C1812] mb-1" style={{ fontFamily: 'Fraunces, serif' }}>
-              {formatCurrency(dashboardData.appointments.reduce((sum, a) => sum + a.price, 0))}
+              {dashboardData.stats.week_appointments}
             </div>
-            <div className="text-xs text-[#6B6455]">↑ 8.5% vs last week</div>
-          </div>
-
-          <div className="bg-white rounded-xl p-6 border border-[rgba(28,24,18,0.08)]">
-            <div className="text-sm text-[#6B6455] mb-2">NEW CLIENTS</div>
-            <div className="text-4xl font-bold text-[#1C1812] mb-1" style={{ fontFamily: 'Fraunces, serif' }}>
-              {dashboardData.stats.total_customers}
-            </div>
-            <div className="text-xs text-[#6B6455]">↑ 12% vs last month</div>
+            <div className="text-xs text-[#6B6455]">appointments</div>
           </div>
 
           <div className="bg-white rounded-xl p-6 border border-[rgba(28,24,18,0.08)]">
@@ -255,7 +246,7 @@ export default function DashboardPage() {
             <div className="text-4xl font-bold text-[#1C1812] mb-1" style={{ fontFamily: 'Fraunces, serif' }}>
               {dashboardData.stats.total_customers}
             </div>
-            <div className="text-xs text-[#6B6455]">since Jan 2026</div>
+            <div className="text-xs text-[#6B6455]">all time</div>
           </div>
         </div>
 
