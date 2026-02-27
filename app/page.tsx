@@ -114,6 +114,7 @@ export default function Home() {
           <div className="flex items-center gap-8">
             <a href="#how" className="text-sm text-[#6B6455] hover:text-[#1C1812] font-medium transition-colors">How it works</a>
             <a href="#pricing" className="text-sm text-[#6B6455] hover:text-[#1C1812] font-medium transition-colors">Pricing</a>
+            <a href="/signin" className="text-sm text-[#6B6455] hover:text-[#1C1812] font-medium transition-colors">Sign in</a>
             <button
               onClick={() => setShowOnboarding(true)}
               className="bg-[#1C1812] text-[#F5F0E8] px-6 py-2.5 rounded-full text-sm font-semibold hover:bg-[#C9993A] hover:text-[#1C1812] transition-all"
@@ -308,6 +309,15 @@ export default function Home() {
 
       {/* Right panel - form */}
       <div className="bg-[#FDFAF5] px-14 py-[60px] overflow-y-auto flex flex-col justify-center">
+        <div className="mb-6 text-center">
+          <p className="text-sm text-[#6B6455]">
+            Already have an account?{' '}
+            <a href="/signin" className="text-[#C9993A] font-semibold hover:underline">
+              Sign in
+            </a>
+          </p>
+        </div>
+
         <div className="text-[11px] font-bold tracking-[0.12em] uppercase text-[#B8AFA3] mb-2">Step 1 of 1</div>
         <h3 className="text-[30px] font-black tracking-tight mb-1.5" style={{ fontFamily: 'Fraunces, serif' }}>Tell us about you</h3>
         <p className="text-sm text-[#6B6455] mb-9 font-light">Your profile will be live in seconds.</p>
