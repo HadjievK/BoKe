@@ -34,8 +34,17 @@ export async function POST(
     const providerId = provider.id;
     const services = provider.services || [];
 
-    // Find the service
-    const serviceIndex = parseInt(service_id);
+    // Find the service - service_id format is "providerId_index"
+    let serviceIndex: number;
+    if (service_id.includes('_')) {
+      // New format: "providerId_index"
+      const parts = service_id.split('_');
+      serviceIndex = parseInt(parts[parts.length - 1]);
+    } else {
+      // Legacy format: just the index
+      serviceIndex = parseInt(service_id);
+    }
+
     const service = services[serviceIndex];
 
     if (!service) {
