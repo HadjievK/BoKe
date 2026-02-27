@@ -17,6 +17,15 @@ export default function DashboardPage() {
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null)
   const [selectedDate, setSelectedDate] = useState(new Date())
 
+  // Settings modal states
+  const [showSettings, setShowSettings] = useState(false)
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [location, setLocation] = useState('')
+  const [services, setServices] = useState<any[]>([])
+  const [settingsError, setSettingsError] = useState('')
+  const [settingsSaving, setSettingsSaving] = useState(false)
+
   useEffect(() => {
     const stored = sessionStorage.getItem(`password_${slug}`)
     if (stored) {
@@ -24,6 +33,25 @@ export default function DashboardPage() {
       fetchDashboard(stored)
     }
   }, [slug])
+
+  useEffect(() => {
+    // Load current settings when modal opens
+    if (showSettings && dashboardData) {
+      const fetchSettings = async () => {
+        try {
+          const response = await fetch(`/api/provider/${slug}`)
+          if (response.ok) {
+            const data = await response.json()
+            setLocation(data.location || '')
+            setServices(data.services || [])
+          }
+        } catch (err) {
+          console.error('Failed to load settings:', err)
+        }
+      }
+      fetchSettings()
+    }
+  }, [showSettings, slug])
 
   const fetchDashboard = async (passwordValue: string) => {
     setLoading(true)
@@ -127,14 +155,19 @@ export default function DashboardPage() {
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="text-2xl font-black" style={{ fontFamily: 'Fraunces, serif' }}>
-              Slot<span className="text-[#C9993A]">Craft</span>
+              Bu<span className="text-[#C9993A]">Ke</span>
             </div>
             <div className="flex items-center gap-2 text-sm">
               <button className="px-3 py-1.5 bg-white/10 rounded-md hover:bg-white/20 transition">📅 Calendar</button>
               <button className="px-3 py-1.5 hover:bg-white/10 rounded-md transition">👥 Clients</button>
               <button className="px-3 py-1.5 hover:bg-white/10 rounded-md transition">📋 Services</button>
               <button className="px-3 py-1.5 hover:bg-white/10 rounded-md transition">💰 Earnings</button>
-              <button className="px-3 py-1.5 hover:bg-white/10 rounded-md transition">⚙️ Settings</button>
+              <button
+                onClick={() => setShowSettings(true)}
+                className="px-3 py-1.5 hover:bg-white/10 rounded-md transition"
+              >
+                ⚙️ Settings
+              </button>
             </div>
           </div>
           <div className="flex items-center gap-4">
@@ -378,6 +411,207 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
+
+      {/* Settings Modal */}
+      {showSettings && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 bg-white border-b border-[rgba(28,24,18,0.08)] px-6 py-4 flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-[#1C1812]" style={{ fontFamily: 'Fraunces, serif' }}>
+                Settings
+              </h2>
+              <button
+                onClick={() => {
+                  setShowSettings(false)
+                  setSettingsError('')
+                }}
+                className="text-2xl text-[#6B6455] hover:text-[#1C1812] transition"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="p-6 space-y-6">
+              {/* Change Password */}
+              <div>
+                <h3 className="text-lg font-bold text-[#1C1812] mb-4" style={{ fontFamily: 'Fraunces, serif' }}>
+                  Change Password
+                </h3>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-sm font-medium text-[#1C1812] mb-2">
+                      New Password
+                    </label>
+                    <input
+                      type="password"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      placeholder="Enter new password (min 6 characters)"
+                      minLength={6}
+                      className="w-full bg-[#F5F0E8] border border-[rgba(28,24,18,0.12)] rounded-lg px-4 py-3 text-sm focus:border-[#C9993A] focus:outline-none transition"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-[#1C1812] mb-2">
+                      Confirm New Password
+                    </label>
+                    <input
+                      type="password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      placeholder="Confirm new password"
+                      minLength={6}
+                      className="w-full bg-[#F5F0E8] border border-[rgba(28,24,18,0.12)] rounded-lg px-4 py-3 text-sm focus:border-[#C9993A] focus:outline-none transition"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <hr className="border-[rgba(28,24,18,0.08)]" />
+
+              {/* Update Location */}
+              <div>
+                <h3 className="text-lg font-bold text-[#1C1812] mb-4" style={{ fontFamily: 'Fraunces, serif' }}>
+                  Business Location
+                </h3>
+                <div>
+                  <label className="block text-sm font-medium text-[#1C1812] mb-2">
+                    Address
+                  </label>
+                  <input
+                    type="text"
+                    value={location}
+                    onChange={(e) => setLocation(e.target.value)}
+                    placeholder="e.g. 123 Main St, Brooklyn, NY"
+                    className="w-full bg-[#F5F0E8] border border-[rgba(28,24,18,0.12)] rounded-lg px-4 py-3 text-sm focus:border-[#C9993A] focus:outline-none transition"
+                  />
+                </div>
+              </div>
+
+              <hr className="border-[rgba(28,24,18,0.08)]" />
+
+              {/* Manage Services */}
+              <div>
+                <h3 className="text-lg font-bold text-[#1C1812] mb-4" style={{ fontFamily: 'Fraunces, serif' }}>
+                  Manage Services
+                </h3>
+                <div className="space-y-3">
+                  {services.map((service, index) => (
+                    <div key={index} className="flex gap-3 items-start p-4 bg-[#F5F0E8] rounded-lg">
+                      <div className="flex-1 grid grid-cols-3 gap-3">
+                        <input
+                          type="text"
+                          value={service.name}
+                          onChange={(e) => {
+                            const updated = [...services]
+                            updated[index].name = e.target.value
+                            setServices(updated)
+                          }}
+                          placeholder="Service name"
+                          className="bg-white border border-[rgba(28,24,18,0.12)] rounded-lg px-3 py-2 text-sm focus:border-[#C9993A] focus:outline-none"
+                        />
+                        <input
+                          type="number"
+                          value={service.duration}
+                          onChange={(e) => {
+                            const updated = [...services]
+                            updated[index].duration = parseInt(e.target.value)
+                            setServices(updated)
+                          }}
+                          placeholder="Duration (min)"
+                          className="bg-white border border-[rgba(28,24,18,0.12)] rounded-lg px-3 py-2 text-sm focus:border-[#C9993A] focus:outline-none"
+                        />
+                        <input
+                          type="number"
+                          value={service.price}
+                          onChange={(e) => {
+                            const updated = [...services]
+                            updated[index].price = parseFloat(e.target.value)
+                            setServices(updated)
+                          }}
+                          placeholder="Price ($)"
+                          className="bg-white border border-[rgba(28,24,18,0.12)] rounded-lg px-3 py-2 text-sm focus:border-[#C9993A] focus:outline-none"
+                        />
+                      </div>
+                      <button
+                        onClick={() => {
+                          setServices(services.filter((_, i) => i !== index))
+                        }}
+                        className="px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg transition"
+                      >
+                        🗑️
+                      </button>
+                    </div>
+                  ))}
+                  <button
+                    onClick={() => {
+                      setServices([...services, { name: '', duration: 30, price: 0, icon: '✂️' }])
+                    }}
+                    className="w-full py-3 border-2 border-dashed border-[rgba(28,24,18,0.12)] rounded-lg text-sm font-medium text-[#6B6455] hover:border-[#C9993A] hover:text-[#C9993A] transition"
+                  >
+                    + Add Service
+                  </button>
+                </div>
+              </div>
+
+              {settingsError && (
+                <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm">
+                  {settingsError}
+                </div>
+              )}
+
+              {/* Save Button */}
+              <button
+                onClick={async () => {
+                  setSettingsError('')
+                  setSettingsSaving(true)
+
+                  try {
+                    // Validate passwords match
+                    if (newPassword && newPassword !== confirmPassword) {
+                      throw new Error('Passwords do not match')
+                    }
+
+                    if (newPassword && newPassword.length < 6) {
+                      throw new Error('Password must be at least 6 characters')
+                    }
+
+                    const updates: any = {}
+                    if (newPassword) updates.password = newPassword
+                    if (location) updates.location = location
+                    if (services.length > 0) updates.services = services
+
+                    const response = await fetch(`/api/provider/${slug}/settings`, {
+                      method: 'PUT',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ password, updates }),
+                    })
+
+                    if (!response.ok) {
+                      const data = await response.json()
+                      throw new Error(data.detail || 'Failed to update settings')
+                    }
+
+                    // Refresh dashboard data
+                    await fetchDashboard(newPassword || password)
+                    setShowSettings(false)
+                    setNewPassword('')
+                    setConfirmPassword('')
+                  } catch (err: any) {
+                    setSettingsError(err.message)
+                  } finally {
+                    setSettingsSaving(false)
+                  }
+                }}
+                disabled={settingsSaving}
+                className="w-full bg-[#1C1812] text-[#F5F0E8] py-3 rounded-lg font-semibold hover:bg-[#C9993A] hover:text-[#1C1812] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {settingsSaving ? 'Saving...' : 'Save Changes'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   )
 }
