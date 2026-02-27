@@ -60,24 +60,24 @@ export async function GET(
       WHERE a.provider_id = $1
     `;
 
-    const params: any[] = [providerId];
+    const queryParams: any[] = [providerId];
     let paramIndex = 2;
 
     if (startDate) {
       query += ` AND a.appointment_date >= $${paramIndex}`;
-      params.push(startDate);
+      queryParams.push(startDate);
       paramIndex++;
     }
 
     if (endDate) {
       query += ` AND a.appointment_date <= $${paramIndex}`;
-      params.push(endDate);
+      queryParams.push(endDate);
       paramIndex++;
     }
 
     query += ` ORDER BY a.appointment_date DESC, a.appointment_time DESC`;
 
-    const appointmentsResult = await pool.query(query, params);
+    const appointmentsResult = await pool.query(query, queryParams);
 
     // Get services from provider's JSONB column
     const servicesResult = await pool.query(
