@@ -5,11 +5,18 @@ import pool from "@/lib/db"
 import bcrypt from "bcrypt"
 
 // Check if Google OAuth is properly configured
+// Only enable if credentials exist, are not empty, and don't contain placeholder text
 const isGoogleConfigured =
   process.env.GOOGLE_CLIENT_ID &&
   process.env.GOOGLE_CLIENT_SECRET &&
+  process.env.GOOGLE_CLIENT_ID.trim() !== '' &&
+  process.env.GOOGLE_CLIENT_SECRET.trim() !== '' &&
   !process.env.GOOGLE_CLIENT_ID.includes('PLACEHOLDER') &&
-  !process.env.GOOGLE_CLIENT_SECRET.includes('PLACEHOLDER')
+  !process.env.GOOGLE_CLIENT_SECRET.includes('PLACEHOLDER') &&
+  process.env.GOOGLE_CLIENT_ID !== 'undefined' &&
+  process.env.GOOGLE_CLIENT_SECRET !== 'undefined'
+
+console.log('[NextAuth] Google OAuth configured:', isGoogleConfigured)
 
 const authOptions: AuthOptions = {
   providers: [
