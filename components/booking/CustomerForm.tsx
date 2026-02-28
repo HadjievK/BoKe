@@ -59,12 +59,16 @@ export default function CustomerForm({ onSubmit, loading }: CustomerFormProps) {
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium mb-2">First Name *</label>
+          <label className="block text-sm font-medium mb-2 text-gray-900">First Name *</label>
           <input
             type="text"
             value={formData.first_name}
             onChange={(e) => handleChange('first_name', e.target.value)}
-            className={`input-field ${errors.first_name ? 'border-red-500' : ''}`}
+            className={`w-full px-4 py-3 rounded-xl border bg-white focus:outline-none transition ${
+              errors.first_name
+                ? 'border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/10'
+                : 'border-gray-200 focus:border-purple-600 focus:ring-2 focus:ring-purple-600/10'
+            }`}
             placeholder="John"
           />
           {errors.first_name && (
@@ -73,12 +77,16 @@ export default function CustomerForm({ onSubmit, loading }: CustomerFormProps) {
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-2">Last Name *</label>
+          <label className="block text-sm font-medium mb-2 text-gray-900">Last Name *</label>
           <input
             type="text"
             value={formData.last_name}
             onChange={(e) => handleChange('last_name', e.target.value)}
-            className={`input-field ${errors.last_name ? 'border-red-500' : ''}`}
+            className={`w-full px-4 py-3 rounded-xl border bg-white focus:outline-none transition ${
+              errors.last_name
+                ? 'border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/10'
+                : 'border-gray-200 focus:border-purple-600 focus:ring-2 focus:ring-purple-600/10'
+            }`}
             placeholder="Doe"
           />
           {errors.last_name && (
@@ -88,12 +96,16 @@ export default function CustomerForm({ onSubmit, loading }: CustomerFormProps) {
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-2">Email *</label>
+        <label className="block text-sm font-medium mb-2 text-gray-900">Email *</label>
         <input
           type="email"
           value={formData.email}
           onChange={(e) => handleChange('email', e.target.value)}
-          className={`input-field ${errors.email ? 'border-red-500' : ''}`}
+          className={`w-full px-4 py-3 rounded-xl border bg-white focus:outline-none transition ${
+            errors.email
+              ? 'border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/10'
+              : 'border-gray-200 focus:border-purple-600 focus:ring-2 focus:ring-purple-600/10'
+          }`}
           placeholder="john@example.com"
         />
         {errors.email && (
@@ -102,12 +114,16 @@ export default function CustomerForm({ onSubmit, loading }: CustomerFormProps) {
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-2">Phone *</label>
+        <label className="block text-sm font-medium mb-2 text-gray-900">Phone *</label>
         <input
           type="tel"
           value={formData.phone}
           onChange={(e) => handleChange('phone', e.target.value)}
-          className={`input-field ${errors.phone ? 'border-red-500' : ''}`}
+          className={`w-full px-4 py-3 rounded-xl border bg-white focus:outline-none transition ${
+            errors.phone
+              ? 'border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/10'
+              : 'border-gray-200 focus:border-purple-600 focus:ring-2 focus:ring-purple-600/10'
+          }`}
           placeholder="+1 (555) 123-4567"
         />
         {errors.phone && (
@@ -118,7 +134,7 @@ export default function CustomerForm({ onSubmit, loading }: CustomerFormProps) {
       <button
         type="submit"
         disabled={loading}
-        className="btn-primary w-full"
+        className="w-full bg-purple-600 text-white py-4 rounded-xl font-semibold hover:bg-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-purple-600/25"
       >
         {loading ? 'Booking...' : 'Confirm Booking'}
       </button>

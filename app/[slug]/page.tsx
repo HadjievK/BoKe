@@ -132,10 +132,10 @@ export default function ProviderProfilePage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-[#F8F5F0] flex items-center justify-center">
+      <main className="min-h-screen bg-white flex items-center justify-center" style={{ fontFamily: "'DM Sans', -apple-system, sans-serif" }}>
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#B8860B] mx-auto mb-4"></div>
-          <p className="text-[#444444]">Loading...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
         </div>
       </main>
     )
@@ -143,16 +143,16 @@ export default function ProviderProfilePage() {
 
   if (error || !provider) {
     return (
-      <main className="min-h-screen bg-[#F8F5F0] flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-lg p-8 text-center max-w-md border border-[#E8E2D9]">
+      <main className="min-h-screen bg-gray-50 flex items-center justify-center p-4" style={{ fontFamily: "'DM Sans', -apple-system, sans-serif" }}>
+        <div className="bg-white rounded-2xl shadow-lg p-8 text-center max-w-md border border-gray-200">
           <div className="text-6xl mb-4">😕</div>
-          <h1 className="text-2xl font-bold mb-2 text-[#111111]" style={{ fontFamily: 'Playfair Display, serif' }}>
+          <h1 className="text-2xl font-bold mb-2 text-gray-900">
             Provider Not Found
           </h1>
-          <p className="text-[#888888] mb-6">{error || 'This booking page does not exist'}</p>
+          <p className="text-gray-600 mb-6">{error || 'This booking page does not exist'}</p>
           <a
             href="/"
-            className="inline-block bg-[#111111] text-white px-8 py-3 rounded-full font-semibold hover:bg-[#B8860B] transition"
+            className="inline-block bg-purple-600 text-white px-8 py-3 rounded-full font-semibold hover:bg-purple-700 transition shadow-lg shadow-purple-600/25"
           >
             Go Home
           </a>
@@ -162,9 +162,9 @@ export default function ProviderProfilePage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#F8F5F0]">
+    <main className="min-h-screen bg-white" style={{ fontFamily: "'DM Sans', -apple-system, sans-serif" }}>
       {/* Hero Section */}
-      <div className="relative h-80 overflow-hidden bg-[#111111]">
+      <div className="relative h-80 overflow-hidden bg-gray-900">
         {/* Background Pattern */}
         <div
           className="absolute inset-0"
@@ -172,8 +172,8 @@ export default function ProviderProfilePage() {
             background: `
               repeating-linear-gradient(45deg, transparent, transparent 20px, rgba(255,255,255,0.015) 20px, rgba(255,255,255,0.015) 21px),
               repeating-linear-gradient(-45deg, transparent, transparent 20px, rgba(255,255,255,0.015) 20px, rgba(255,255,255,0.015) 21px),
-              radial-gradient(ellipse 70% 80% at 80% 20%, rgba(184,134,11,0.2) 0%, transparent 60%),
-              radial-gradient(ellipse 50% 50% at 20% 80%, rgba(184,134,11,0.1) 0%, transparent 55%)
+              radial-gradient(ellipse 70% 80% at 80% 20%, rgba(124,58,237,0.2) 0%, transparent 60%),
+              radial-gradient(ellipse 50% 50% at 20% 80%, rgba(124,58,237,0.1) 0%, transparent 55%)
             `
           }}
         />
@@ -185,9 +185,8 @@ export default function ProviderProfilePage() {
             <div
               className="w-20 h-20 rounded-full flex items-center justify-center text-3xl font-bold text-white flex-shrink-0"
               style={{
-                background: 'linear-gradient(135deg, #B8860B, #7A5A08)',
-                border: '3px solid rgba(255,255,255,0.15)',
-                fontFamily: 'Playfair Display, serif'
+                background: 'linear-gradient(135deg, #7C3AED, #5B21B6)',
+                border: '3px solid rgba(255,255,255,0.15)'
               }}
             >
               {provider.name.charAt(0)}
@@ -195,14 +194,9 @@ export default function ProviderProfilePage() {
 
             {/* Open Badge */}
             <div
-              className="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold mb-1"
-              style={{
-                background: 'rgba(45,122,79,0.2)',
-                border: '1px solid rgba(45,122,79,0.4)',
-                color: '#6ECA88'
-              }}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold mb-1 bg-green-100/20 border border-green-600/40 text-green-400"
             >
-              <div className="w-1.5 h-1.5 rounded-full bg-[#6ECA88] animate-pulse" />
+              <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
               Open now
             </div>
           </div>
@@ -210,7 +204,7 @@ export default function ProviderProfilePage() {
           {/* Name & Info */}
           <h1
             className="text-4xl font-black text-white leading-none mb-2"
-            style={{ fontFamily: 'Playfair Display, serif', letterSpacing: '-0.02em' }}
+            style={{ letterSpacing: '-0.02em' }}
           >
             {provider.business_name || provider.name}
           </h1>
@@ -231,7 +225,7 @@ export default function ProviderProfilePage() {
       </div>
 
       {/* Tabs */}
-      <div className="bg-white border-b border-[#E8E2D9] sticky top-0 z-50 shadow-sm">
+      <div className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
         <div className="max-w-[680px] mx-auto px-8 flex gap-0">
           {['services', 'about'].map((tab) => (
             <button
@@ -239,8 +233,8 @@ export default function ProviderProfilePage() {
               onClick={() => setActiveTab(tab)}
               className={`px-5 py-4 text-sm font-semibold border-b-2 transition ${
                 activeTab === tab
-                  ? 'border-[#111111] text-[#111111]'
-                  : 'border-transparent text-[#888888] hover:text-[#111111]'
+                  ? 'border-purple-600 text-gray-900'
+                  : 'border-transparent text-gray-600 hover:text-gray-900'
               }`}
             >
               {tab.charAt(0).toUpperCase() + tab.slice(1)}
@@ -253,19 +247,19 @@ export default function ProviderProfilePage() {
       <div className="max-w-[680px] mx-auto px-8 py-7 pb-24">
         {/* Quick Info Cards */}
         <div className="grid grid-cols-2 gap-3 mb-7">
-          <div className="bg-white border border-[#E8E2D9] rounded-xl p-4 text-center">
+          <div className="bg-white border border-gray-200 rounded-xl p-4 text-center shadow-sm">
             <div className="text-xl mb-1.5">✂️</div>
-            <div className="text-xl font-bold text-[#111111] mb-0.5" style={{ fontFamily: 'Playfair Display, serif' }}>
+            <div className="text-xl font-bold text-gray-900 mb-0.5">
               {provider.services.length}
             </div>
-            <div className="text-xs text-[#888888]">Services</div>
+            <div className="text-xs text-gray-600">Services</div>
           </div>
-          <div className="bg-white border border-[#E8E2D9] rounded-xl p-4 text-center">
+          <div className="bg-white border border-gray-200 rounded-xl p-4 text-center shadow-sm">
             <div className="text-xl mb-1.5">👥</div>
-            <div className="text-xl font-bold text-[#111111] mb-0.5" style={{ fontFamily: 'Playfair Display, serif' }}>
+            <div className="text-xl font-bold text-gray-900 mb-0.5">
               New
             </div>
-            <div className="text-xs text-[#888888]">Provider</div>
+            <div className="text-xs text-gray-600">Provider</div>
           </div>
         </div>
 
@@ -273,7 +267,7 @@ export default function ProviderProfilePage() {
         {activeTab === 'services' && (
           <div className="mb-8" id="services-section">
             <h2
-              className="text-xl font-bold text-[#111111] mb-3.5"
+              className="text-xl font-bold text-[gray-900] mb-3.5"
               style={{ fontFamily: 'Playfair Display, serif', letterSpacing: '-0.01em' }}
             >
               Services & Pricing
@@ -285,8 +279,8 @@ export default function ProviderProfilePage() {
                   key={service.id}
                   className={`bg-white border rounded-xl p-5 flex items-center justify-between transition-all ${
                     selectedService?.id === service.id
-                      ? 'border-[#B8860B] shadow-lg'
-                      : 'border-[#E8E2D9] hover:border-[#111111] hover:shadow-lg cursor-pointer'
+                      ? 'border-[purple-600] shadow-lg'
+                      : 'border-[gray-200] hover:border-[gray-900] hover:shadow-lg cursor-pointer'
                   }`}
                   onClick={() => selectedService?.id !== service.id && handleSelectService(service)}
                 >
@@ -300,10 +294,10 @@ export default function ProviderProfilePage() {
 
                     {/* Service Info */}
                     <div>
-                      <div className="text-[15px] font-semibold text-[#111111] mb-0.5">
+                      <div className="text-[15px] font-semibold text-[gray-900] mb-0.5">
                         {service.name}
                       </div>
-                      <div className="text-xs text-[#888888]">
+                      <div className="text-xs text-[gray-600]">
                         {service.duration} min
                         {service.description && ` · ${service.description}`}
                       </div>
@@ -313,7 +307,7 @@ export default function ProviderProfilePage() {
                   {/* Price & Select Button */}
                   <div className="flex items-center gap-3">
                     <div
-                      className="text-lg font-bold text-[#111111]"
+                      className="text-lg font-bold text-[gray-900]"
                       style={{ fontFamily: 'Playfair Display, serif' }}
                     >
                       ${service.price}
@@ -325,8 +319,8 @@ export default function ProviderProfilePage() {
                       }}
                       className={`px-4 py-2 rounded-lg text-sm font-semibold transition whitespace-nowrap ${
                         selectedService?.id === service.id
-                          ? 'bg-[#B8860B] text-white'
-                          : 'bg-[#111111] text-white hover:bg-[#B8860B]'
+                          ? 'bg-[purple-600] text-white'
+                          : 'bg-[gray-900] text-white hover:bg-[purple-600]'
                       }`}
                     >
                       {selectedService?.id === service.id ? 'Selected' : 'Select'}
@@ -342,7 +336,7 @@ export default function ProviderProfilePage() {
         {activeTab === 'about' && (
           <div>
             <h2
-              className="text-xl font-bold text-[#111111] mb-3.5"
+              className="text-xl font-bold text-[gray-900] mb-3.5"
               style={{ fontFamily: 'Playfair Display, serif', letterSpacing: '-0.01em' }}
             >
               About {provider.name}
@@ -357,20 +351,20 @@ export default function ProviderProfilePage() {
         {bookingStep !== 'select-service' && (
           <div id="booking-section" className="mt-8 scroll-mt-8">
             {/* Selected Service Summary */}
-            <div className="bg-[#B8860B]/10 border border-[#B8860B]/30 rounded-xl p-4 mb-6">
+            <div className="bg-[purple-600]/10 border border-[purple-600]/30 rounded-xl p-4 mb-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="text-2xl">{selectedService?.icon || '✂️'}</div>
                   <div>
-                    <div className="font-semibold text-[#111111]">{selectedService?.name}</div>
-                    <div className="text-sm text-[#888888]">
+                    <div className="font-semibold text-[gray-900]">{selectedService?.name}</div>
+                    <div className="text-sm text-[gray-600]">
                       {selectedService?.duration} min · ${selectedService?.price}
                     </div>
                   </div>
                 </div>
                 <button
                   onClick={handleBookAnother}
-                  className="text-sm text-[#B8860B] hover:text-[#8A6830] font-semibold"
+                  className="text-sm text-[purple-600] hover:text-[purple-700] font-semibold"
                 >
                   Change
                 </button>
@@ -380,7 +374,7 @@ export default function ProviderProfilePage() {
             {bookingStep === 'select-datetime' && (
               <>
                 <h2
-                  className="text-xl font-bold text-[#111111] mb-4"
+                  className="text-xl font-bold text-[gray-900] mb-4"
                   style={{ fontFamily: 'Playfair Display, serif', letterSpacing: '-0.01em' }}
                 >
                   Select Date & Time
@@ -388,8 +382,8 @@ export default function ProviderProfilePage() {
 
                 <div className="grid lg:grid-cols-2 gap-6">
                   {/* Calendar */}
-                  <div className="bg-white border border-[#E8E2D9] rounded-xl p-6">
-                    <h3 className="text-base font-semibold text-[#111111] mb-4">Choose a Date</h3>
+                  <div className="bg-white border border-[gray-200] rounded-xl p-6">
+                    <h3 className="text-base font-semibold text-[gray-900] mb-4">Choose a Date</h3>
                     <CalendarPicker
                       selectedDate={selectedDate}
                       onDateSelect={handleDateSelect}
@@ -397,8 +391,8 @@ export default function ProviderProfilePage() {
                   </div>
 
                   {/* Time Slots */}
-                  <div className="bg-white border border-[#E8E2D9] rounded-xl p-6">
-                    <h3 className="text-base font-semibold text-[#111111] mb-4">
+                  <div className="bg-white border border-[gray-200] rounded-xl p-6">
+                    <h3 className="text-base font-semibold text-[gray-900] mb-4">
                       {selectedDate ? 'Available Times' : 'Select a date first'}
                     </h3>
                     {selectedDate && (
@@ -410,7 +404,7 @@ export default function ProviderProfilePage() {
                       />
                     )}
                     {!selectedDate && (
-                      <div className="text-center py-12 text-[#888888]">
+                      <div className="text-center py-12 text-[gray-600]">
                         <div className="text-4xl mb-3">📅</div>
                         <p className="text-sm">Pick a date to see available time slots</p>
                       </div>
@@ -423,15 +417,15 @@ export default function ProviderProfilePage() {
             {bookingStep === 'enter-details' && selectedDate && selectedTime && (
               <>
                 <h2
-                  className="text-xl font-bold text-[#111111] mb-4"
+                  className="text-xl font-bold text-[gray-900] mb-4"
                   style={{ fontFamily: 'Playfair Display, serif', letterSpacing: '-0.01em' }}
                 >
                   Your Information
                 </h2>
 
-                <div className="bg-[#F8F5F0]/50 border border-[#E8E2D9] rounded-xl p-4 mb-6">
-                  <div className="text-sm text-[#888888] mb-1">Selected Time</div>
-                  <div className="font-semibold text-[#111111]">
+                <div className="bg-[#F8F5F0]/50 border border-[gray-200] rounded-xl p-4 mb-6">
+                  <div className="text-sm text-[gray-600] mb-1">Selected Time</div>
+                  <div className="font-semibold text-[gray-900]">
                     {selectedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })} at {selectedTime}
                   </div>
                 </div>
@@ -453,24 +447,24 @@ export default function ProviderProfilePage() {
               <div className="text-center py-8">
                 <div className="text-6xl mb-4">✅</div>
                 <h2
-                  className="text-2xl font-bold text-[#111111] mb-2"
+                  className="text-2xl font-bold text-[gray-900] mb-2"
                   style={{ fontFamily: 'Playfair Display, serif' }}
                 >
                   Booking Confirmed!
                 </h2>
-                <p className="text-[#888888] mb-6">
+                <p className="text-[gray-600] mb-6">
                   Your appointment has been successfully booked.
                 </p>
 
-                <div className="bg-white border border-[#E8E2D9] rounded-xl p-6 max-w-md mx-auto mb-6 text-left">
+                <div className="bg-white border border-[gray-200] rounded-xl p-6 max-w-md mx-auto mb-6 text-left">
                   <div className="space-y-3">
                     <div>
-                      <div className="text-xs text-[#888888] mb-1">Service</div>
-                      <div className="font-semibold text-[#111111]">{confirmation.appointment.service.name}</div>
+                      <div className="text-xs text-[gray-600] mb-1">Service</div>
+                      <div className="font-semibold text-[gray-900]">{confirmation.appointment.service.name}</div>
                     </div>
-                    <div className="border-t border-[#E8E2D9] pt-3">
-                      <div className="text-xs text-[#888888] mb-1">Date & Time</div>
-                      <div className="font-semibold text-[#111111]">
+                    <div className="border-t border-[gray-200] pt-3">
+                      <div className="text-xs text-[gray-600] mb-1">Date & Time</div>
+                      <div className="font-semibold text-[gray-900]">
                         {new Date(confirmation.appointment.appointment_date).toLocaleDateString('en-US', {
                           weekday: 'long',
                           month: 'long',
@@ -478,20 +472,20 @@ export default function ProviderProfilePage() {
                         })} at {confirmation.appointment.appointment_time}
                       </div>
                     </div>
-                    <div className="border-t border-[#E8E2D9] pt-3">
-                      <div className="text-xs text-[#888888] mb-1">Duration</div>
-                      <div className="font-semibold text-[#111111]">{confirmation.appointment.duration} minutes</div>
+                    <div className="border-t border-[gray-200] pt-3">
+                      <div className="text-xs text-[gray-600] mb-1">Duration</div>
+                      <div className="font-semibold text-[gray-900]">{confirmation.appointment.duration} minutes</div>
                     </div>
-                    <div className="border-t border-[#E8E2D9] pt-3">
-                      <div className="text-xs text-[#888888] mb-1">Price</div>
-                      <div className="font-semibold text-[#111111]">${confirmation.appointment.price}</div>
+                    <div className="border-t border-[gray-200] pt-3">
+                      <div className="text-xs text-[gray-600] mb-1">Price</div>
+                      <div className="font-semibold text-[gray-900]">${confirmation.appointment.price}</div>
                     </div>
                   </div>
                 </div>
 
                 <button
                   onClick={handleBookAnother}
-                  className="bg-[#111111] text-white px-8 py-3 rounded-full text-sm font-semibold hover:bg-[#B8860B] transition"
+                  className="bg-[gray-900] text-white px-8 py-3 rounded-full text-sm font-semibold hover:bg-[purple-600] transition"
                 >
                   Book Another Appointment
                 </button>
@@ -503,13 +497,13 @@ export default function ProviderProfilePage() {
 
       {/* Sticky CTA - Only show when no service is selected */}
       {bookingStep === 'select-service' && (
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-[#E8E2D9] px-8 py-4 flex items-center justify-between z-50 shadow-2xl">
-          <div className="text-sm text-[#888888]">
-            Next available: <strong className="text-[#111111] font-semibold">Today</strong>
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-[gray-200] px-8 py-4 flex items-center justify-between z-50 shadow-2xl">
+          <div className="text-sm text-[gray-600]">
+            Next available: <strong className="text-[gray-900] font-semibold">Today</strong>
           </div>
           <button
             onClick={() => document.getElementById('services-section')?.scrollIntoView({ behavior: 'smooth' })}
-            className="bg-[#111111] text-white px-8 py-3.5 rounded-full text-[15px] font-semibold flex items-center gap-2 hover:bg-[#B8860B] hover:scale-105 transition-all"
+            className="bg-[gray-900] text-white px-8 py-3.5 rounded-full text-[15px] font-semibold flex items-center gap-2 hover:bg-[purple-600] hover:scale-105 transition-all"
           >
             Choose a Service →
           </button>

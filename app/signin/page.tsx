@@ -43,62 +43,59 @@ export default function SignInPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F5F0E8]">
+    <div className="min-h-screen bg-gray-50" style={{ fontFamily: "'DM Sans', -apple-system, sans-serif" }}>
       {/* Nav */}
-      <nav className="relative z-10 flex items-center justify-between px-[60px] py-7">
-        <Link href="/" className="text-[22px] font-black tracking-tight" style={{ fontFamily: 'Fraunces, serif' }}>
-          Bu<span className="text-[#C9993A]">Ke</span>
+      <nav className="relative z-10 flex items-center justify-between px-[60px] py-7 bg-white border-b border-gray-200">
+        <Link href="/" className="text-[22px] font-bold tracking-tight text-gray-900">
+          Bu<span className="text-purple-600">Ke</span>
         </Link>
         <div className="flex items-center gap-8">
-          <Link href="/#how" className="text-sm text-[#6B6455] hover:text-[#1C1812] font-medium transition-colors">
+          <Link href="/#how-it-works" className="text-sm text-gray-600 hover:text-gray-900 font-medium transition-colors">
             How it works
-          </Link>
-          <Link href="/#pricing" className="text-sm text-[#6B6455] hover:text-[#1C1812] font-medium transition-colors">
-            Pricing
           </Link>
           <Link
             href="/"
-            className="bg-[#1C1812] text-[#F5F0E8] px-6 py-2.5 rounded-full text-sm font-semibold hover:bg-[#C9993A] hover:text-[#1C1812] transition-all"
+            className="bg-purple-600 text-white px-6 py-2.5 rounded-full text-sm font-semibold hover:bg-purple-700 transition-all shadow-sm"
           >
-            Get started free →
+            Get started free
           </Link>
         </div>
       </nav>
 
       {/* Sign In Form */}
       <div className="max-w-md mx-auto px-6 py-20">
-        <div className="bg-white rounded-2xl shadow-lg p-8 border border-[rgba(28,24,18,0.08)]">
+        <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-200">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-[#1C1812] mb-2" style={{ fontFamily: 'Fraunces, serif' }}>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
               Welcome back
             </h1>
-            <p className="text-[#6B6455]">Sign in to access your dashboard</p>
+            <p className="text-gray-600">Sign in to access your dashboard</p>
           </div>
 
           <form onSubmit={handleSignIn} className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-[#1C1812] mb-2">
+              <label className="block text-sm font-medium text-gray-900 mb-2">
                 Email address
               </label>
               <div className="relative">
-                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-[#B8AFA3]">✉</span>
+                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-gray-400">✉</span>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@email.com"
                   required
-                  className="w-full bg-[#F5F0E8] border border-[rgba(28,24,18,0.12)] rounded-lg pl-9 pr-3.5 py-3 text-sm focus:border-[#C9993A] focus:shadow-[0_0_0_3px_rgba(201,153,58,0.1)] outline-none transition"
+                  className="w-full bg-white border border-gray-200 rounded-lg pl-9 pr-3.5 py-3 text-sm focus:border-purple-600 focus:ring-2 focus:ring-purple-600/10 outline-none transition"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-[#1C1812] mb-2">
+              <label className="block text-sm font-medium text-gray-900 mb-2">
                 Password
               </label>
               <div className="relative">
-                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-[#B8AFA3]">🔐</span>
+                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-gray-400">🔐</span>
                 <input
                   type="password"
                   value={password}
@@ -106,7 +103,7 @@ export default function SignInPage() {
                   placeholder="Enter your password"
                   required
                   minLength={6}
-                  className="w-full bg-[#F5F0E8] border border-[rgba(28,24,18,0.12)] rounded-lg pl-9 pr-3.5 py-3 text-sm focus:border-[#C9993A] focus:shadow-[0_0_0_3px_rgba(201,153,58,0.1)] outline-none transition"
+                  className="w-full bg-white border border-gray-200 rounded-lg pl-9 pr-3.5 py-3 text-sm focus:border-purple-600 focus:ring-2 focus:ring-purple-600/10 outline-none transition"
                 />
               </div>
             </div>
@@ -120,7 +117,7 @@ export default function SignInPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-[#1C1812] text-[#F5F0E8] py-3 rounded-lg font-semibold hover:bg-[#C9993A] hover:text-[#1C1812] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-purple-600/25"
             >
               {loading ? 'Signing in...' : 'Sign in'}
             </button>
@@ -129,10 +126,10 @@ export default function SignInPage() {
           {/* Divider */}
           <div className="relative my-6">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-[rgba(28,24,18,0.12)]"></div>
+              <div className="w-full border-t border-gray-200"></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-white text-[#6B6455]">or continue with</span>
+              <span className="px-4 bg-white text-gray-600">or continue with</span>
             </div>
           </div>
 
@@ -140,7 +137,7 @@ export default function SignInPage() {
           <button
             onClick={handleGoogleSignIn}
             disabled={googleLoading || loading}
-            className="w-full bg-white border-2 border-[rgba(28,24,18,0.12)] text-[#1C1812] py-3 rounded-lg font-semibold hover:bg-[#F5F0E8] hover:border-[#C9993A] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
+            className="w-full bg-white border-2 border-gray-200 text-gray-900 py-3 rounded-lg font-semibold hover:bg-gray-50 hover:border-purple-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -152,9 +149,9 @@ export default function SignInPage() {
           </button>
 
           <div className="mt-6 text-center">
-            <p className="text-sm text-[#6B6455]">
+            <p className="text-sm text-gray-600">
               Don't have an account?{' '}
-              <Link href="/" className="text-[#C9993A] font-semibold hover:underline">
+              <Link href="/" className="text-purple-600 font-semibold hover:underline">
                 Sign up for free
               </Link>
             </p>

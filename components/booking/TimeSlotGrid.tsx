@@ -17,8 +17,8 @@ export default function TimeSlotGrid({
   if (loading) {
     return (
       <div className="text-center py-8">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gold mx-auto mb-4"></div>
-        <p className="text-muted-foreground">Loading available times...</p>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+        <p className="text-gray-600">Loading available times...</p>
       </div>
     )
   }
@@ -27,7 +27,7 @@ export default function TimeSlotGrid({
 
   if (slots.length === 0) {
     return (
-      <div className="text-center py-8 text-muted-foreground">
+      <div className="text-center py-8 text-gray-600">
         <svg className="w-12 h-12 mx-auto mb-3 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
@@ -39,7 +39,7 @@ export default function TimeSlotGrid({
 
   if (availableSlots.length === 0) {
     return (
-      <div className="text-center py-8 text-muted-foreground">
+      <div className="text-center py-8 text-gray-600">
         <svg className="w-12 h-12 mx-auto mb-3 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
@@ -51,7 +51,7 @@ export default function TimeSlotGrid({
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-muted-foreground">
+      <p className="text-sm text-gray-600">
         {availableSlots.length} {availableSlots.length === 1 ? 'slot' : 'slots'} available
       </p>
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3 max-h-[400px] overflow-y-auto pr-2">
@@ -64,12 +64,12 @@ export default function TimeSlotGrid({
               key={slot.time}
               onClick={() => available && onTimeSelect(slot.time)}
               disabled={!available}
-              className={`time-slot ${
+              className={`px-4 py-3 rounded-lg border-2 text-sm font-medium transition-all duration-200 ${
                 selected
-                  ? 'time-slot-selected'
+                  ? 'bg-purple-600 border-purple-600 text-white cursor-pointer'
                   : available
-                  ? 'time-slot-available'
-                  : 'time-slot-unavailable'
+                  ? 'bg-white border-gray-200 text-gray-900 hover:border-purple-600 hover:bg-purple-50 cursor-pointer'
+                  : 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed opacity-50'
               }`}
             >
               {formatTime(slot.time)}
