@@ -1,34 +1,10 @@
 import NextAuth, { AuthOptions } from "next-auth"
-import GoogleProvider from "next-auth/providers/google"
 import CredentialsProvider from "next-auth/providers/credentials"
 import pool from "@/lib/db"
 import bcrypt from "bcrypt"
 
-// Check if Google OAuth is properly configured
-// Only enable if credentials exist, are not empty, and don't contain placeholder text
-const isGoogleConfigured =
-  process.env.GOOGLE_CLIENT_ID &&
-  process.env.GOOGLE_CLIENT_SECRET &&
-  process.env.GOOGLE_CLIENT_ID.trim() !== '' &&
-  process.env.GOOGLE_CLIENT_SECRET.trim() !== '' &&
-  !process.env.GOOGLE_CLIENT_ID.includes('PLACEHOLDER') &&
-  !process.env.GOOGLE_CLIENT_SECRET.includes('PLACEHOLDER') &&
-  process.env.GOOGLE_CLIENT_ID !== 'undefined' &&
-  process.env.GOOGLE_CLIENT_SECRET !== 'undefined'
-
-console.log('[NextAuth] Google OAuth configured:', isGoogleConfigured)
-
 const authOptions: AuthOptions = {
   providers: [
-    // Only add Google provider if properly configured
-    ...(isGoogleConfigured
-      ? [
-          GoogleProvider({
-            clientId: process.env.GOOGLE_CLIENT_ID!,
-            clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-          }),
-        ]
-      : []),
     CredentialsProvider({
       name: "Credentials",
       credentials: {
@@ -53,6 +29,11 @@ const authOptions: AuthOptions = {
 
           const provider = result.rows[0]
 
+          // Check if password exists (OAuth users might not have password)
+          if (!provider.password) {
+            return null
+          }
+
           // Verify password
           const isPasswordValid = await bcrypt.compare(credentials.password, provider.password)
 
@@ -75,48 +56,9 @@ const authOptions: AuthOptions = {
     })
   ],
   callbacks: {
-    async signIn({ user, account, profile }) {
-      if (account?.provider === "google") {
-        try {
-          // Check if user exists
-          const result = await pool.query(
-            'SELECT id, slug, name, business_name, email, oauth_provider, oauth_provider_id FROM service_providers WHERE email = $1',
-            [user.email]
-          )
-
-          if (result.rows.length === 0) {
-            // User doesn't exist - redirect to onboarding
-            // Store Google info for onboarding
-            return `/onboard?google=true&email=${encodeURIComponent(user.email || '')}&name=${encodeURIComponent(user.name || '')}`
-          }
-
-          // User exists - update OAuth info if not already set
-          const provider = result.rows[0]
-
-          if (!provider.oauth_provider || !provider.oauth_provider_id) {
-            // Link Google account to existing email/password account
-            await pool.query(
-              'UPDATE service_providers SET oauth_provider = $1, oauth_provider_id = $2, last_login_at = NOW() WHERE id = $3',
-              ['google', account.providerAccountId, provider.id]
-            )
-          } else {
-            // Just update last login
-            await pool.query(
-              'UPDATE service_providers SET last_login_at = NOW() WHERE id = $1',
-              [provider.id]
-            )
-          }
-
-          // Update user object with provider data
-          user.id = provider.id.toString()
-          user.slug = provider.slug
-          user.business_name = provider.business_name
-        } catch (error) {
-          console.error('Google sign in error:', error)
-          return false
-        }
-      } else if (account?.provider === "credentials") {
-        // Update last login for email/password users
+    async signIn({ user, account }) {
+      // Update last login for email/password users
+      if (account?.provider === "credentials") {
         try {
           await pool.query(
             'UPDATE service_providers SET last_login_at = NOW() WHERE id = $1',
