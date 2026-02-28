@@ -3,6 +3,12 @@ import CredentialsProvider from "next-auth/providers/credentials"
 import pool from "@/lib/db"
 import bcrypt from "bcrypt"
 
+console.log('[NextAuth] Initializing with:', {
+  hasSecret: !!process.env.NEXTAUTH_SECRET,
+  hasUrl: !!process.env.NEXTAUTH_URL,
+  hasDbUrl: !!process.env.DATABASE_URL,
+})
+
 const authOptions: AuthOptions = {
   providers: [
     CredentialsProvider({
@@ -17,13 +23,18 @@ const authOptions: AuthOptions = {
         }
 
         try {
+          console.log('[NextAuth] Authorize attempt for:', credentials.email)
+
           // Find provider by email
           const result = await pool.query(
             'SELECT id, slug, name, business_name, email, password FROM service_providers WHERE email = $1',
             [credentials.email]
           )
 
+          console.log('[NextAuth] Query result:', { found: result.rows.length > 0 })
+
           if (result.rows.length === 0) {
+            console.log('[NextAuth] No user found')
             return null
           }
 
@@ -31,15 +42,20 @@ const authOptions: AuthOptions = {
 
           // Check if password exists (OAuth users might not have password)
           if (!provider.password) {
+            console.log('[NextAuth] No password set for user')
             return null
           }
 
           // Verify password
           const isPasswordValid = await bcrypt.compare(credentials.password, provider.password)
 
+          console.log('[NextAuth] Password valid:', isPasswordValid)
+
           if (!isPasswordValid) {
             return null
           }
+
+          console.log('[NextAuth] Auth successful for user:', provider.id)
 
           return {
             id: provider.id.toString(),
@@ -49,7 +65,7 @@ const authOptions: AuthOptions = {
             business_name: provider.business_name,
           }
         } catch (error) {
-          console.error('Auth error:', error)
+          console.error('[NextAuth] Auth error:', error)
           return null
         }
       }

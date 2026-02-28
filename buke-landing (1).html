@@ -1,0 +1,1467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BuKe — Your booking page. Ready in 60 seconds.</title>
+
+<!-- Nova uses DM Sans for body + headings -->
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* ════════════════════════════════
+   NOVA EXACT COLOR + FONT SYSTEM
+   ════════════════════════════════
+   Background:  #FFFFFF / #F5F5F7
+   Text:        #0A0A0A (headings) / #6B6B6B (body)
+   Purple:      #7C3AED (primary)  / #EDE9FE (pale)
+   Border:      #E5E5E5
+   Card:        #FFFFFF with border
+   Font:        DM Sans (all weights)
+*/
+
+:root {
+  --bg:          #FFFFFF;
+  --bg-soft:     #F7F7F8;
+  --bg-purple:   #F5F3FF;
+  --card:        #FFFFFF;
+  --border:      #E8E8EC;
+  --border-dark: #D1D1D9;
+
+  --ink:         #0A0A0F;
+  --ink-soft:    #3D3D4E;
+  --ink-muted:   #6B6B80;
+  --ink-faint:   #ABABBC;
+
+  --purple:      #7C3AED;
+  --purple-mid:  #9D5FF0;
+  --purple-pale: #EDE9FE;
+  --purple-soft: #F5F3FF;
+  --purple-glow: rgba(124,58,237,0.2);
+
+  --green:       #059669;
+  --green-pale:  #ECFDF5;
+  --green-text:  #065F46;
+
+  --yellow:      #D97706;
+  --yellow-pale: #FFFBEB;
+
+  --font: 'DM Sans', -apple-system, sans-serif;
+
+  --r:    16px;
+  --r-sm: 10px;
+  --r-lg: 24px;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* ── NAV ── */
+nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 40px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.nav-logo {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -0.03em;
+}
+
+.nav-logo span { color: var(--purple); }
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.nav-link {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink-muted);
+  text-decoration: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  transition: all 0.15s;
+}
+
+.nav-link:hover { color: var(--ink); background: var(--bg-soft); }
+
+.btn-nav {
+  background: var(--purple);
+  color: white;
+  border: none;
+  padding: 9px 20px;
+  border-radius: 50px;
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-left: 8px;
+}
+
+.btn-nav:hover {
+  background: var(--purple-mid);
+  box-shadow: 0 4px 16px var(--purple-glow);
+}
+
+/* ── HERO ── */
+.hero {
+  text-align: center;
+  padding: 96px 24px 80px;
+  position: relative;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+/* Nova's subtle radial glow behind hero */
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -120px; left: 50%;
+  transform: translateX(-50%);
+  width: 900px; height: 600px;
+  background: radial-gradient(ellipse, rgba(124,58,237,0.07) 0%, transparent 65%);
+  pointer-events: none;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--purple-pale);
+  border: 1px solid rgba(124,58,237,0.2);
+  border-radius: 50px;
+  padding: 6px 14px 6px 10px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--purple);
+  margin-bottom: 28px;
+  animation: fadeDown 0.5s ease both;
+}
+
+.badge-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--purple);
+  animation: blink 2s infinite;
+}
+
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+.hero-title {
+  font-size: clamp(44px, 6.5vw, 80px);
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+  max-width: 760px;
+  margin: 0 auto 20px;
+  animation: fadeDown 0.5s ease 0.05s both;
+}
+
+.hero-title .purple { color: var(--purple); }
+
+.hero-sub {
+  font-size: 18px;
+  font-weight: 400;
+  color: var(--ink-muted);
+  max-width: 520px;
+  margin: 0 auto 40px;
+  line-height: 1.65;
+  animation: fadeDown 0.5s ease 0.1s both;
+}
+
+.hero-cta {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 72px;
+  flex-wrap: wrap;
+  animation: fadeDown 0.5s ease 0.15s both;
+}
+
+.btn-primary {
+  background: var(--purple);
+  color: white;
+  border: none;
+  padding: 14px 32px;
+  border-radius: 50px;
+  font-family: var(--font);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-primary:hover {
+  background: var(--purple-mid);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px var(--purple-glow);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--ink-soft);
+  border: 1.5px solid var(--border-dark);
+  padding: 13px 24px;
+  border-radius: 50px;
+  font-family: var(--font);
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-ghost:hover { border-color: var(--ink-muted); color: var(--ink); }
+
+/* ── HERO PHONE CLUSTER ── */
+.hero-phones {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 16px;
+  animation: fadeUp 0.7s ease 0.2s both;
+  padding-bottom: 20px;
+}
+
+.phone {
+  border-radius: 28px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  overflow: hidden;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.10), 0 4px 12px rgba(0,0,0,0.06);
+  flex-shrink: 0;
+}
+
+.phone-main { width: 230px; animation: floatA 6s ease-in-out infinite; }
+.phone-side { width: 200px; opacity: 0.72; }
+.phone-side.left  { animation: floatB 7s ease-in-out infinite 0.5s; }
+.phone-side.right { animation: floatB 7s ease-in-out infinite 1.2s; }
+
+@keyframes floatA { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-14px)} }
+@keyframes floatB { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+
+/* Phone top bar */
+.phone-top {
+  height: 28px;
+  background: var(--bg-soft);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.phone-notch {
+  width: 52px; height: 5px;
+  border-radius: 3px;
+  background: var(--border-dark);
+}
+
+.phone-body { padding: 12px; }
+
+/* ── Provider card inside phone ── */
+.p-provider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  background: var(--bg-soft);
+  border-radius: var(--r-sm);
+  margin-bottom: 10px;
+  border: 1px solid var(--border);
+}
+
+.p-ava {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: var(--purple);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: white;
+  flex-shrink: 0;
+}
+
+.p-pname { font-size: 12px; font-weight: 700; color: var(--ink); }
+.p-ptype { font-size: 10px; color: var(--ink-muted); }
+
+.p-live {
+  margin-left: auto;
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--green);
+  background: var(--green-pale);
+  padding: 3px 8px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.p-live-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--green);
+  animation: blink 2s infinite;
+}
+
+.p-section-label {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--ink-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 6px;
+}
+
+.p-services { display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px; }
+
+.p-svc {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 10px;
+  border-radius: 8px;
+  border: 1.5px solid var(--border);
+  background: var(--bg);
+  transition: all 0.15s;
+}
+
+.p-svc.active {
+  border-color: var(--purple);
+  background: var(--purple-soft);
+}
+
+.p-svc-name { font-size: 10px; font-weight: 600; color: var(--ink); }
+.p-svc-dur  { font-size: 9px; color: var(--ink-muted); }
+.p-svc-price { font-size: 11px; font-weight: 700; color: var(--purple); }
+
+.p-book {
+  width: 100%;
+  background: var(--purple);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 9px;
+  font-family: var(--font);
+  font-size: 11px;
+  font-weight: 700;
+  text-align: center;
+}
+
+/* Dashboard phone */
+.dash-stat-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.ds {
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 6px;
+  text-align: center;
+}
+
+.ds-val { font-size: 14px; font-weight: 700; color: var(--ink); }
+.ds-lbl { font-size: 8px; color: var(--ink-muted); margin-top: 1px; }
+
+.dash-appts { display: flex; flex-direction: column; gap: 5px; }
+
+.dash-appt {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  border-left: 2.5px solid var(--purple);
+}
+
+.da-time { font-size: 9px; font-weight: 700; color: var(--ink); min-width: 32px; }
+.da-name { font-size: 9px; flex: 1; color: var(--ink-soft); }
+.da-amt  { font-size: 9px; font-weight: 700; color: var(--purple); }
+
+/* Confirm phone */
+.confirm-box {
+  background: var(--green-pale);
+  border: 1px solid rgba(5,150,105,0.2);
+  border-radius: var(--r-sm);
+  padding: 10px;
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.cb-icon { font-size: 20px; margin-bottom: 4px; }
+.cb-title { font-size: 11px; font-weight: 700; color: var(--green-text); }
+.cb-sub { font-size: 9px; color: var(--green); margin-top: 2px; }
+
+/* Floating chips */
+.float-chip {
+  position: absolute;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.10);
+  white-space: nowrap;
+  font-size: 12px;
+}
+
+.fc-left { left: -20px; bottom: 100px; animation: floatB 5s ease-in-out infinite 0.3s; }
+.fc-right { right: -20px; bottom: 140px; animation: floatB 5s ease-in-out infinite 1.3s; }
+.fc-top { right: 30px; top: 20px; animation: floatB 5s ease-in-out infinite 2s; }
+
+.fc-icon { font-size: 20px; }
+.fc-label { font-size: 10px; color: var(--ink-muted); }
+.fc-val { font-size: 13px; font-weight: 700; color: var(--ink); }
+
+/* ── TICKER ── */
+.ticker {
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-soft);
+  padding: 16px 0;
+  overflow: hidden;
+}
+
+.ticker-track {
+  display: flex;
+  width: max-content;
+  animation: ticker 28s linear infinite;
+}
+
+@keyframes ticker { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+
+.ticker-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 32px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink-muted);
+  border-right: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.ticker-item span { font-size: 18px; }
+
+/* ── SECTION WRAPPER ── */
+.section {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 96px 24px;
+}
+
+.section-alt {
+  background: var(--bg-soft);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.section-alt .section { padding: 96px 24px; }
+
+.eyebrow {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--purple);
+  letter-spacing: 0.04em;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.eyebrow::before {
+  content: '';
+  display: inline-block;
+  width: 16px; height: 2px;
+  background: var(--purple);
+  border-radius: 2px;
+}
+
+h2.section-h {
+  font-size: clamp(30px, 4vw, 48px);
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  margin-bottom: 14px;
+}
+
+.section-desc {
+  font-size: 17px;
+  color: var(--ink-muted);
+  line-height: 1.65;
+  max-width: 520px;
+  margin-bottom: 56px;
+}
+
+/* ── FEATURES GRID — Nova style ── */
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.feat {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 32px;
+  transition: all 0.2s;
+}
+
+.feat:hover {
+  border-color: rgba(124,58,237,0.25);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.06);
+  transform: translateY(-3px);
+}
+
+.feat.wide { grid-column: span 2; }
+
+.feat-icon {
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  background: var(--purple-pale);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  margin-bottom: 18px;
+}
+
+.feat-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -0.02em;
+  margin-bottom: 8px;
+}
+
+.feat-desc {
+  font-size: 14px;
+  color: var(--ink-muted);
+  line-height: 1.7;
+}
+
+/* ── HOW IT WORKS ── */
+.steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.step {
+  background: var(--card);
+  padding: 40px 32px;
+  transition: background 0.2s;
+}
+
+.step:hover { background: var(--bg-soft); }
+
+.step-num {
+  font-size: 56px;
+  font-weight: 700;
+  color: var(--border-dark);
+  letter-spacing: -0.05em;
+  line-height: 1;
+  margin-bottom: 20px;
+}
+
+.step-icon {
+  width: 40px; height: 40px;
+  border-radius: 10px;
+  background: var(--purple-pale);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  margin-bottom: 14px;
+}
+
+.step-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -0.02em;
+  margin-bottom: 10px;
+}
+
+.step-desc {
+  font-size: 14px;
+  color: var(--ink-muted);
+  line-height: 1.7;
+}
+
+/* ── SPLIT SECTION ── */
+.split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 72px;
+  align-items: center;
+}
+
+.split-phone-wrap {
+  display: flex;
+  justify-content: center;
+  position: relative;
+}
+
+.split-phone {
+  width: 260px;
+  border-radius: 32px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  overflow: hidden;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.10);
+  animation: floatA 6s ease-in-out infinite;
+}
+
+.split-phone-header {
+  background: var(--purple);
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sph-ava {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: white;
+}
+
+.sph-name { font-size: 13px; font-weight: 700; color: white; }
+.sph-url  { font-size: 10px; color: rgba(255,255,255,0.6); }
+
+.sph-badge {
+  margin-left: auto;
+  font-size: 9px;
+  font-weight: 700;
+  background: rgba(255,255,255,0.15);
+  color: white;
+  padding: 3px 8px;
+  border-radius: 20px;
+}
+
+.split-phone-body { padding: 14px; }
+
+.feature-rows { display: flex; flex-direction: column; gap: 12px; }
+
+.feature-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  transition: all 0.2s;
+}
+
+.feature-row:hover { border-color: rgba(124,58,237,0.3); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+
+.fr-icon {
+  width: 40px; height: 40px;
+  border-radius: 10px;
+  background: var(--purple-pale);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.fr-title { font-size: 14px; font-weight: 600; color: var(--ink); margin-bottom: 2px; }
+.fr-desc  { font-size: 12px; color: var(--ink-muted); }
+
+/* ── TESTIMONIALS ── */
+.testi-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.testi {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 28px;
+  transition: all 0.2s;
+}
+
+.testi:hover {
+  box-shadow: 0 8px 32px rgba(0,0,0,0.06);
+  transform: translateY(-3px);
+}
+
+.testi-stars { font-size: 14px; color: #F59E0B; letter-spacing: 2px; margin-bottom: 14px; }
+
+.testi-text {
+  font-size: 14px;
+  color: var(--ink-soft);
+  line-height: 1.7;
+  margin-bottom: 20px;
+  font-style: italic;
+}
+
+.testi-author { display: flex; align-items: center; gap: 10px; }
+
+.testi-ava {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: white;
+  flex-shrink: 0;
+}
+
+.testi-name { font-size: 13px; font-weight: 700; color: var(--ink); }
+.testi-role { font-size: 11px; color: var(--ink-muted); }
+
+/* ── PRICING ── */
+.pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.plan {
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 32px;
+  position: relative;
+  transition: all 0.2s;
+}
+
+.plan:hover { box-shadow: 0 8px 32px rgba(0,0,0,0.06); transform: translateY(-3px); }
+
+.plan.featured {
+  border-color: var(--purple);
+  box-shadow: 0 0 0 4px var(--purple-pale), 0 16px 48px rgba(124,58,237,0.12);
+}
+
+.plan-badge {
+  position: absolute;
+  top: -13px; left: 50%;
+  transform: translateX(-50%);
+  background: var(--purple);
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 14px;
+  border-radius: 20px;
+  white-space: nowrap;
+  letter-spacing: 0.04em;
+}
+
+.plan-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 12px;
+}
+
+.plan-price {
+  font-size: 52px;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -0.05em;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.plan-period {
+  font-size: 13px;
+  color: var(--ink-muted);
+  margin-bottom: 28px;
+}
+
+.plan-divider {
+  height: 1px;
+  background: var(--border);
+  margin-bottom: 24px;
+}
+
+.plan-feats { display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
+
+.pf {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: var(--ink-soft);
+}
+
+.pf-check {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: var(--purple-pale);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  color: var(--purple);
+  flex-shrink: 0;
+  font-weight: 700;
+}
+
+.btn-plan {
+  width: 100%;
+  padding: 13px;
+  border-radius: 10px;
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1.5px solid var(--border-dark);
+  background: transparent;
+  color: var(--ink);
+}
+
+.btn-plan:hover { background: var(--bg-soft); }
+
+.plan.featured .btn-plan {
+  background: var(--purple);
+  color: white;
+  border-color: var(--purple);
+}
+
+.plan.featured .btn-plan:hover { background: var(--purple-mid); }
+
+/* ── CTA BANNER ── */
+.cta-banner {
+  background: var(--purple);
+  border-radius: var(--r-lg);
+  padding: 72px 48px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.cta-banner::before {
+  content: '';
+  position: absolute;
+  top: -80px; right: -80px;
+  width: 300px; height: 300px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 50%;
+}
+
+.cta-banner::after {
+  content: '';
+  position: absolute;
+  bottom: -60px; left: -60px;
+  width: 240px; height: 240px;
+  background: rgba(255,255,255,0.04);
+  border-radius: 50%;
+}
+
+.cta-inner { position: relative; z-index: 1; }
+
+.cta-title {
+  font-size: clamp(28px, 4vw, 48px);
+  font-weight: 700;
+  color: white;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  margin-bottom: 16px;
+}
+
+.cta-desc {
+  font-size: 16px;
+  color: rgba(255,255,255,0.7);
+  margin-bottom: 36px;
+}
+
+.btn-cta-white {
+  background: white;
+  color: var(--purple);
+  border: none;
+  padding: 14px 32px;
+  border-radius: 50px;
+  font-family: var(--font);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-cta-white:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+}
+
+/* ── FOOTER ── */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  max-width: 1080px;
+  margin: 0 auto;
+}
+
+.foot-logo {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -0.03em;
+}
+
+.foot-logo span { color: var(--purple); }
+
+.foot-links {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.foot-link {
+  font-size: 13px;
+  color: var(--ink-muted);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.foot-link:hover { color: var(--ink); }
+
+.foot-copy { font-size: 13px; color: var(--ink-faint); }
+
+/* ── ANIMATIONS ── */
+@keyframes fadeDown {
+  from { opacity:0; transform:translateY(-12px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(20px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.reveal.in { opacity:1; transform:translateY(0); }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 860px) {
+  .nav-links { display: none; }
+  .features-grid { grid-template-columns: 1fr; }
+  .feat.wide { grid-column: span 1; }
+  .steps { grid-template-columns: 1fr; }
+  .split { grid-template-columns: 1fr; }
+  .testi-grid { grid-template-columns: 1fr; }
+  .pricing-grid { grid-template-columns: 1fr; }
+  .hero-phones .phone-side { display: none; }
+  .float-chip { display: none; }
+  footer { flex-direction: column; text-align: center; }
+  .foot-links { justify-content: center; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── NAV ── -->
+<nav>
+  <div class="nav-logo">Bu<span>Ke</span></div>
+  <div class="nav-links">
+    <a class="nav-link" href="#">Features</a>
+    <a class="nav-link" href="#">How it works</a>
+    <a class="nav-link" href="#">Pricing</a>
+    <a class="nav-link" href="#">Blog</a>
+    <button class="btn-nav">Get started free</button>
+  </div>
+</nav>
+
+<!-- ── HERO ── -->
+<div class="hero">
+  <div class="hero-badge">
+    <div class="badge-dot"></div>
+    Now live · 3,200+ professionals booked
+  </div>
+
+  <h1 class="hero-title">
+    Your booking page.<br>
+    <span class="purple">Ready in 60 seconds.</span>
+  </h1>
+
+  <p class="hero-sub">
+    BuKe gives every barber, dentist, nail artist, personal trainer, massage therapist, tattoo artist, physiotherapist — and anyone who offers a service — their own booking page. Clients book themselves. You just show up.
+  </p>
+
+  <div class="hero-cta">
+    <button class="btn-primary">Get started for free →</button>
+    <button class="btn-ghost">See how it works</button>
+  </div>
+
+  <!-- Phones -->
+  <div class="hero-phones">
+
+    <!-- Left: Dashboard -->
+    <div class="phone phone-side left">
+      <div class="phone-top"><div class="phone-notch"></div></div>
+      <div class="phone-body">
+        <div class="p-section-label">Today's schedule</div>
+        <div class="dash-stat-row" style="margin-bottom:10px">
+          <div class="ds"><div class="ds-val">7</div><div class="ds-lbl">Today</div></div>
+          <div class="ds"><div class="ds-val">$486</div><div class="ds-lbl">Revenue</div></div>
+          <div class="ds"><div class="ds-val">4.9★</div><div class="ds-lbl">Rating</div></div>
+        </div>
+        <div class="dash-appts">
+          <div class="dash-appt"><div class="da-time">9:00</div><div class="da-name">Marcus W.</div><div class="da-amt">$45</div></div>
+          <div class="dash-appt" style="border-left-color:#059669"><div class="da-time">10:30</div><div class="da-name">Jordan L.</div><div class="da-amt">$35</div></div>
+          <div class="dash-appt" style="border-left-color:#DB2777"><div class="da-time">12:00</div><div class="da-name">Andre T.</div><div class="da-amt">$55</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Center: Booking page -->
+    <div class="phone phone-main" style="z-index:2">
+      <div class="phone-top"><div class="phone-notch"></div></div>
+      <div class="phone-body">
+        <div class="p-provider">
+          <div class="p-ava">K</div>
+          <div>
+            <div class="p-pname">Karlos Johnson</div>
+            <div class="p-ptype">✂️ King's Cuts · Brooklyn</div>
+          </div>
+          <div class="p-live"><div class="p-live-dot"></div>Open</div>
+        </div>
+        <div class="p-section-label">Choose a service</div>
+        <div class="p-services">
+          <div class="p-svc active">
+            <div><div class="p-svc-name">✂️ Classic Cut</div><div class="p-svc-dur">30 min</div></div>
+            <div class="p-svc-price">$35</div>
+          </div>
+          <div class="p-svc">
+            <div><div class="p-svc-name">💈 Fade</div><div class="p-svc-dur">45 min</div></div>
+            <div class="p-svc-price">$45</div>
+          </div>
+          <div class="p-svc">
+            <div><div class="p-svc-name">🧔 Beard Trim</div><div class="p-svc-dur">20 min</div></div>
+            <div class="p-svc-price">$25</div>
+          </div>
+        </div>
+        <div class="p-book">Book an appointment →</div>
+      </div>
+    </div>
+
+    <!-- Right: Confirmed -->
+    <div class="phone phone-side right">
+      <div class="phone-top"><div class="phone-notch"></div></div>
+      <div class="phone-body">
+        <div class="confirm-box">
+          <div class="cb-icon">✅</div>
+          <div class="cb-title">You're booked!</div>
+          <div class="cb-sub">Confirmation sent to your phone</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:5px">
+          <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);font-size:10px">
+            <span style="color:var(--ink-muted)">Service</span>
+            <span style="font-weight:600;color:var(--ink)">Classic Cut</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);font-size:10px">
+            <span style="color:var(--ink-muted)">Date</span>
+            <span style="font-weight:600;color:var(--ink)">Fri, Feb 28</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);font-size:10px">
+            <span style="color:var(--ink-muted)">Time</span>
+            <span style="font-weight:600;color:var(--ink)">12:00 PM</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:7px 0;font-size:10px">
+            <span style="color:var(--ink-muted)">Deposit paid</span>
+            <span style="font-weight:700;color:var(--green)">$10 ✓</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Floating chips -->
+    <div class="float-chip fc-left">
+      <div class="fc-icon">🔔</div>
+      <div>
+        <div class="fc-val">New booking</div>
+        <div class="fc-label">Marcus just booked a Fade</div>
+      </div>
+    </div>
+
+    <div class="float-chip fc-right">
+      <div class="fc-icon">💳</div>
+      <div>
+        <div class="fc-val">+$45 received</div>
+        <div class="fc-label">Deposit paid by Marcus</div>
+      </div>
+    </div>
+
+    <div class="float-chip fc-top">
+      <div class="fc-icon">⭐</div>
+      <div>
+        <div class="fc-val">4.9 rating</div>
+        <div class="fc-label">89 reviews</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── TICKER ── -->
+<div class="ticker">
+  <div class="ticker-track">
+    <div class="ticker-item"><span>✂️</span> Barbers</div>
+    <div class="ticker-item"><span>🦷</span> Dentists</div>
+    <div class="ticker-item"><span>💅</span> Nail Artists</div>
+    <div class="ticker-item"><span>💪</span> Personal Trainers</div>
+    <div class="ticker-item"><span>💆</span> Massage Therapists</div>
+    <div class="ticker-item"><span>🎨</span> Tattoo Artists</div>
+    <div class="ticker-item"><span>🧘</span> Yoga Instructors</div>
+    <div class="ticker-item"><span>🩺</span> Physiotherapists</div>
+    <div class="ticker-item"><span>🐶</span> Pet Groomers</div>
+    <div class="ticker-item"><span>📸</span> Photographers</div>
+    <div class="ticker-item"><span>🎓</span> Tutors</div>
+    <div class="ticker-item"><span>🏠</span> Cleaners</div>
+    <div class="ticker-item"><span>✂️</span> Barbers</div>
+    <div class="ticker-item"><span>🦷</span> Dentists</div>
+    <div class="ticker-item"><span>💅</span> Nail Artists</div>
+    <div class="ticker-item"><span>💪</span> Personal Trainers</div>
+    <div class="ticker-item"><span>💆</span> Massage Therapists</div>
+    <div class="ticker-item"><span>🎨</span> Tattoo Artists</div>
+    <div class="ticker-item"><span>🧘</span> Yoga Instructors</div>
+    <div class="ticker-item"><span>🩺</span> Physiotherapists</div>
+    <div class="ticker-item"><span>🐶</span> Pet Groomers</div>
+    <div class="ticker-item"><span>📸</span> Photographers</div>
+    <div class="ticker-item"><span>🎓</span> Tutors</div>
+    <div class="ticker-item"><span>🏠</span> Cleaners</div>
+  </div>
+</div>
+
+<!-- ── FEATURES ── -->
+<div class="section reveal">
+  <div class="eyebrow">Why BuKe</div>
+  <h2 class="section-h">Everything you need.<br>Nothing you don't.</h2>
+  <p class="section-desc">Built for real service professionals. Simple enough to set up in 60 seconds, powerful enough to run your whole schedule.</p>
+
+  <div class="features-grid">
+    <div class="feat wide">
+      <div class="feat-icon">🔗</div>
+      <div class="feat-title">One link. Your entire business.</div>
+      <div class="feat-desc">Share a single link anywhere your clients are — Instagram bio, WhatsApp, business card. They see your services, your availability, and book instantly. No app download. No account needed. Your link, your brand, your rules.</div>
+    </div>
+    <div class="feat">
+      <div class="feat-icon">📅</div>
+      <div class="feat-title">Smart calendar, zero admin</div>
+      <div class="feat-desc">BuKe manages your slots automatically. No double bookings, no gaps. Clients see exactly what's available in real time.</div>
+    </div>
+    <div class="feat">
+      <div class="feat-icon">🔔</div>
+      <div class="feat-title">Automatic reminders</div>
+      <div class="feat-desc">SMS and email reminders go out 24h and 2h before every appointment. Fewer no-shows. Less chasing. More trust.</div>
+    </div>
+    <div class="feat">
+      <div class="feat-icon">💳</div>
+      <div class="feat-title">Deposits that protect your time</div>
+      <div class="feat-desc">Require a deposit to confirm. No more ghost appointments. Stripe handles everything — money lands directly in your account.</div>
+    </div>
+    <div class="feat">
+      <div class="feat-icon">🎨</div>
+      <div class="feat-title">Fully personalised to you</div>
+      <div class="feat-desc">Your colors, your logo, your brand. Every BuKe page looks unique to the professional behind it. Not a template — your identity.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── HOW IT WORKS ── -->
+<div class="section-alt reveal">
+  <div class="section">
+    <div class="eyebrow">How it works</div>
+    <h2 class="section-h">Up and running<br>in three steps.</h2>
+    <p class="section-desc" style="margin-bottom:48px">No technical knowledge needed. No credit card required to start.</p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">01</div>
+        <div class="step-icon">📝</div>
+        <div class="step-title">Create your profile</div>
+        <div class="step-desc">Tell us your name, service type, and location. Add your services and pricing. Your page goes live in under 60 seconds.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <div class="step-icon">🔗</div>
+        <div class="step-title">Share your link</div>
+        <div class="step-desc">You get a personal link instantly. Drop it in your Instagram bio, send it on WhatsApp, or put it on your business card.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <div class="step-icon">📅</div>
+        <div class="step-title">Clients book. You earn.</div>
+        <div class="step-desc">Clients pick their slot, pay a deposit, and get a confirmation automatically. You see everything in your dashboard. Focus on your craft.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SPLIT / DASHBOARD ── -->
+<div class="section reveal">
+  <div class="split">
+    <div>
+      <div class="eyebrow">Your dashboard</div>
+      <h2 class="section-h">Manage your clients.<br>From your pocket.</h2>
+      <p class="section-desc">Your bookings, clients, and calendar — all in one place. Know exactly who's coming in, track your earnings, and stay in control from anywhere.</p>
+
+      <div class="feature-rows">
+        <div class="feature-row">
+          <div class="fr-icon">📊</div>
+          <div>
+            <div class="fr-title">Real-time earnings</div>
+            <div class="fr-desc">See revenue per day, week and month at a glance</div>
+          </div>
+        </div>
+        <div class="feature-row">
+          <div class="fr-icon">👥</div>
+          <div>
+            <div class="fr-title">Client history</div>
+            <div class="fr-desc">Track every client's visits, preferences and notes</div>
+          </div>
+        </div>
+        <div class="feature-row">
+          <div class="fr-icon">🔔</div>
+          <div>
+            <div class="fr-title">Instant notifications</div>
+            <div class="fr-desc">Know the moment a client books, cancels or pays</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="split-phone-wrap">
+      <div class="split-phone">
+        <div class="split-phone-header">
+          <div class="sph-ava">K</div>
+          <div>
+            <div class="sph-name">King's Cuts</div>
+            <div class="sph-url">karloscuts.buke.app</div>
+          </div>
+          <div class="sph-badge">● Live</div>
+        </div>
+        <div class="split-phone-body">
+          <div class="dash-stat-row" style="margin-bottom:12px">
+            <div class="ds"><div class="ds-val">7</div><div class="ds-lbl">Today</div></div>
+            <div class="ds"><div class="ds-val">$486</div><div class="ds-lbl">Revenue</div></div>
+            <div class="ds"><div class="ds-val">4.9★</div><div class="ds-lbl">Rating</div></div>
+          </div>
+          <div class="p-section-label" style="margin-bottom:8px">Today's appointments</div>
+          <div class="dash-appts">
+            <div class="dash-appt"><div class="da-time">9:00</div><div class="da-name">Marcus W. — Fade</div><div class="da-amt">$45</div></div>
+            <div class="dash-appt" style="border-left-color:#059669"><div class="da-time">10:30</div><div class="da-name">Jordan L. — Classic</div><div class="da-amt">$35</div></div>
+            <div class="dash-appt" style="border-left-color:#DB2777"><div class="da-time">12:00</div><div class="da-name">Andre T. — Beard</div><div class="da-amt">$55</div></div>
+            <div class="dash-appt" style="opacity:0.45"><div class="da-time">2:00</div><div class="da-name">Kevin P. — Classic</div><div class="da-amt">$35</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── TESTIMONIALS ── -->
+<div class="section-alt reveal">
+  <div class="section">
+    <div class="eyebrow">Testimonials</div>
+    <h2 class="section-h">Loved by professionals<br>across every craft.</h2>
+    <p class="section-desc" style="margin-bottom:48px">Real people. Real businesses. Real results.</p>
+
+    <div class="testi-grid">
+      <div class="testi">
+        <div class="testi-stars">★★★★★</div>
+        <div class="testi-text">"BuKe completely changed how I run my chair. I used to lose bookings to WhatsApp all the time. Now everything is organised and I'm fully booked every week."</div>
+        <div class="testi-author">
+          <div class="testi-ava" style="background:var(--purple)">KJ</div>
+          <div>
+            <div class="testi-name">Karlos Johnson</div>
+            <div class="testi-role">✂️ Barber · Brooklyn, NY</div>
+          </div>
+        </div>
+      </div>
+      <div class="testi">
+        <div class="testi-stars">★★★★★</div>
+        <div class="testi-text">"My clients love how easy it is to book. The deposit feature alone has saved me hundreds in no-shows. I'd never go back to managing it over text."</div>
+        <div class="testi-author">
+          <div class="testi-ava" style="background:#DB2777">AM</div>
+          <div>
+            <div class="testi-name">Ana Martinez</div>
+            <div class="testi-role">💅 Nail Artist · Miami, FL</div>
+          </div>
+        </div>
+      </div>
+      <div class="testi">
+        <div class="testi-stars">★★★★★</div>
+        <div class="testi-text">"As a personal trainer I was drowning in messages. BuKe gave me my evenings back. Setup took literally 2 minutes and it just works perfectly."</div>
+        <div class="testi-author">
+          <div class="testi-ava" style="background:#059669">MT</div>
+          <div>
+            <div class="testi-name">Mike Torres</div>
+            <div class="testi-role">💪 Personal Trainer · Austin, TX</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── PRICING ── -->
+<div class="section reveal">
+  <div style="text-align:center;margin-bottom:56px">
+    <div class="eyebrow" style="justify-content:center">Pricing</div>
+    <h2 class="section-h">Start free. Upgrade when ready.</h2>
+    <p class="section-desc" style="margin:0 auto">No credit card to start. No hidden fees. Cancel anytime.</p>
+  </div>
+
+  <div class="pricing-grid">
+    <div class="plan">
+      <div class="plan-name">Basic</div>
+      <div class="plan-price">$0</div>
+      <div class="plan-period">Free forever</div>
+      <div class="plan-divider"></div>
+      <div class="plan-feats">
+        <div class="pf"><div class="pf-check">✓</div>Personal booking page</div>
+        <div class="pf"><div class="pf-check">✓</div>Up to 20 bookings/month</div>
+        <div class="pf"><div class="pf-check">✓</div>Email confirmations</div>
+        <div class="pf"><div class="pf-check">✓</div>Basic calendar</div>
+      </div>
+      <button class="btn-plan">Start for free</button>
+    </div>
+
+    <div class="plan featured">
+      <div class="plan-badge">Most popular</div>
+      <div class="plan-name">Pro</div>
+      <div class="plan-price">$12</div>
+      <div class="plan-period">per month, billed yearly</div>
+      <div class="plan-divider"></div>
+      <div class="plan-feats">
+        <div class="pf"><div class="pf-check">✓</div>Unlimited bookings</div>
+        <div class="pf"><div class="pf-check">✓</div>SMS + email reminders</div>
+        <div class="pf"><div class="pf-check">✓</div>Deposit collection</div>
+        <div class="pf"><div class="pf-check">✓</div>Custom colors & branding</div>
+        <div class="pf"><div class="pf-check">✓</div>Client history & notes</div>
+        <div class="pf"><div class="pf-check">✓</div>Earnings analytics</div>
+      </div>
+      <button class="btn-plan">Get full access</button>
+    </div>
+
+    <div class="plan">
+      <div class="plan-name">Business</div>
+      <div class="plan-price">$29</div>
+      <div class="plan-period">per month, billed yearly</div>
+      <div class="plan-divider"></div>
+      <div class="plan-feats">
+        <div class="pf"><div class="pf-check">✓</div>Everything in Pro</div>
+        <div class="pf"><div class="pf-check">✓</div>Custom domain</div>
+        <div class="pf"><div class="pf-check">✓</div>Multiple staff members</div>
+        <div class="pf"><div class="pf-check">✓</div>AI booking assistant</div>
+        <div class="pf"><div class="pf-check">✓</div>Priority support</div>
+      </div>
+      <button class="btn-plan">Get Business</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── CTA BANNER ── -->
+<div class="section" style="padding-top:0">
+  <div class="cta-banner reveal">
+    <div class="cta-inner">
+      <h2 class="cta-title">Use BuKe to book more, stress<br>less, and make every slot count.</h2>
+      <p class="cta-desc">Join 3,200+ professionals who stopped losing clients to WhatsApp chaos.</p>
+      <button class="btn-cta-white">Get started for free →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <div class="foot-logo">Bu<span>Ke</span></div>
+  <div class="foot-links">
+    <a class="foot-link" href="#">Company</a>
+    <a class="foot-link" href="#">Support</a>
+    <a class="foot-link" href="#">Blog</a>
+    <a class="foot-link" href="#">Privacy policy</a>
+    <a class="foot-link" href="#">Terms of use</a>
+  </div>
+  <div class="foot-copy">© 2026 BuKe</div>
+</footer>
+
+<script>
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('in');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.08 });
+
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
