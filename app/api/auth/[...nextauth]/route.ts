@@ -1,7 +1,7 @@
 import NextAuth, { AuthOptions } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 import pool from "@/lib/db"
-import bcrypt from "bcrypt"
+import bcrypt from "bcryptjs"
 
 console.log('[NextAuth] Initializing with:', {
   hasSecret: !!process.env.NEXTAUTH_SECRET,

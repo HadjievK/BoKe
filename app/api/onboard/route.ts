@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import pool from '@/lib/db';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 
 function generateSlug(businessName: string): string {
   const base = businessName.toLowerCase().replace(/[^a-z0-9]/g, '');
