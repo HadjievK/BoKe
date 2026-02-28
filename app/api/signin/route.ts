@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import pool from '@/lib/db';
+import bcrypt from 'bcrypt';
+import { generateToken } from '@/lib/auth';
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,10 +15,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Find provider by email and password
+    // Find provider by email
     const result = await pool.query(
-      'SELECT id, slug, name, business_name, email FROM service_providers WHERE email = $1 AND password = $2',
-      [email, password]
+      'SELECT id, slug, name, business_name, email, password FROM service_providers WHERE email = $1',
+      [email]
     );
 
     if (result.rows.length === 0) {
@@ -28,12 +30,42 @@ export async function POST(request: NextRequest) {
 
     const provider = result.rows[0];
 
-    return NextResponse.json({
+    // Verify password
+    const isPasswordValid = await bcrypt.compare(password, provider.password);
+
+    if (!isPasswordValid) {
+      return NextResponse.json(
+        { detail: 'Invalid email or password' },
+        { status: 401 }
+      );
+    }
+
+    // Generate JWT token
+    const token = generateToken({
+      providerId: provider.id,
+      slug: provider.slug,
+      email: provider.email,
+    });
+
+    // Create response with HTTP-only cookie
+    const response = NextResponse.json({
       slug: provider.slug,
       name: provider.name,
       business_name: provider.business_name,
       email: provider.email,
+      token, // Also return token in response for localStorage option
     });
+
+    // Set HTTP-only cookie for better security
+    response.cookies.set('auth_token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production', // HTTPS only in production
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+      path: '/',
+    });
+
+    return response;
 
   } catch (error: any) {
     console.error('Sign in error:', error);

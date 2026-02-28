@@ -1,19 +1,19 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useParams } from 'next/navigation'
-import { getDashboardData } from '@/lib/api'
+import { useParams, useRouter } from 'next/navigation'
+import { getDashboardData, verifyAuth, signOut } from '@/lib/api'
 import type { DashboardData } from '@/lib/types'
 import { formatDate, formatTime, formatCurrency } from '@/lib/utils'
 import ThemeToggle from '@/components/ThemeToggle'
 
 export default function DashboardPage() {
   const params = useParams()
+  const router = useRouter()
   const slug = params.slug as string
 
-  const [password, setPassword] = useState('')
   const [authenticated, setAuthenticated] = useState(false)
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null)
   const [selectedDate, setSelectedDate] = useState(new Date())
@@ -25,6 +25,7 @@ export default function DashboardPage() {
   // Settings modal states
   const [showSettings, setShowSettings] = useState(false)
   const [showCalendarModal, setShowCalendarModal] = useState(false)
+  const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [location, setLocation] = useState('')
@@ -32,31 +33,54 @@ export default function DashboardPage() {
   const [settingsError, setSettingsError] = useState('')
   const [settingsSaving, setSettingsSaving] = useState(false)
 
+  // Check authentication on mount
   useEffect(() => {
-    const stored = sessionStorage.getItem(`password_${slug}`)
-    if (stored) {
-      setPassword(stored)
-      fetchDashboard(stored)
+    const checkAuth = async () => {
+      try {
+        const auth = await verifyAuth()
+
+        if (!auth.authenticated) {
+          // Not authenticated, redirect to signin
+          router.push('/signin')
+          return
+        }
+
+        // Verify slug matches authenticated provider
+        if (auth.slug !== slug) {
+          router.push(`/dashboard/${auth.slug}`)
+          return
+        }
+
+        setAuthenticated(true)
+        await fetchDashboard()
+      } catch (err: any) {
+        console.error('Auth check failed:', err)
+        router.push('/signin')
+      } finally {
+        setLoading(false)
+      }
     }
-  }, [slug])
+
+    checkAuth()
+  }, [slug, router])
 
   // Auto-refresh dashboard every 30 seconds
   useEffect(() => {
-    if (!authenticated || !password) return
+    if (!authenticated) return
 
     const interval = setInterval(() => {
-      fetchDashboard(password, true) // Silent refresh (no loading spinner)
+      fetchDashboard(true) // Silent refresh (no loading spinner)
     }, 30000) // 30 seconds
 
     return () => clearInterval(interval)
-  }, [authenticated, password, slug])
+  }, [authenticated, slug])
 
   // Fetch calendar appointments when view/date changes
   useEffect(() => {
-    if (authenticated && password && showCalendarModal) {
+    if (authenticated && showCalendarModal) {
       fetchCalendarAppointments()
     }
-  }, [authenticated, password, showCalendarModal, calendarView, currentMonth, currentYear, selectedDate])
+  }, [authenticated, showCalendarModal, calendarView, currentMonth, currentYear, selectedDate])
 
   useEffect(() => {
     // Load current settings when modal opens
@@ -77,26 +101,27 @@ export default function DashboardPage() {
     }
   }, [showSettings, slug])
 
-  const fetchDashboard = async (passwordValue: string, silent = false) => {
+  const fetchDashboard = async (silent = false) => {
     if (!silent) setLoading(true)
     setError('')
 
     try {
-      const data = await getDashboardData(slug, passwordValue)
+      const data = await getDashboardData(slug)
       setDashboardData(data)
       setAuthenticated(true)
-      sessionStorage.setItem(`password_${slug}`, passwordValue)
     } catch (err: any) {
       setError(err.message)
       setAuthenticated(false)
-      sessionStorage.removeItem(`password_${slug}`)
+      // If unauthorized, redirect to signin
+      if (err.message.includes('Unauthorized')) {
+        router.push('/signin')
+      }
     } finally {
       if (!silent) setLoading(false)
     }
   }
 
   const fetchCalendarAppointments = async () => {
-    if (!password) return
 
     try {
       let startDate, endDate
@@ -117,8 +142,18 @@ export default function DashboardPage() {
         endDate = `${currentYear}-12-31`
       }
 
+      const params = new URLSearchParams()
+      if (startDate) params.append('start_date', startDate)
+      if (endDate) params.append('end_date', endDate)
+
       const response = await fetch(
-        `/api/dashboard/${slug}/appointments?password=${encodeURIComponent(password)}&start_date=${startDate}&end_date=${endDate}`
+        `/api/dashboard/${slug}/appointments?${params.toString()}`,
+        {
+          credentials: 'include',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('auth_token') || ''}`,
+          },
+        }
       )
 
       if (response.ok) {
@@ -130,18 +165,15 @@ export default function DashboardPage() {
     }
   }
 
-  const handlePasswordSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (password.length >= 6) {
-      fetchDashboard(password)
+  const handleLogout = async () => {
+    try {
+      await signOut()
+    } catch (err) {
+      console.error('Sign out error:', err)
     }
-  }
-
-  const handleLogout = () => {
     setAuthenticated(false)
-    setPassword('')
     setDashboardData(null)
-    sessionStorage.removeItem(`password_${slug}`)
+    router.push('/signin')
   }
 
   const getDaysInMonth = (date: Date) => {
@@ -166,53 +198,26 @@ export default function DashboardPage() {
     })
   }
 
-  // Password Entry Screen
-  if (!authenticated) {
+  // Loading Screen
+  if (loading) {
     return (
       <main className="min-h-screen bg-[#F5F0E8] flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl shadow-lg p-8 max-w-md w-full border border-[rgba(28,24,18,0.08)]">
-          <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-[#F5EDD8] rounded-full flex items-center justify-center mx-auto mb-4">
+          <div className="text-center">
+            <div className="w-16 h-16 bg-[#F5EDD8] rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
               <svg className="w-8 h-8 text-[#C9993A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
             </div>
-            <h1 className="text-3xl font-bold text-[#1C1812] mb-2" style={{ fontFamily: 'Fraunces, serif' }}>Dashboard Access</h1>
-            <p className="text-[#6B6455]">Enter your password to continue</p>
+            <h1 className="text-2xl font-bold text-[#1C1812] mb-2" style={{ fontFamily: 'Fraunces, serif' }}>Loading Dashboard</h1>
+            <p className="text-[#6B6455]">Please wait...</p>
           </div>
-
-          <form onSubmit={handlePasswordSubmit}>
-            <div className="mb-6">
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 bg-[#F5F0E8] border border-[rgba(28,24,18,0.12)] rounded-lg text-[#1C1812] focus:border-[#C9993A] focus:outline-none transition"
-                placeholder="Enter your password"
-                autoFocus
-                minLength={6}
-              />
-            </div>
-
-            {error && (
-              <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-6 text-sm">
-                {error}
-              </div>
-            )}
-
-            <button
-              type="submit"
-              disabled={password.length < 6 || loading}
-              className="w-full bg-[#1C1812] text-[#F5F0E8] font-semibold py-3 rounded-lg hover:bg-[#C9993A] hover:text-[#1C1812] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading ? 'Verifying...' : 'Access Dashboard'}
-            </button>
-          </form>
         </div>
       </main>
     )
   }
 
+  // Dashboard Main Content
   if (!dashboardData) {
     return (
       <main className="min-h-screen bg-[#F5F0E8] flex items-center justify-center">
@@ -817,6 +822,18 @@ export default function DashboardPage() {
                 <div className="space-y-3">
                   <div>
                     <label className="block text-sm font-medium text-[#1C1812] mb-2">
+                      Current Password
+                    </label>
+                    <input
+                      type="password"
+                      value={currentPassword}
+                      onChange={(e) => setCurrentPassword(e.target.value)}
+                      placeholder="Enter current password"
+                      className="w-full bg-[#F5F0E8] border border-[rgba(28,24,18,0.12)] rounded-lg px-4 py-3 text-sm focus:border-[#C9993A] focus:outline-none transition"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-[#1C1812] mb-2">
                       New Password
                     </label>
                     <input
@@ -953,15 +970,25 @@ export default function DashboardPage() {
                       throw new Error('Password must be at least 6 characters')
                     }
 
+                    // Require current password if changing password
+                    if (newPassword && !currentPassword) {
+                      throw new Error('Current password is required to change password')
+                    }
+
                     const updates: any = {}
                     if (newPassword) updates.password = newPassword
                     if (location) updates.location = location
                     if (services.length > 0) updates.services = services
 
+                    const token = localStorage.getItem('auth_token')
                     const response = await fetch(`/api/provider/${slug}/settings`, {
                       method: 'PUT',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ password, updates }),
+                      headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token || ''}`,
+                      },
+                      credentials: 'include',
+                      body: JSON.stringify({ currentPassword, updates }),
                     })
 
                     if (!response.ok) {
@@ -970,8 +997,11 @@ export default function DashboardPage() {
                     }
 
                     // Refresh dashboard data
-                    await fetchDashboard(newPassword || password)
+                    await fetchDashboard()
                     setShowSettings(false)
+                    setCurrentPassword('')
+                    setNewPassword('')
+                    setConfirmPassword('')
                     setNewPassword('')
                     setConfirmPassword('')
                   } catch (err: any) {

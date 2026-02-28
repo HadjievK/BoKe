@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import pool from '@/lib/db';
 import type { CustomerPublic } from '@/lib/types';
+import { authenticateRequest } from '@/lib/auth';
 
 export async function GET(
   request: NextRequest,
@@ -8,30 +9,26 @@ export async function GET(
 ) {
   try {
     const { slug } = await params;
-    const { searchParams } = new URL(request.url);
-    const password = searchParams.get('password');
 
-    if (!password) {
+    // Authenticate using JWT token
+    const auth = authenticateRequest(request);
+
+    if (!auth) {
       return NextResponse.json(
-        { detail: 'Password is required' },
-        { status: 400 }
-      );
-    }
-
-    // Verify password and get provider
-    const providerResult = await pool.query(
-      'SELECT id FROM service_providers WHERE slug = $1 AND password = $2',
-      [slug, password]
-    );
-
-    if (providerResult.rows.length === 0) {
-      return NextResponse.json(
-        { detail: 'Invalid password' },
+        { detail: 'Unauthorized - Please sign in' },
         { status: 401 }
       );
     }
 
-    const providerId = providerResult.rows[0].id;
+    // Verify the slug matches the authenticated provider
+    if (auth.slug !== slug) {
+      return NextResponse.json(
+        { detail: 'Forbidden - Cannot access another provider\'s customers' },
+        { status: 403 }
+      );
+    }
+
+    const providerId = auth.providerId;
 
     // Get all unique customers who have booked with this provider
     const customersResult = await pool.query(

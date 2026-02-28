@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import pool from '@/lib/db'
+import { signIn } from '@/lib/api'
 
 export default function SignInPage() {
   const router = useRouter()
@@ -18,18 +18,8 @@ export default function SignInPage() {
     setLoading(true)
 
     try {
-      const response = await fetch('/api/signin', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.detail || 'Invalid credentials')
-      }
-
+      const data = await signIn(email, password)
+      // Token is automatically stored by signIn function
       // Redirect to dashboard
       router.push(`/dashboard/${data.slug}`)
     } catch (err: any) {

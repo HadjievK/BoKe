@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import pool from '@/lib/db';
+import bcrypt from 'bcrypt';
+import { authenticateRequest } from '@/lib/auth';
 
 export async function PUT(
   request: NextRequest,
@@ -8,29 +10,59 @@ export async function PUT(
   try {
     const { slug } = await params;
     const body = await request.json();
-    const { password, updates } = body;
+    const { currentPassword, updates } = body;
 
-    if (!password) {
+    // Authenticate using JWT token
+    const auth = authenticateRequest(request);
+
+    if (!auth) {
       return NextResponse.json(
-        { detail: 'Current password is required' },
-        { status: 400 }
-      );
-    }
-
-    // Verify current password
-    const authResult = await pool.query(
-      'SELECT id FROM service_providers WHERE slug = $1 AND password = $2',
-      [slug, password]
-    );
-
-    if (authResult.rows.length === 0) {
-      return NextResponse.json(
-        { detail: 'Invalid password' },
+        { detail: 'Unauthorized - Please sign in' },
         { status: 401 }
       );
     }
 
-    const providerId = authResult.rows[0].id;
+    // Verify the slug matches the authenticated provider
+    if (auth.slug !== slug) {
+      return NextResponse.json(
+        { detail: 'Forbidden - Cannot update another provider\'s settings' },
+        { status: 403 }
+      );
+    }
+
+    // For sensitive updates (like password changes), require current password
+    if (updates.password && !currentPassword) {
+      return NextResponse.json(
+        { detail: 'Current password is required to change password' },
+        { status: 400 }
+      );
+    }
+
+    const providerId = auth.providerId;
+
+    // If changing password, verify current password first
+    if (updates.password) {
+      const authResult = await pool.query(
+        'SELECT password FROM service_providers WHERE id = $1',
+        [providerId]
+      );
+
+      if (authResult.rows.length === 0) {
+        return NextResponse.json(
+          { detail: 'Provider not found' },
+          { status: 404 }
+        );
+      }
+
+      const isPasswordValid = await bcrypt.compare(currentPassword, authResult.rows[0].password);
+
+      if (!isPasswordValid) {
+        return NextResponse.json(
+          { detail: 'Invalid current password' },
+          { status: 401 }
+        );
+      }
+    }
 
     // Build update query dynamically
     const updateFields: string[] = [];
@@ -38,8 +70,10 @@ export async function PUT(
     let paramIndex = 1;
 
     if (updates.password) {
+      // Hash the new password before storing
+      const hashedPassword = await bcrypt.hash(updates.password, 10);
       updateFields.push(`password = $${paramIndex}`);
-      updateValues.push(updates.password);
+      updateValues.push(hashedPassword);
       paramIndex++;
     }
 

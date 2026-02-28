@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import pool from '@/lib/db';
+import bcrypt from 'bcrypt';
 
 function generateSlug(businessName: string): string {
   const base = businessName.toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -40,6 +41,9 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     // Validate at least one service
     if (!services || !Array.isArray(services) || services.length === 0) {
@@ -104,7 +108,7 @@ export async function POST(request: NextRequest) {
         phone,
         location,
         bio,
-        password,
+        hashedPassword,
         servicesJson,
         availabilityJson,
       ]

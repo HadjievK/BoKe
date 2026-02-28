@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import pool from '@/lib/db';
 import type { AppointmentWithDetails } from '@/lib/types';
+import { authenticateRequest } from '@/lib/auth';
 
 export async function GET(
   request: NextRequest,
@@ -9,31 +10,28 @@ export async function GET(
   try {
     const { slug } = await params;
     const { searchParams } = new URL(request.url);
-    const password = searchParams.get('password');
     const startDate = searchParams.get('start_date');
     const endDate = searchParams.get('end_date');
 
-    if (!password) {
-      return NextResponse.json(
-        { detail: 'Password is required' },
-        { status: 400 }
-      );
-    }
+    // Authenticate using JWT token
+    const auth = authenticateRequest(request);
 
-    // Verify password and get provider
-    const providerResult = await pool.query(
-      'SELECT id FROM service_providers WHERE slug = $1 AND password = $2',
-      [slug, password]
-    );
-
-    if (providerResult.rows.length === 0) {
+    if (!auth) {
       return NextResponse.json(
-        { detail: 'Invalid password' },
+        { detail: 'Unauthorized - Please sign in' },
         { status: 401 }
       );
     }
 
-    const providerId = providerResult.rows[0].id;
+    // Verify the slug matches the authenticated provider
+    if (auth.slug !== slug) {
+      return NextResponse.json(
+        { detail: 'Forbidden - Cannot access another provider\'s appointments' },
+        { status: 403 }
+      );
+    }
+
+    const providerId = auth.providerId;
 
     // Build query based on date filters
     let query = `

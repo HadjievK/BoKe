@@ -3,7 +3,7 @@ import './globals.css'
 import { ThemeProvider } from '@/components/ThemeProvider'
 
 export const metadata: Metadata = {
-  title: 'BuKe - Simple Booking for Service Providers',
+  title: 'BooKie - Simple Booking for Service Providers',
   description: 'Book appointments with local service providers easily',
 }
 

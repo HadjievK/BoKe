@@ -105,52 +105,151 @@ export async function registerProvider(data: OnboardingData): Promise<Onboarding
 }
 
 
-// ============ Dashboard API (Password-protected) ============
+// ============ Dashboard API (JWT-protected) ============
+// Note: Backward compatible - password parameter deprecated but optional
 
-export async function getDashboardData(slug: string, password: string): Promise<DashboardData> {
-  const res = await fetch(`${API_URL}/api/dashboard/${slug}?password=${password}`)
+// Helper to get auth token from localStorage
+function getAuthToken(): string | null {
+  if (typeof window === 'undefined') return null;
+  return localStorage.getItem('auth_token');
+}
+
+// Helper to add auth headers
+function getAuthHeaders(): HeadersInit {
+  const token = getAuthToken();
+  return {
+    'Content-Type': 'application/json',
+    ...(token && { 'Authorization': `Bearer ${token}` }),
+  };
+}
+
+/**
+ * @deprecated password parameter - now uses JWT authentication
+ */
+export async function getDashboardData(slug: string, password?: string): Promise<DashboardData> {
+  const res = await fetch(`${API_URL}/api/dashboard/${slug}`, {
+    headers: getAuthHeaders(),
+    credentials: 'include', // Include cookies
+  });
 
   if (!res.ok) {
     if (res.status === 401) {
-      throw new Error('Invalid password')
+      throw new Error('Unauthorized - Please sign in');
     }
-    throw new Error('Failed to fetch dashboard data')
+    throw new Error('Failed to fetch dashboard data');
   }
 
-  return res.json()
+  return res.json();
 }
 
+/**
+ * @deprecated password parameter - now uses JWT authentication
+ */
 export async function getAppointments(
   slug: string,
-  password: string,
+  password?: string,
   startDate?: string,
   endDate?: string
-): Promise<AppointmentWithDetails[]> {
-  const params = new URLSearchParams({ password })
-  if (startDate) params.append('start_date', startDate)
-  if (endDate) params.append('end_date', endDate)
+): Promise<{ appointments: AppointmentWithDetails[], appointments_by_date: Record<string, number> }> {
+  const params = new URLSearchParams();
+  if (startDate) params.append('start_date', startDate);
+  if (endDate) params.append('end_date', endDate);
 
-  const res = await fetch(`${API_URL}/api/dashboard/${slug}/appointments?${params}`)
+  const queryString = params.toString();
+  const url = queryString
+    ? `${API_URL}/api/dashboard/${slug}/appointments?${queryString}`
+    : `${API_URL}/api/dashboard/${slug}/appointments`;
+
+  const res = await fetch(url, {
+    headers: getAuthHeaders(),
+    credentials: 'include',
+  });
 
   if (!res.ok) {
     if (res.status === 401) {
-      throw new Error('Invalid password')
+      throw new Error('Unauthorized - Please sign in');
     }
-    throw new Error('Failed to fetch appointments')
+    throw new Error('Failed to fetch appointments');
   }
 
-  return res.json()
+  return res.json();
 }
 
-export async function getCustomers(slug: string, password: string): Promise<CustomerPublic[]> {
-  const res = await fetch(`${API_URL}/api/dashboard/${slug}/customers?password=${password}`)
+/**
+ * @deprecated password parameter - now uses JWT authentication
+ */
+export async function getCustomers(slug: string, password?: string): Promise<CustomerPublic[]> {
+  const res = await fetch(`${API_URL}/api/dashboard/${slug}/customers`, {
+    headers: getAuthHeaders(),
+    credentials: 'include',
+  });
 
   if (!res.ok) {
     if (res.status === 401) {
-      throw new Error('Invalid password')
+      throw new Error('Unauthorized - Please sign in');
     }
-    throw new Error('Failed to fetch customers')
+    throw new Error('Failed to fetch customers');
   }
 
-  return res.json()
+  return res.json();
+}
+
+// ============ Auth API ============
+
+export interface SignInResponse {
+  slug: string;
+  name: string;
+  business_name: string;
+  email: string;
+  token: string;
+}
+
+export async function signIn(email: string, password: string): Promise<SignInResponse> {
+  const res = await fetch(`${API_URL}/api/signin`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include', // Include cookies
+    body: JSON.stringify({ email, password }),
+  });
+
+  if (!res.ok) {
+    const error = await res.json();
+    throw new Error(error.detail || 'Failed to sign in');
+  }
+
+  const data = await res.json();
+
+  // Store token in localStorage for Authorization header
+  if (typeof window !== 'undefined' && data.token) {
+    localStorage.setItem('auth_token', data.token);
+  }
+
+  return data;
+}
+
+export async function signOut(): Promise<void> {
+  await fetch(`${API_URL}/api/signout`, {
+    method: 'POST',
+    credentials: 'include',
+  });
+
+  // Clear token from localStorage
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem('auth_token');
+  }
+}
+
+export async function verifyAuth(): Promise<{ authenticated: boolean; providerId?: number; slug?: string; email?: string }> {
+  const res = await fetch(`${API_URL}/api/auth/verify`, {
+    headers: getAuthHeaders(),
+    credentials: 'include',
+  });
+
+  if (!res.ok) {
+    return { authenticated: false };
+  }
+
+  return res.json();
 }
