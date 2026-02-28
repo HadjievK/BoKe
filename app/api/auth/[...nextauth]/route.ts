@@ -61,7 +61,7 @@ const handler = NextAuth({
         try {
           // Check if user exists
           const result = await pool.query(
-            'SELECT id, slug, name, business_name, email FROM service_providers WHERE email = $1',
+            'SELECT id, slug, name, business_name, email, oauth_provider, oauth_provider_id FROM service_providers WHERE email = $1',
             [user.email]
           )
 
@@ -71,14 +71,41 @@ const handler = NextAuth({
             return `/onboard?google=true&email=${encodeURIComponent(user.email || '')}&name=${encodeURIComponent(user.name || '')}`
           }
 
-          // User exists - update the user object with provider data
+          // User exists - update OAuth info if not already set
           const provider = result.rows[0]
+
+          if (!provider.oauth_provider || !provider.oauth_provider_id) {
+            // Link Google account to existing email/password account
+            await pool.query(
+              'UPDATE service_providers SET oauth_provider = $1, oauth_provider_id = $2, last_login_at = NOW() WHERE id = $3',
+              ['google', account.providerAccountId, provider.id]
+            )
+          } else {
+            // Just update last login
+            await pool.query(
+              'UPDATE service_providers SET last_login_at = NOW() WHERE id = $1',
+              [provider.id]
+            )
+          }
+
+          // Update user object with provider data
           user.id = provider.id.toString()
           user.slug = provider.slug
           user.business_name = provider.business_name
         } catch (error) {
           console.error('Google sign in error:', error)
           return false
+        }
+      } else if (account?.provider === "credentials") {
+        // Update last login for email/password users
+        try {
+          await pool.query(
+            'UPDATE service_providers SET last_login_at = NOW() WHERE id = $1',
+            [parseInt(user.id)]
+          )
+        } catch (error) {
+          console.error('Login tracking error:', error)
+          // Don't fail sign in if tracking fails
         }
       }
       return true

@@ -33,17 +33,22 @@ async function ensureUniqueSlug(baseSlug: string): Promise<string> {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { name, business_name, service_type, email, phone, location, bio, services, password } = body;
+    const { name, business_name, service_type, email, phone, location, bio, services, password, google_id } = body;
 
-    if (!password || password.length < 6) {
-      return NextResponse.json(
-        { detail: 'Password must be at least 6 characters' },
-        { status: 400 }
-      );
+    // For Google OAuth users, password is optional
+    const isGoogleUser = !!google_id;
+    let hashedPassword = null;
+
+    if (!isGoogleUser) {
+      // Email/password signup - password required
+      if (!password || password.length < 6) {
+        return NextResponse.json(
+          { detail: 'Password must be at least 6 characters' },
+          { status: 400 }
+        );
+      }
+      hashedPassword = await bcrypt.hash(password, 10);
     }
-
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
 
     // Validate at least one service
     if (!services || !Array.isArray(services) || services.length === 0) {
@@ -93,9 +98,10 @@ export async function POST(request: NextRequest) {
       `
       INSERT INTO service_providers (
         slug, name, business_name, service_type, email, phone,
-        location, bio, password, services, availability
+        location, bio, password, services, availability,
+        oauth_provider, oauth_provider_id
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10::jsonb, $11::jsonb)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10::jsonb, $11::jsonb, $12, $13)
       RETURNING id, slug, name, business_name, service_type, email, phone,
                 location, bio, avatar_url, theme_config, created_at
       `,
@@ -111,6 +117,8 @@ export async function POST(request: NextRequest) {
         hashedPassword,
         servicesJson,
         availabilityJson,
+        isGoogleUser ? 'google' : null,
+        google_id || null,
       ]
     );
 
