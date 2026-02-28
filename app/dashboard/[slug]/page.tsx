@@ -1,11 +1,15 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { getDashboardData, verifyAuth, signOut } from '@/lib/api'
-import type { DashboardData } from '@/lib/types'
+import type { DashboardData, AppointmentWithDetails } from '@/lib/types'
 import { formatDate, formatTime, formatCurrency } from '@/lib/utils'
 import ThemeToggle from '@/components/ThemeToggle'
+import AppointmentCalendar from '@/components/dashboard/AppointmentCalendar'
+import AppointmentDetailsModal from '@/components/dashboard/AppointmentDetailsModal'
+import { View } from 'react-big-calendar'
+import moment from 'moment'
 
 export default function DashboardPage() {
   const params = useParams()
@@ -16,15 +20,16 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null)
-  const [selectedDate, setSelectedDate] = useState(new Date())
-  const [calendarView, setCalendarView] = useState<'day' | 'week' | 'month' | 'year'>('week')
-  const [currentMonth, setCurrentMonth] = useState(new Date())
-  const [currentYear, setCurrentYear] = useState(new Date().getFullYear())
-  const [appointmentsByDate, setAppointmentsByDate] = useState<Record<string, number>>({})
+
+  // Calendar state
+  const [appointments, setAppointments] = useState<AppointmentWithDetails[]>([])
+  const [selectedAppointment, setSelectedAppointment] = useState<AppointmentWithDetails | null>(null)
+  const [showAppointmentModal, setShowAppointmentModal] = useState(false)
+  const [calendarView, setCalendarView] = useState<View>('week')
+  const [currentDate, setCurrentDate] = useState(new Date())
 
   // Settings modal states
   const [showSettings, setShowSettings] = useState(false)
-  const [showCalendarModal, setShowCalendarModal] = useState(false)
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -40,12 +45,10 @@ export default function DashboardPage() {
         const auth = await verifyAuth()
 
         if (!auth.authenticated) {
-          // Not authenticated, redirect to signin
           router.push('/signin')
           return
         }
 
-        // Verify slug matches authenticated provider
         if (auth.slug !== slug) {
           router.push(`/dashboard/${auth.slug}`)
           return
@@ -69,21 +72,20 @@ export default function DashboardPage() {
     if (!authenticated) return
 
     const interval = setInterval(() => {
-      fetchDashboard(true) // Silent refresh (no loading spinner)
-    }, 30000) // 30 seconds
+      fetchDashboard(true)
+    }, 30000)
 
     return () => clearInterval(interval)
   }, [authenticated, slug])
 
   // Fetch calendar appointments when view/date changes
   useEffect(() => {
-    if (authenticated && showCalendarModal) {
+    if (authenticated) {
       fetchCalendarAppointments()
     }
-  }, [authenticated, showCalendarModal, calendarView, currentMonth, currentYear, selectedDate])
+  }, [authenticated, calendarView, currentDate])
 
   useEffect(() => {
-    // Load current settings when modal opens
     if (showSettings && dashboardData) {
       const fetchSettings = async () => {
         try {
@@ -112,7 +114,6 @@ export default function DashboardPage() {
     } catch (err: any) {
       setError(err.message)
       setAuthenticated(false)
-      // If unauthorized, redirect to signin
       if (err.message.includes('Unauthorized')) {
         router.push('/signin')
       }
@@ -122,24 +123,23 @@ export default function DashboardPage() {
   }
 
   const fetchCalendarAppointments = async () => {
-
     try {
       let startDate, endDate
 
       // Calculate date range based on calendar view
       if (calendarView === 'week') {
-        const weekStart = getWeekDays(selectedDate)[0]
-        const weekEnd = getWeekDays(selectedDate)[6]
-        startDate = weekStart.toISOString().split('T')[0]
-        endDate = weekEnd.toISOString().split('T')[0]
+        const weekStart = moment(currentDate).startOf('week')
+        const weekEnd = moment(currentDate).endOf('week')
+        startDate = weekStart.format('YYYY-MM-DD')
+        endDate = weekEnd.format('YYYY-MM-DD')
+      } else if (calendarView === 'day') {
+        startDate = moment(currentDate).format('YYYY-MM-DD')
+        endDate = startDate
       } else if (calendarView === 'month') {
-        const year = currentMonth.getFullYear()
-        const month = currentMonth.getMonth()
-        startDate = new Date(year, month, 1).toISOString().split('T')[0]
-        endDate = new Date(year, month + 1, 0).toISOString().split('T')[0]
-      } else if (calendarView === 'year') {
-        startDate = `${currentYear}-01-01`
-        endDate = `${currentYear}-12-31`
+        const monthStart = moment(currentDate).startOf('month')
+        const monthEnd = moment(currentDate).endOf('month')
+        startDate = monthStart.format('YYYY-MM-DD')
+        endDate = monthEnd.format('YYYY-MM-DD')
       }
 
       const params = new URLSearchParams()
@@ -158,7 +158,7 @@ export default function DashboardPage() {
 
       if (response.ok) {
         const data = await response.json()
-        setAppointmentsByDate(data.appointments_by_date || {})
+        setAppointments(data.appointments || [])
       }
     } catch (err) {
       console.error('Failed to fetch calendar appointments:', err)
@@ -176,26 +176,125 @@ export default function DashboardPage() {
     router.push('/signin')
   }
 
-  const getDaysInMonth = (date: Date) => {
-    return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate()
+  const handleSelectAppointment = useCallback((appointment: AppointmentWithDetails) => {
+    setSelectedAppointment(appointment)
+    setShowAppointmentModal(true)
+  }, [])
+
+  const handleNavigate = useCallback((date: Date, view: View) => {
+    setCurrentDate(date)
+    setCalendarView(view)
+  }, [])
+
+  const handleViewChange = useCallback((view: View) => {
+    setCalendarView(view)
+  }, [])
+
+  const handleCancelAppointment = async (appointmentId: string) => {
+    try {
+      const response = await fetch(`/api/dashboard/${slug}/appointments/${appointmentId}`, {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('auth_token') || ''}`,
+        },
+        body: JSON.stringify({ status: 'cancelled' }),
+      })
+
+      if (response.ok) {
+        await fetchCalendarAppointments()
+        await fetchDashboard(true)
+        alert('Appointment cancelled successfully')
+      } else {
+        alert('Failed to cancel appointment')
+      }
+    } catch (err) {
+      console.error('Failed to cancel appointment:', err)
+      alert('Failed to cancel appointment')
+    }
   }
 
-  const getFirstDayOfMonth = (date: Date) => {
-    return new Date(date.getFullYear(), date.getMonth(), 1).getDay()
+  const handleCompleteAppointment = async (appointmentId: string) => {
+    try {
+      const response = await fetch(`/api/dashboard/${slug}/appointments/${appointmentId}`, {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('auth_token') || ''}`,
+        },
+        body: JSON.stringify({ status: 'completed' }),
+      })
+
+      if (response.ok) {
+        await fetchCalendarAppointments()
+        await fetchDashboard(true)
+        alert('Appointment marked as complete')
+      } else {
+        alert('Failed to update appointment')
+      }
+    } catch (err) {
+      console.error('Failed to update appointment:', err)
+      alert('Failed to update appointment')
+    }
   }
 
-  const getMonthName = (date: Date) => {
-    return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
-  }
+  const handleSaveSettings = async () => {
+    setSettingsError('')
+    setSettingsSaving(true)
 
-  const getWeekDays = (date: Date) => {
-    const start = new Date(date)
-    start.setDate(date.getDate() - date.getDay())
-    return Array.from({ length: 7 }, (_, i) => {
-      const day = new Date(start)
-      day.setDate(start.getDate() + i)
-      return day
-    })
+    try {
+      // Update location
+      const locationResponse = await fetch(`/api/provider/${slug}`, {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('auth_token') || ''}`,
+        },
+        body: JSON.stringify({ location }),
+      })
+
+      if (!locationResponse.ok) {
+        throw new Error('Failed to update location')
+      }
+
+      // Update password if provided
+      if (currentPassword && newPassword) {
+        if (newPassword !== confirmPassword) {
+          throw new Error('New passwords do not match')
+        }
+
+        const passwordResponse = await fetch(`/api/provider/${slug}/password`, {
+          method: 'POST',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('auth_token') || ''}`,
+          },
+          body: JSON.stringify({
+            current_password: currentPassword,
+            new_password: newPassword,
+          }),
+        })
+
+        if (!passwordResponse.ok) {
+          throw new Error('Failed to update password')
+        }
+      }
+
+      alert('Settings saved successfully!')
+      setShowSettings(false)
+      setCurrentPassword('')
+      setNewPassword('')
+      setConfirmPassword('')
+      await fetchDashboard(true)
+    } catch (err: any) {
+      setSettingsError(err.message)
+    } finally {
+      setSettingsSaving(false)
+    }
   }
 
   // Loading Screen
@@ -217,7 +316,6 @@ export default function DashboardPage() {
     )
   }
 
-  // Dashboard Main Content
   if (!dashboardData) {
     return (
       <main className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -241,26 +339,15 @@ export default function DashboardPage() {
             <div className="text-2xl font-bold">
               Bo<span className="text-purple-600">Ke</span>
             </div>
-            <div className="flex items-center gap-2 text-sm">
-              <button
-                onClick={() => setShowCalendarModal(true)}
-                className="px-3 py-1.5 bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition font-medium"
-              >
-                📅 Calendar
-              </button>
-              <button className="px-3 py-1.5 hover:bg-gray-100 rounded-lg transition font-medium">👥 Clients</button>
-              <button className="px-3 py-1.5 hover:bg-gray-100 rounded-lg transition font-medium">📋 Services</button>
-              <button
-                onClick={() => setShowSettings(true)}
-                className="px-3 py-1.5 hover:bg-gray-100 rounded-lg transition font-medium"
-              >
-                ⚙️ Settings
-              </button>
-            </div>
           </div>
           <div className="flex items-center gap-4">
             <ThemeToggle />
-            <button className="text-sm hover:text-purple-600 transition">🔔</button>
+            <button
+              onClick={() => setShowSettings(true)}
+              className="px-4 py-2 hover:bg-gray-100 rounded-lg transition text-sm font-medium"
+            >
+              ⚙️ Settings
+            </button>
             <button
               onClick={handleLogout}
               className="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-semibold hover:bg-purple-700 transition shadow-lg shadow-purple-600/25"
@@ -317,701 +404,153 @@ export default function DashboardPage() {
           </p>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-3 gap-4 mb-6">
-          <div className="bg-white rounded-xl p-6 border border-gray-200">
-            <div className="text-sm text-gray-600 mb-2">TODAY</div>
-            <div className="text-4xl font-bold text-gray-900 mb-1">
-              {dashboardData.stats.today_appointments}
-            </div>
-            <div className="text-xs text-gray-600">appointments</div>
-          </div>
-
-          <div className="bg-white rounded-xl p-6 border border-gray-200">
-            <div className="text-sm text-gray-600 mb-2">THIS WEEK</div>
-            <div className="text-4xl font-bold text-gray-900 mb-1">
-              {dashboardData.stats.week_appointments}
-            </div>
-            <div className="text-xs text-gray-600">appointments</div>
-          </div>
-
-          <div className="bg-white rounded-xl p-6 border border-gray-200">
-            <div className="text-sm text-gray-600 mb-2">TOTAL CLIENTS</div>
-            <div className="text-4xl font-bold text-gray-900 mb-1">
-              {dashboardData.stats.total_customers}
-            </div>
-            <div className="text-xs text-gray-600">all time</div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-[1fr_400px] gap-6">
-          {/* Left Column - Appointments */}
-          <div>
-            {/* Week Navigation */}
-            <div className="bg-white rounded-xl p-4 mb-4 border border-gray-200">
-              <div className="flex items-center justify-between mb-4">
-                <div className="text-lg font-bold text-gray-900">
-                  Week of Feb 24
-                </div>
-                <button className="text-sm text-purple-600 font-medium hover:underline">Full calendar →</button>
-              </div>
-              <div className="flex gap-2">
-                {['24', '25', '26', '27', '28', '01', '02'].map((day, i) => (
-                  <button
-                    key={day}
-                    className={`flex-1 py-3 rounded-lg text-center font-medium transition ${
-                      i === 2
-                        ? 'bg-gray-900 text-white'
-                        : 'bg-gray-50 text-gray-900 hover:bg-gray-100'
-                    }`}
-                  >
-                    {day}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Today's Appointments */}
+        {/* Stats Cards - Collapsible */}
+        <details className="mb-6" open>
+          <summary className="cursor-pointer text-lg font-semibold text-gray-900 mb-4">
+            📊 Quick Stats
+          </summary>
+          <div className="grid grid-cols-3 gap-4">
             <div className="bg-white rounded-xl p-6 border border-gray-200">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-gray-900">
-                  Today's appointments
-                </h2>
-                <button className="text-sm text-purple-600 font-medium hover:underline">Block time</button>
+              <div className="text-sm text-gray-600 mb-2">TODAY</div>
+              <div className="text-4xl font-bold text-gray-900 mb-1">
+                {dashboardData.stats.today_appointments}
               </div>
+              <div className="text-xs text-gray-600">appointments</div>
+            </div>
 
-              {dashboardData.appointments.length === 0 ? (
-                <div className="text-center py-12 text-gray-600">
-                  <div className="text-5xl mb-3">📭</div>
-                  <p>No appointments scheduled for today</p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {dashboardData.appointments.map((appt) => (
-                    <div
-                      key={appt.id}
-                      className="flex items-center gap-4 p-4 bg-purple-50 rounded-lg border border-purple-200 hover:border-purple-400 transition group"
-                    >
-                      <div className="text-lg font-bold text-gray-900 min-w-[60px]">
-                        {formatTime(appt.appointment_time)}
-                      </div>
-                      <div className="flex-1">
-                        <div className="font-semibold text-gray-900 mb-0.5">
-                          {appt.customer.first_name} {appt.customer.last_name}
-                        </div>
-                        <div className="text-sm text-gray-600">
-                          {appt.service.name} · {appt.duration} min
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-lg font-bold text-gray-900">
-                          {formatCurrency(appt.price)}
-                        </div>
-                        <div className={`text-xs px-2 py-1 rounded-full ${
-                          appt.status === 'confirmed'
-                            ? 'bg-green-100 text-green-700'
-                            : appt.status === 'completed'
-                            ? 'bg-blue-100 text-blue-700'
-                            : 'bg-gray-100 text-gray-700'
-                        }`}>
-                          {appt.status.charAt(0).toUpperCase() + appt.status.slice(1)}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
+            <div className="bg-white rounded-xl p-6 border border-gray-200">
+              <div className="text-sm text-gray-600 mb-2">THIS WEEK</div>
+              <div className="text-4xl font-bold text-gray-900 mb-1">
+                {dashboardData.stats.week_appointments}
+              </div>
+              <div className="text-xs text-gray-600">appointments</div>
+            </div>
+
+            <div className="bg-white rounded-xl p-6 border border-gray-200">
+              <div className="text-sm text-gray-600 mb-2">TOTAL CLIENTS</div>
+              <div className="text-4xl font-bold text-gray-900 mb-1">
+                {dashboardData.stats.total_customers}
+              </div>
+              <div className="text-xs text-gray-600">all time</div>
             </div>
           </div>
+        </details>
 
-          {/* Right Column - Profile & Calendar */}
-          <div className="space-y-6">
-            {/* Profile Card */}
-            <div className="bg-gray-900 rounded-xl p-6 text-white">
-              <div className="flex items-center gap-4 mb-6">
-                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-600 to-purple-700 flex items-center justify-center text-2xl font-bold">
-                  {provider.name.charAt(0)}
-                </div>
-                <div className="flex-1">
-                  <div className="font-bold text-lg">
-                    {provider.name}
-                  </div>
-                  <div className="text-sm text-white/60">slotcraft.app/{slug}</div>
-                </div>
-              </div>
-
-              <div className="space-y-2 text-sm">
-                <div className="flex items-center gap-2 text-white/80">
-                  <span>📍</span>
-                  <span>123 Atlantic Ave, Brooklyn</span>
-                </div>
-                <div className="flex items-center gap-2 text-white/80">
-                  <span>📞</span>
-                  <span>+1 718 555 0192</span>
-                </div>
-                <div className="flex items-center gap-2 text-white/80">
-                  <span>✉️</span>
-                  <span>{slug}@kingcuts.com</span>
-                </div>
-                <div className="flex items-center gap-2 text-white/80">
-                  <span>✂️</span>
-                  <span>Fade, Classic Cut, Beard Trim, Shave</span>
-                </div>
-              </div>
-
-              <button className="w-full mt-6 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm font-medium transition">
-                Edit profile
-              </button>
-            </div>
-
-            {/* Mini Calendar */}
-            <div className="bg-white rounded-xl p-6 border border-gray-200">
-              <div className="flex items-center justify-between mb-4">
-                <div className="font-bold text-gray-900">
-                  February 2026
-                </div>
-                <div className="flex gap-1">
-                  <button className="p-1 hover:bg-gray-100 rounded">←</button>
-                  <button className="p-1 hover:bg-gray-100 rounded">→</button>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-7 gap-1 text-center text-xs mb-2">
-                {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map(d => (
-                  <div key={d} className="text-gray-600 font-medium">{d}</div>
-                ))}
-              </div>
-
-              <div className="grid grid-cols-7 gap-1 text-center text-sm">
-                {Array.from({ length: 29 }, (_, i) => i + 1).map(day => (
-                  <button
-                    key={day}
-                    className={`aspect-square flex items-center justify-center rounded-lg transition ${
-                      day === 26
-                        ? 'bg-gray-900 text-white font-bold'
-                        : day % 5 === 0
-                        ? 'bg-purple-100 text-purple-700 font-medium'
-                        : 'text-gray-900 hover:bg-gray-100'
-                    }`}
-                  >
-                    {day}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Next 5 Days */}
-            <div className="bg-white rounded-xl p-6 border border-gray-200">
-              <div className="font-bold text-gray-900 mb-4">
-                Next 5 days
-              </div>
-              <div className="space-y-3">
-                {[
-                  { name: 'Marcus W.', service: 'Fade', time: 'Thu 2:00 PM' },
-                  { name: 'Sarah K.', service: 'Classic Cut', time: 'Thu 4:30 PM' },
-                  { name: 'Dmitri V.', service: 'Shave', time: 'Fri 10:00 AM' },
-                  { name: 'Andre T.', service: 'Fade + Design', time: 'Fri 1:30 PM' },
-                  { name: 'Kevin P.', service: 'Classic Cut', time: 'Sat 11:00 AM' },
-                ].map((appt, i) => (
-                  <div key={i} className="flex items-center gap-3 text-sm">
-                    <div className="w-2 h-2 rounded-full bg-purple-600"></div>
-                    <div className="flex-1">
-                      <div className="font-medium text-gray-900">{appt.name}</div>
-                      <div className="text-gray-600">{appt.service}</div>
-                    </div>
-                    <div className="text-gray-600">{appt.time}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
+        {/* Calendar - Main View */}
+        <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+          <div className="mb-4">
+            <h2 className="text-2xl font-bold text-gray-900">
+              Appointment Calendar
+            </h2>
+            <p className="text-sm text-gray-600 mt-1">
+              Click on any appointment to view details or take actions
+            </p>
           </div>
+          <AppointmentCalendar
+            appointments={appointments}
+            onSelectAppointment={handleSelectAppointment}
+            onNavigate={handleNavigate}
+            onViewChange={handleViewChange}
+          />
         </div>
       </div>
 
-      {/* Calendar Modal */}
-      {showCalendarModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl max-w-6xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <h2 className="text-2xl font-bold text-gray-900">
-                  Calendar
-                </h2>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setCalendarView('week')}
-                    className={`px-3 py-1.5 rounded-md text-sm font-medium transition ${
-                      calendarView === 'week'
-                        ? 'bg-gray-900 text-white'
-                        : 'bg-gray-50 text-gray-900 hover:bg-gray-100'
-                    }`}
-                  >
-                    Week
-                  </button>
-                  <button
-                    onClick={() => setCalendarView('month')}
-                    className={`px-3 py-1.5 rounded-md text-sm font-medium transition ${
-                      calendarView === 'month'
-                        ? 'bg-gray-900 text-white'
-                        : 'bg-gray-50 text-gray-900 hover:bg-gray-100'
-                    }`}
-                  >
-                    Month
-                  </button>
-                  <button
-                    onClick={() => setCalendarView('year')}
-                    className={`px-3 py-1.5 rounded-md text-sm font-medium transition ${
-                      calendarView === 'year'
-                        ? 'bg-gray-900 text-white'
-                        : 'bg-gray-50 text-gray-900 hover:bg-gray-100'
-                    }`}
-                  >
-                    Year
-                  </button>
-                </div>
-              </div>
-              <button
-                onClick={() => setShowCalendarModal(false)}
-                className="text-2xl text-gray-600 hover:text-gray-900 transition"
-              >
-                ×
-              </button>
-            </div>
-
-            <div className="p-6">
-              {/* Week View */}
-              {calendarView === 'week' && (
-                <div>
-                  <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-lg font-bold text-gray-900">
-                      {getWeekDays(selectedDate)[0].toLocaleDateString('en-US', { month: 'long', day: 'numeric' })} - {getWeekDays(selectedDate)[6].toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-                    </h3>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => {
-                          const newDate = new Date(selectedDate)
-                          newDate.setDate(newDate.getDate() - 7)
-                          setSelectedDate(newDate)
-                        }}
-                        className="px-3 py-1 bg-gray-50 rounded-md hover:bg-gray-100 transition"
-                      >
-                        ← Prev
-                      </button>
-                      <button
-                        onClick={() => setSelectedDate(new Date())}
-                        className="px-3 py-1 bg-gray-50 rounded-md hover:bg-gray-100 transition"
-                      >
-                        Today
-                      </button>
-                      <button
-                        onClick={() => {
-                          const newDate = new Date(selectedDate)
-                          newDate.setDate(newDate.getDate() + 7)
-                          setSelectedDate(newDate)
-                        }}
-                        className="px-3 py-1 bg-gray-50 rounded-md hover:bg-gray-100 transition"
-                      >
-                        Next →
-                      </button>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-7 gap-2">
-                    {getWeekDays(selectedDate).map((day, i) => (
-                      <div
-                        key={i}
-                        className={`p-4 rounded-lg border-2 min-h-[120px] ${
-                          day.toDateString() === new Date().toDateString()
-                            ? 'border-[#C9993A] bg-gray-100'
-                            : 'border-gray-200 bg-white'
-                        }`}
-                      >
-                        <div className="text-xs text-gray-600 font-medium mb-1">
-                          {day.toLocaleDateString('en-US', { weekday: 'short' })}
-                        </div>
-                        <div className={`text-2xl font-bold mb-2 ${
-                          day.toDateString() === new Date().toDateString()
-                            ? 'text-purple-600'
-                            : 'text-gray-900'
-                        }`}>
-                          {day.getDate()}
-                        </div>
-                        <div className="text-xs text-gray-600">
-                          {appointmentsByDate[day.toISOString().split('T')[0]] || 0} appointments
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Month View */}
-              {calendarView === 'month' && (
-                <div>
-                  <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-lg font-bold text-gray-900">
-                      {getMonthName(currentMonth)}
-                    </h3>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => {
-                          const newMonth = new Date(currentMonth)
-                          newMonth.setMonth(newMonth.getMonth() - 1)
-                          setCurrentMonth(newMonth)
-                        }}
-                        className="px-3 py-1 bg-gray-50 rounded-md hover:bg-gray-100 transition"
-                      >
-                        ← Prev
-                      </button>
-                      <button
-                        onClick={() => setCurrentMonth(new Date())}
-                        className="px-3 py-1 bg-gray-50 rounded-md hover:bg-gray-100 transition"
-                      >
-                        Today
-                      </button>
-                      <button
-                        onClick={() => {
-                          const newMonth = new Date(currentMonth)
-                          newMonth.setMonth(newMonth.getMonth() + 1)
-                          setCurrentMonth(newMonth)
-                        }}
-                        className="px-3 py-1 bg-gray-50 rounded-md hover:bg-gray-100 transition"
-                      >
-                        Next →
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-7 gap-1 text-center mb-2">
-                    {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-                      <div key={day} className="text-sm font-semibold text-gray-600 py-2">
-                        {day}
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="grid grid-cols-7 gap-1">
-                    {Array.from({ length: getFirstDayOfMonth(currentMonth) }).map((_, i) => (
-                      <div key={`empty-${i}`} className="aspect-square" />
-                    ))}
-                    {Array.from({ length: getDaysInMonth(currentMonth) }, (_, i) => i + 1).map(day => {
-                      const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day)
-                      const dateStr = date.toISOString().split('T')[0]
-                      const isToday = date.toDateString() === new Date().toDateString()
-                      const hasAppointments = (appointmentsByDate[dateStr] || 0) > 0
-
-                      return (
-                        <button
-                          key={day}
-                          onClick={() => setSelectedDate(date)}
-                          className={`aspect-square p-2 rounded-lg transition flex flex-col items-center justify-center ${
-                            isToday
-                              ? 'bg-gray-900 text-white'
-                              : hasAppointments
-                              ? 'bg-purple-100 text-purple-700 hover:bg-purple-200'
-                              : 'bg-white border border-gray-200 hover:bg-gray-100'
-                          }`}
-                        >
-                          <div className="text-lg font-bold">
-                            {day}
-                          </div>
-                          {hasAppointments && !isToday && (
-                            <div className="w-1.5 h-1.5 rounded-full bg-purple-600 mt-1" />
-                          )}
-                        </button>
-                      )
-                    })}
-                  </div>
-                </div>
-              )}
-
-              {/* Year View */}
-              {calendarView === 'year' && (
-                <div>
-                  <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-lg font-bold text-gray-900">
-                      {currentYear}
-                    </h3>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => setCurrentYear(currentYear - 1)}
-                        className="px-3 py-1 bg-gray-50 rounded-md hover:bg-gray-100 transition"
-                      >
-                        ← Prev
-                      </button>
-                      <button
-                        onClick={() => setCurrentYear(new Date().getFullYear())}
-                        className="px-3 py-1 bg-gray-50 rounded-md hover:bg-gray-100 transition"
-                      >
-                        This Year
-                      </button>
-                      <button
-                        onClick={() => setCurrentYear(currentYear + 1)}
-                        className="px-3 py-1 bg-gray-50 rounded-md hover:bg-gray-100 transition"
-                      >
-                        Next →
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-4 gap-4">
-                    {Array.from({ length: 12 }, (_, i) => {
-                      const monthDate = new Date(currentYear, i, 1)
-                      const monthName = monthDate.toLocaleDateString('en-US', { month: 'long' })
-                      const isCurrentMonth = i === new Date().getMonth() && currentYear === new Date().getFullYear()
-
-                      return (
-                        <button
-                          key={i}
-                          onClick={() => {
-                            setCurrentMonth(monthDate)
-                            setCalendarView('month')
-                          }}
-                          className={`p-4 rounded-lg border-2 transition ${
-                            isCurrentMonth
-                              ? 'border-purple-600 bg-purple-50'
-                              : 'border-gray-200 bg-white hover:bg-gray-100'
-                          }`}
-                        >
-                          <div className={`text-lg font-bold mb-2 ${
-                            isCurrentMonth ? 'text-purple-600' : 'text-gray-900'
-                          }`}>
-                            {monthName}
-                          </div>
-                          <div className="text-sm text-gray-600">
-                            {Object.keys(appointmentsByDate).filter(date => {
-                              const d = new Date(date)
-                              return d.getFullYear() === currentYear && d.getMonth() === i
-                            }).reduce((sum, date) => sum + (appointmentsByDate[date] || 0), 0)} appointments
-                          </div>
-                        </button>
-                      )
-                    })}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Appointment Details Modal */}
+      <AppointmentDetailsModal
+        appointment={selectedAppointment}
+        isOpen={showAppointmentModal}
+        onClose={() => {
+          setShowAppointmentModal(false)
+          setSelectedAppointment(null)
+        }}
+        onCancel={handleCancelAppointment}
+        onComplete={handleCompleteAppointment}
+      />
 
       {/* Settings Modal */}
       {showSettings && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-gray-900">
-                Settings
-              </h2>
+              <h2 className="text-2xl font-bold text-gray-900">Settings</h2>
               <button
-                onClick={() => {
-                  setShowSettings(false)
-                  setSettingsError('')
-                }}
+                onClick={() => setShowSettings(false)}
                 className="text-2xl text-gray-600 hover:text-gray-900 transition"
               >
                 ×
               </button>
             </div>
-
             <div className="p-6 space-y-6">
-              {/* Change Password */}
+              {settingsError && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                  {settingsError}
+                </div>
+              )}
+
               <div>
-                <h3 className="text-lg font-bold text-gray-900 mb-4">
-                  Change Password
-                </h3>
-                <div className="space-y-3">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Business Location
+                </label>
+                <input
+                  type="text"
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
+                  placeholder="123 Main St, City, State"
+                />
+              </div>
+
+              <div className="border-t border-gray-200 pt-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Change Password</h3>
+                <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-900 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
                       Current Password
                     </label>
                     <input
                       type="password"
                       value={currentPassword}
                       onChange={(e) => setCurrentPassword(e.target.value)}
-                      placeholder="Enter current password"
-                      className="w-full bg-gray-50 border border-[rgba(28,24,18,0.12)] rounded-lg px-4 py-3 text-sm focus:border-[#C9993A] focus:outline-none transition"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-900 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
                       New Password
                     </label>
                     <input
                       type="password"
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
-                      placeholder="Enter new password (min 6 characters)"
-                      minLength={6}
-                      className="w-full bg-gray-50 border border-[rgba(28,24,18,0.12)] rounded-lg px-4 py-3 text-sm focus:border-[#C9993A] focus:outline-none transition"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-900 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
                       Confirm New Password
                     </label>
                     <input
                       type="password"
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      placeholder="Confirm new password"
-                      minLength={6}
-                      className="w-full bg-gray-50 border border-[rgba(28,24,18,0.12)] rounded-lg px-4 py-3 text-sm focus:border-[#C9993A] focus:outline-none transition"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
                     />
                   </div>
                 </div>
               </div>
+            </div>
 
-              <hr className="border-gray-200" />
-
-              {/* Update Location */}
-              <div>
-                <h3 className="text-lg font-bold text-gray-900 mb-4">
-                  Business Location
-                </h3>
-                <div>
-                  <label className="block text-sm font-medium text-gray-900 mb-2">
-                    Address
-                  </label>
-                  <input
-                    type="text"
-                    value={location}
-                    onChange={(e) => setLocation(e.target.value)}
-                    placeholder="e.g. 123 Main St, Brooklyn, NY"
-                    className="w-full bg-gray-50 border border-[rgba(28,24,18,0.12)] rounded-lg px-4 py-3 text-sm focus:border-[#C9993A] focus:outline-none transition"
-                  />
-                </div>
-              </div>
-
-              <hr className="border-gray-200" />
-
-              {/* Manage Services */}
-              <div>
-                <h3 className="text-lg font-bold text-gray-900 mb-4">
-                  Manage Services
-                </h3>
-                <div className="space-y-3">
-                  {services.map((service, index) => (
-                    <div key={index} className="flex gap-3 items-start p-4 bg-gray-50 rounded-lg">
-                      <div className="flex-1 grid grid-cols-3 gap-3">
-                        <input
-                          type="text"
-                          value={service.name}
-                          onChange={(e) => {
-                            const updated = [...services]
-                            updated[index].name = e.target.value
-                            setServices(updated)
-                          }}
-                          placeholder="Service name"
-                          className="bg-white border border-[rgba(28,24,18,0.12)] rounded-lg px-3 py-2 text-sm focus:border-[#C9993A] focus:outline-none"
-                        />
-                        <input
-                          type="number"
-                          value={service.duration}
-                          onChange={(e) => {
-                            const updated = [...services]
-                            updated[index].duration = parseInt(e.target.value)
-                            setServices(updated)
-                          }}
-                          placeholder="Duration (min)"
-                          className="bg-white border border-[rgba(28,24,18,0.12)] rounded-lg px-3 py-2 text-sm focus:border-[#C9993A] focus:outline-none"
-                        />
-                        <input
-                          type="number"
-                          value={service.price}
-                          onChange={(e) => {
-                            const updated = [...services]
-                            updated[index].price = parseFloat(e.target.value)
-                            setServices(updated)
-                          }}
-                          placeholder="Price ($)"
-                          className="bg-white border border-[rgba(28,24,18,0.12)] rounded-lg px-3 py-2 text-sm focus:border-[#C9993A] focus:outline-none"
-                        />
-                      </div>
-                      <button
-                        onClick={() => {
-                          setServices(services.filter((_, i) => i !== index))
-                        }}
-                        className="px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg transition"
-                      >
-                        🗑️
-                      </button>
-                    </div>
-                  ))}
-                  <button
-                    onClick={() => {
-                      setServices([...services, { name: '', duration: 30, price: 0, icon: '✂️' }])
-                    }}
-                    className="w-full py-3 border-2 border-dashed border-[rgba(28,24,18,0.12)] rounded-lg text-sm font-medium text-gray-600 hover:border-[#C9993A] hover:text-purple-600 transition"
-                  >
-                    + Add Service
-                  </button>
-                </div>
-              </div>
-
-              {settingsError && (
-                <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm">
-                  {settingsError}
-                </div>
-              )}
-
-              {/* Save Button */}
+            <div className="border-t border-gray-200 px-6 py-4 bg-gray-50 flex items-center justify-end gap-3">
               <button
-                onClick={async () => {
-                  setSettingsError('')
-                  setSettingsSaving(true)
-
-                  try {
-                    // Validate passwords match
-                    if (newPassword && newPassword !== confirmPassword) {
-                      throw new Error('Passwords do not match')
-                    }
-
-                    if (newPassword && newPassword.length < 6) {
-                      throw new Error('Password must be at least 6 characters')
-                    }
-
-                    // Require current password if changing password
-                    if (newPassword && !currentPassword) {
-                      throw new Error('Current password is required to change password')
-                    }
-
-                    const updates: any = {}
-                    if (newPassword) updates.password = newPassword
-                    if (location) updates.location = location
-                    if (services.length > 0) updates.services = services
-
-                    const token = localStorage.getItem('auth_token')
-                    const response = await fetch(`/api/provider/${slug}/settings`, {
-                      method: 'PUT',
-                      headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token || ''}`,
-                      },
-                      credentials: 'include',
-                      body: JSON.stringify({ currentPassword, updates }),
-                    })
-
-                    if (!response.ok) {
-                      const data = await response.json()
-                      throw new Error(data.detail || 'Failed to update settings')
-                    }
-
-                    // Refresh dashboard data
-                    await fetchDashboard()
-                    setShowSettings(false)
-                    setCurrentPassword('')
-                    setNewPassword('')
-                    setConfirmPassword('')
-                    setNewPassword('')
-                    setConfirmPassword('')
-                  } catch (err: any) {
-                    setSettingsError(err.message)
-                  } finally {
-                    setSettingsSaving(false)
-                  }
-                }}
+                onClick={() => setShowSettings(false)}
+                className="px-4 py-2 text-gray-700 hover:bg-gray-200 rounded-lg transition font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveSettings}
                 disabled={settingsSaving}
-                className="w-full bg-gray-900 text-[#F5F0E8] py-3 rounded-lg font-semibold hover:bg-purple-600 hover:text-gray-900 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition font-medium disabled:opacity-50"
               >
                 {settingsSaving ? 'Saving...' : 'Save Changes'}
               </button>
