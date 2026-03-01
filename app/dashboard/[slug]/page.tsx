@@ -160,25 +160,28 @@ export default function DashboardPage() {
         currentDate: currentDate.toISOString().split('T')[0]
       })
 
-      const response = await fetch(
-        `/api/dashboard/${slug}/appointments?${params.toString()}`,
-        {
-          credentials: 'include',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('auth_token') || ''}`,
-          },
-        }
-      )
+      const url = `/api/dashboard/${slug}/appointments?${params.toString()}`
+      console.log('📡 Request URL:', url)
+
+      const response = await fetch(url, {
+        credentials: 'include',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('auth_token') || ''}`,
+        },
+      })
+
+      console.log('📥 Response status:', response.status, response.statusText)
 
       if (response.ok) {
         const data = await response.json()
         console.log('✅ Calendar appointments received:', data.appointments.length, data.appointments)
         setAppointments(data.appointments || [])
       } else {
-        console.error('❌ Failed to fetch appointments:', response.status, response.statusText)
+        const errorText = await response.text()
+        console.error('❌ Failed to fetch appointments:', response.status, response.statusText, errorText)
       }
     } catch (err) {
-      console.error('Failed to fetch calendar appointments:', err)
+      console.error('❌ Network error fetching calendar appointments:', err)
     }
   }
 
