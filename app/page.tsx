@@ -312,6 +312,7 @@ export default function Home() {
 
   // Onboarding Form
   return (
+    <MapProvider>
     <div className="min-h-screen bg-gray-50 py-20" style={{ fontFamily: "'DM Sans', -apple-system, sans-serif" }}>
       <div className="container mx-auto px-6 max-w-2xl">
         <div className="mb-8">
@@ -500,6 +501,7 @@ export default function Home() {
         </div>
       </div>
     </div>
+    </MapProvider>
   )
 }
 
@@ -550,5 +552,7 @@ const DashboardMockup = () => (
       ))}
     </div>
   </div>
+        </div>
       </MapProvider>
-)
+    )
+  }
