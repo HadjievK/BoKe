@@ -9,7 +9,7 @@ import CalendarPicker from '@/components/booking/CalendarPicker'
 import TimeSlotGrid from '@/components/booking/TimeSlotGrid'
 import CustomerForm from '@/components/booking/CustomerForm'
 
-type BookingStep = 'select-service' | 'select-datetime' | 'enter-details' | 'success'
+type BookingStep = 'select-datetime' | 'enter-details' | 'success'
 
 export default function ProviderProfilePage() {
   const params = useParams()
@@ -22,8 +22,7 @@ export default function ProviderProfilePage() {
   const [activeTab, setActiveTab] = useState('services')
 
   // Booking state
-  const [bookingStep, setBookingStep] = useState<BookingStep>('select-service')
-  const [selectedService, setSelectedService] = useState<Service | null>(null)
+  const [bookingStep, setBookingStep] = useState<BookingStep>('select-datetime')
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [selectedTime, setSelectedTime] = useState<string | null>(null)
   const [timeSlots, setTimeSlots] = useState<any[]>([])
@@ -46,37 +45,28 @@ export default function ProviderProfilePage() {
     fetchProvider()
   }, [slug])
 
-  // Fetch time slots when date and service are selected
+  // Fetch time slots when date is selected (fetch for all services, not specific one)
   useEffect(() => {
-    if (selectedDate && selectedService) {
+    if (selectedDate) {
       fetchTimeSlots()
     }
-  }, [selectedDate, selectedService])
+  }, [selectedDate])
 
   const fetchTimeSlots = async () => {
-    if (!selectedDate || !selectedService) return
+    if (!selectedDate || !provider) return
 
     setLoadingSlots(true)
     try {
       const dateStr = formatDateISO(selectedDate)
-      const data = await getAvailability(slug, dateStr, selectedService.id)
+      // Fetch availability for the first service (or you can aggregate across all services)
+      // For now, using first service as a representative sample
+      const data = await getAvailability(slug, dateStr, provider.services[0]?.id || '')
       setTimeSlots(data.slots)
     } catch (err: any) {
       setError(err.message)
     } finally {
       setLoadingSlots(false)
     }
-  }
-
-  const handleSelectService = (service: Service) => {
-    setSelectedService(service)
-    setBookingStep('select-datetime')
-    setSelectedDate(null)
-    setSelectedTime(null)
-    // Scroll to booking section
-    setTimeout(() => {
-      document.getElementById('booking-section')?.scrollIntoView({ behavior: 'smooth' })
-    }, 100)
   }
 
   const handleDateSelect = (date: Date) => {
@@ -87,17 +77,22 @@ export default function ProviderProfilePage() {
   const handleTimeSelect = (time: string) => {
     setSelectedTime(time)
     setBookingStep('enter-details')
+    // Scroll to customer form
+    setTimeout(() => {
+      document.getElementById('customer-form-section')?.scrollIntoView({ behavior: 'smooth' })
+    }, 100)
   }
 
   const handleCustomerSubmit = async (customer: Customer) => {
-    if (!selectedService || !selectedDate || !selectedTime) return
+    if (!selectedDate || !selectedTime || !provider) return
 
     setBooking(true)
     setError('')
 
     try {
+      // For now, book with the first service. Later you can add service selection logic.
       const bookingRequest: BookingRequest = {
-        service_id: selectedService.id,
+        service_id: provider.services[0]?.id || '',
         appointment_date: formatDateISO(selectedDate),
         appointment_time: selectedTime,
         customer
@@ -108,7 +103,7 @@ export default function ProviderProfilePage() {
       setBookingStep('success')
       // Scroll to success message
       setTimeout(() => {
-        document.getElementById('booking-section')?.scrollIntoView({ behavior: 'smooth' })
+        document.getElementById('success-section')?.scrollIntoView({ behavior: 'smooth' })
       }, 100)
     } catch (err: any) {
       setError(err.message)
@@ -118,16 +113,13 @@ export default function ProviderProfilePage() {
   }
 
   const handleBookAnother = () => {
-    setBookingStep('select-service')
-    setSelectedService(null)
+    setBookingStep('select-datetime')
     setSelectedDate(null)
     setSelectedTime(null)
     setConfirmation(null)
     setError('')
-    // Scroll to services
-    setTimeout(() => {
-      document.getElementById('services-section')?.scrollIntoView({ behavior: 'smooth' })
-    }, 100)
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   if (loading) {
@@ -244,7 +236,7 @@ export default function ProviderProfilePage() {
       </div>
 
       {/* Body */}
-      <div className="max-w-[680px] mx-auto px-8 py-7 pb-24">
+      <div className="max-w-[1200px] mx-auto px-8 py-7 pb-24">
         {/* Quick Info Cards */}
         <div className="grid grid-cols-2 gap-3 mb-7">
           <div className="bg-white border border-gray-200 rounded-xl p-4 text-center shadow-sm">
@@ -263,71 +255,96 @@ export default function ProviderProfilePage() {
           </div>
         </div>
 
-        {/* Services Section */}
-        {activeTab === 'services' && (
-          <div className="mb-8" id="services-section">
-            <h2
-              className="text-xl font-bold text-[gray-900] mb-3.5"
-              style={{ fontFamily: 'Playfair Display, serif', letterSpacing: '-0.01em' }}
-            >
-              Services & Pricing
-            </h2>
+        {activeTab === 'services' && bookingStep !== 'success' && (
+          <div className="grid lg:grid-cols-2 gap-8">
+            {/* Left: Services & Pricing (Read-only) */}
+            <div id="services-section">
+              <h2
+                className="text-xl font-bold text-gray-900 mb-4"
+                style={{ fontFamily: 'Playfair Display, serif', letterSpacing: '-0.01em' }}
+              >
+                Services & Pricing
+              </h2>
 
-            <div className="space-y-2">
-              {provider.services.map((service) => (
-                <div
-                  key={service.id}
-                  className={`bg-white border rounded-xl p-5 flex items-center justify-between transition-all ${
-                    selectedService?.id === service.id
-                      ? 'border-[purple-600] shadow-lg'
-                      : 'border-[gray-200] hover:border-[gray-900] hover:shadow-lg cursor-pointer'
-                  }`}
-                  onClick={() => selectedService?.id !== service.id && handleSelectService(service)}
-                >
-                  <div className="flex items-center gap-3.5">
-                    {/* Icon */}
-                    <div
-                      className="w-11 h-11 rounded-xl bg-[#F8F5F0] flex items-center justify-center text-lg flex-shrink-0"
-                    >
-                      {service.icon || '✂️'}
-                    </div>
-
-                    {/* Service Info */}
-                    <div>
-                      <div className="text-[15px] font-semibold text-[gray-900] mb-0.5">
-                        {service.name}
+              <div className="space-y-3">
+                {provider.services.map((service) => (
+                  <div
+                    key={service.id}
+                    className="bg-white border border-gray-200 rounded-xl p-5"
+                  >
+                    <div className="flex items-start gap-3.5">
+                      {/* Icon */}
+                      <div
+                        className="w-11 h-11 rounded-xl bg-purple-50 flex items-center justify-center text-lg flex-shrink-0"
+                      >
+                        {service.icon || '✂️'}
                       </div>
-                      <div className="text-xs text-[gray-600]">
-                        {service.duration} min
-                        {service.description && ` · ${service.description}`}
+
+                      {/* Service Info */}
+                      <div className="flex-1">
+                        <div className="flex items-start justify-between mb-1">
+                          <div className="text-[15px] font-semibold text-gray-900">
+                            {service.name}
+                          </div>
+                          <div
+                            className="text-lg font-bold text-gray-900"
+                            style={{ fontFamily: 'Playfair Display, serif' }}
+                          >
+                            ${service.price}
+                          </div>
+                        </div>
+                        <div className="text-xs text-gray-600">
+                          {service.duration} minutes
+                        </div>
+                        {service.description && (
+                          <div className="text-sm text-gray-600 mt-2">
+                            {service.description}
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
+                ))}
+              </div>
+            </div>
 
-                  {/* Price & Select Button */}
-                  <div className="flex items-center gap-3">
-                    <div
-                      className="text-lg font-bold text-[gray-900]"
-                      style={{ fontFamily: 'Playfair Display, serif' }}
-                    >
-                      ${service.price}
-                    </div>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        handleSelectService(service)
-                      }}
-                      className={`px-4 py-2 rounded-lg text-sm font-semibold transition whitespace-nowrap ${
-                        selectedService?.id === service.id
-                          ? 'bg-[purple-600] text-white'
-                          : 'bg-[gray-900] text-white hover:bg-[purple-600]'
-                      }`}
-                    >
-                      {selectedService?.id === service.id ? 'Selected' : 'Select'}
-                    </button>
+            {/* Right: Calendar & Time Slots (Always visible) */}
+            <div>
+              <h2
+                className="text-xl font-bold text-gray-900 mb-4"
+                style={{ fontFamily: 'Playfair Display, serif', letterSpacing: '-0.01em' }}
+              >
+                Book Your Appointment
+              </h2>
+
+              {/* Calendar */}
+              <div className="bg-white border border-gray-200 rounded-xl p-6 mb-6">
+                <h3 className="text-base font-semibold text-gray-900 mb-4">Choose a Date</h3>
+                <CalendarPicker
+                  selectedDate={selectedDate}
+                  onDateSelect={handleDateSelect}
+                />
+              </div>
+
+              {/* Time Slots */}
+              <div className="bg-white border border-gray-200 rounded-xl p-6">
+                <h3 className="text-base font-semibold text-gray-900 mb-4">
+                  {selectedDate ? 'Available Times' : 'Select a date first'}
+                </h3>
+                {selectedDate ? (
+                  <TimeSlotGrid
+                    slots={timeSlots}
+                    selectedTime={selectedTime}
+                    onTimeSelect={handleTimeSelect}
+                    loading={loadingSlots}
+                  />
+                ) : (
+                  <div className="text-center py-12 text-gray-600">
+                    <div className="text-4xl mb-3">📅</div>
+                    <p className="text-sm">Pick a date to see available time slots</p>
                   </div>
-                </div>
-              ))}
+                )}
+              </div>
             </div>
           </div>
         )}
@@ -336,176 +353,109 @@ export default function ProviderProfilePage() {
         {activeTab === 'about' && (
           <div>
             <h2
-              className="text-xl font-bold text-[gray-900] mb-3.5"
+              className="text-xl font-bold text-gray-900 mb-3.5"
               style={{ fontFamily: 'Playfair Display, serif', letterSpacing: '-0.01em' }}
             >
               About {provider.name}
             </h2>
-            <div className="text-sm text-[#444444] leading-relaxed font-light">
+            <div className="text-sm text-gray-700 leading-relaxed">
               {provider.bio || `Professional service provider offering quality services. Book your appointment today!`}
             </div>
           </div>
         )}
 
-        {/* Booking Section - Shows when service is selected */}
-        {bookingStep !== 'select-service' && (
-          <div id="booking-section" className="mt-8 scroll-mt-8">
-            {/* Selected Service Summary */}
-            <div className="bg-[purple-600]/10 border border-[purple-600]/30 rounded-xl p-4 mb-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="text-2xl">{selectedService?.icon || '✂️'}</div>
-                  <div>
-                    <div className="font-semibold text-[gray-900]">{selectedService?.name}</div>
-                    <div className="text-sm text-[gray-600]">
-                      {selectedService?.duration} min · ${selectedService?.price}
-                    </div>
-                  </div>
-                </div>
-                <button
-                  onClick={handleBookAnother}
-                  className="text-sm text-[purple-600] hover:text-[purple-700] font-semibold"
-                >
-                  Change
-                </button>
+        {/* Customer Form Section - Shows when time is selected */}
+        {bookingStep === 'enter-details' && selectedDate && selectedTime && (
+          <div id="customer-form-section" className="mt-8 scroll-mt-8 max-w-2xl mx-auto">
+            <h2
+              className="text-xl font-bold text-gray-900 mb-4"
+              style={{ fontFamily: 'Playfair Display, serif', letterSpacing: '-0.01em' }}
+            >
+              Your Information
+            </h2>
+
+            <div className="bg-purple-50/50 border border-purple-200 rounded-xl p-4 mb-6">
+              <div className="text-sm text-gray-600 mb-1">Selected Time</div>
+              <div className="font-semibold text-gray-900">
+                {selectedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })} at {selectedTime}
               </div>
             </div>
 
-            {bookingStep === 'select-datetime' && (
-              <>
-                <h2
-                  className="text-xl font-bold text-[gray-900] mb-4"
-                  style={{ fontFamily: 'Playfair Display, serif', letterSpacing: '-0.01em' }}
-                >
-                  Select Date & Time
-                </h2>
+            <CustomerForm
+              onSubmit={handleCustomerSubmit}
+              loading={booking}
+            />
 
-                <div className="grid lg:grid-cols-2 gap-6">
-                  {/* Calendar */}
-                  <div className="bg-white border border-[gray-200] rounded-xl p-6">
-                    <h3 className="text-base font-semibold text-[gray-900] mb-4">Choose a Date</h3>
-                    <CalendarPicker
-                      selectedDate={selectedDate}
-                      onDateSelect={handleDateSelect}
-                    />
-                  </div>
-
-                  {/* Time Slots */}
-                  <div className="bg-white border border-[gray-200] rounded-xl p-6">
-                    <h3 className="text-base font-semibold text-[gray-900] mb-4">
-                      {selectedDate ? 'Available Times' : 'Select a date first'}
-                    </h3>
-                    {selectedDate && (
-                      <TimeSlotGrid
-                        slots={timeSlots}
-                        selectedTime={selectedTime}
-                        onTimeSelect={handleTimeSelect}
-                        loading={loadingSlots}
-                      />
-                    )}
-                    {!selectedDate && (
-                      <div className="text-center py-12 text-[gray-600]">
-                        <div className="text-4xl mb-3">📅</div>
-                        <p className="text-sm">Pick a date to see available time slots</p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </>
-            )}
-
-            {bookingStep === 'enter-details' && selectedDate && selectedTime && (
-              <>
-                <h2
-                  className="text-xl font-bold text-[gray-900] mb-4"
-                  style={{ fontFamily: 'Playfair Display, serif', letterSpacing: '-0.01em' }}
-                >
-                  Your Information
-                </h2>
-
-                <div className="bg-[#F8F5F0]/50 border border-[gray-200] rounded-xl p-4 mb-6">
-                  <div className="text-sm text-[gray-600] mb-1">Selected Time</div>
-                  <div className="font-semibold text-[gray-900]">
-                    {selectedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })} at {selectedTime}
-                  </div>
-                </div>
-
-                <CustomerForm
-                  onSubmit={handleCustomerSubmit}
-                  loading={booking}
-                />
-
-                {error && (
-                  <div className="mt-4 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm">
-                    {error}
-                  </div>
-                )}
-              </>
-            )}
-
-            {bookingStep === 'success' && confirmation && (
-              <div className="text-center py-8">
-                <div className="text-6xl mb-4">✅</div>
-                <h2
-                  className="text-2xl font-bold text-[gray-900] mb-2"
-                  style={{ fontFamily: 'Playfair Display, serif' }}
-                >
-                  Booking Confirmed!
-                </h2>
-                <p className="text-[gray-600] mb-6">
-                  Your appointment has been successfully booked.
-                </p>
-
-                <div className="bg-white border border-[gray-200] rounded-xl p-6 max-w-md mx-auto mb-6 text-left">
-                  <div className="space-y-3">
-                    <div>
-                      <div className="text-xs text-[gray-600] mb-1">Service</div>
-                      <div className="font-semibold text-[gray-900]">{confirmation.appointment.service.name}</div>
-                    </div>
-                    <div className="border-t border-[gray-200] pt-3">
-                      <div className="text-xs text-[gray-600] mb-1">Date & Time</div>
-                      <div className="font-semibold text-[gray-900]">
-                        {new Date(confirmation.appointment.appointment_date).toLocaleDateString('en-US', {
-                          weekday: 'long',
-                          month: 'long',
-                          day: 'numeric'
-                        })} at {confirmation.appointment.appointment_time}
-                      </div>
-                    </div>
-                    <div className="border-t border-[gray-200] pt-3">
-                      <div className="text-xs text-[gray-600] mb-1">Duration</div>
-                      <div className="font-semibold text-[gray-900]">{confirmation.appointment.duration} minutes</div>
-                    </div>
-                    <div className="border-t border-[gray-200] pt-3">
-                      <div className="text-xs text-[gray-600] mb-1">Price</div>
-                      <div className="font-semibold text-[gray-900]">${confirmation.appointment.price}</div>
-                    </div>
-                  </div>
-                </div>
-
-                <button
-                  onClick={handleBookAnother}
-                  className="bg-[gray-900] text-white px-8 py-3 rounded-full text-sm font-semibold hover:bg-[purple-600] transition"
-                >
-                  Book Another Appointment
-                </button>
+            {error && (
+              <div className="mt-4 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm">
+                {error}
               </div>
             )}
           </div>
         )}
+
+        {/* Success Section */}
+        {bookingStep === 'success' && confirmation && (
+          <div id="success-section" className="text-center py-8 scroll-mt-8">
+            <div className="text-6xl mb-4">✅</div>
+            <h2
+              className="text-2xl font-bold text-gray-900 mb-2"
+              style={{ fontFamily: 'Playfair Display, serif' }}
+            >
+              Booking Confirmed!
+            </h2>
+            <p className="text-gray-600 mb-6">
+              Your appointment has been successfully booked.
+            </p>
+
+            <div className="bg-white border border-gray-200 rounded-xl p-6 max-w-md mx-auto mb-6 text-left">
+              <div className="space-y-3">
+                <div>
+                  <div className="text-xs text-gray-600 mb-1">Service</div>
+                  <div className="font-semibold text-gray-900">{confirmation.appointment.service.name}</div>
+                </div>
+                <div className="border-t border-gray-200 pt-3">
+                  <div className="text-xs text-gray-600 mb-1">Date & Time</div>
+                  <div className="font-semibold text-gray-900">
+                    {new Date(confirmation.appointment.appointment_date).toLocaleDateString('en-US', {
+                      weekday: 'long',
+                      month: 'long',
+                      day: 'numeric'
+                    })} at {confirmation.appointment.appointment_time}
+                  </div>
+                </div>
+                <div className="border-t border-gray-200 pt-3">
+                  <div className="text-xs text-gray-600 mb-1">Duration</div>
+                  <div className="font-semibold text-gray-900">{confirmation.appointment.duration} minutes</div>
+                </div>
+                <div className="border-t border-gray-200 pt-3">
+                  <div className="text-xs text-gray-600 mb-1">Price</div>
+                  <div className="font-semibold text-gray-900">${confirmation.appointment.price}</div>
+                </div>
+              </div>
+            </div>
+
+            <button
+              onClick={handleBookAnother}
+              className="bg-gray-900 text-white px-8 py-3 rounded-full text-sm font-semibold hover:bg-purple-600 transition"
+            >
+              Book Another Appointment
+            </button>
+          </div>
+        )}
       </div>
 
-      {/* Sticky CTA - Only show when no service is selected */}
-      {bookingStep === 'select-service' && (
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-[gray-200] px-8 py-4 flex items-center justify-between z-50 shadow-2xl">
-          <div className="text-sm text-[gray-600]">
-            Next available: <strong className="text-[gray-900] font-semibold">Today</strong>
+      {/* Sticky CTA - Only show in initial state */}
+      {bookingStep === 'select-datetime' && !selectedTime && (
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-8 py-4 flex items-center justify-between z-50 shadow-2xl">
+          <div className="text-sm text-gray-600">
+            Next available: <strong className="text-gray-900 font-semibold">Today</strong>
           </div>
           <button
             onClick={() => document.getElementById('services-section')?.scrollIntoView({ behavior: 'smooth' })}
-            className="bg-[gray-900] text-white px-8 py-3.5 rounded-full text-[15px] font-semibold flex items-center gap-2 hover:bg-[purple-600] hover:scale-105 transition-all"
+            className="bg-gray-900 text-white px-8 py-3.5 rounded-full text-[15px] font-semibold flex items-center gap-2 hover:bg-purple-600 hover:scale-105 transition-all"
           >
-            Choose a Service →
+            Select Date & Time →
           </button>
         </div>
       )}
