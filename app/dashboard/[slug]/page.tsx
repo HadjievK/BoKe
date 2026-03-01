@@ -42,14 +42,21 @@ export default function DashboardPage() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
+        console.log('🔐 Starting auth check...')
+        const token = localStorage.getItem('auth_token')
+        console.log('🔑 Auth token exists:', !!token)
+
         const auth = await verifyAuth()
+        console.log('✅ Auth verified:', auth)
 
         if (!auth.authenticated) {
+          console.log('❌ Not authenticated, redirecting to signin')
           router.push('/signin')
           return
         }
 
         if (auth.slug !== slug) {
+          console.log('❌ Slug mismatch, redirecting to correct dashboard')
           router.push(`/dashboard/${auth.slug}`)
           return
         }
@@ -57,7 +64,7 @@ export default function DashboardPage() {
         setAuthenticated(true)
         await fetchDashboard()
       } catch (err: any) {
-        console.error('Auth check failed:', err)
+        console.error('❌ Auth check failed:', err)
         router.push('/signin')
       } finally {
         setLoading(false)
