@@ -83,6 +83,18 @@ export async function PUT(
       paramIndex++;
     }
 
+    if (updates.latitude !== undefined) {
+      updateFields.push(`latitude = $${paramIndex}`);
+      updateValues.push(updates.latitude);
+      paramIndex++;
+    }
+
+    if (updates.longitude !== undefined) {
+      updateFields.push(`longitude = $${paramIndex}`);
+      updateValues.push(updates.longitude);
+      paramIndex++;
+    }
+
     if (updates.services) {
       updateFields.push(`services = $${paramIndex}::jsonb`);
       updateValues.push(JSON.stringify(updates.services));
@@ -103,7 +115,7 @@ export async function PUT(
       UPDATE service_providers
       SET ${updateFields.join(', ')}
       WHERE id = $${paramIndex}
-      RETURNING id, slug, name, business_name, location
+      RETURNING id, slug, name, business_name, location, latitude, longitude
     `;
 
     const result = await pool.query(query, updateValues);

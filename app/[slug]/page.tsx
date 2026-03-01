@@ -8,6 +8,8 @@ import { formatDateISO } from '@/lib/utils'
 import CalendarPicker from '@/components/booking/CalendarPicker'
 import TimeSlotGrid from '@/components/booking/TimeSlotGrid'
 import CustomerForm from '@/components/booking/CustomerForm'
+import MapProvider from '@/components/maps/MapProvider'
+import LocationMap from '@/components/maps/LocationMap'
 
 type BookingStep = 'select-datetime' | 'enter-details' | 'success'
 
@@ -154,7 +156,8 @@ export default function ProviderProfilePage() {
   }
 
   return (
-    <main className="min-h-screen bg-white" style={{ fontFamily: "'DM Sans', -apple-system, sans-serif" }}>
+    <MapProvider>
+      <main className="min-h-screen bg-white" style={{ fontFamily: "'DM Sans', -apple-system, sans-serif" }}>
       {/* Hero Section */}
       <div className="relative h-80 overflow-hidden bg-gray-900">
         {/* Background Pattern */}
@@ -209,7 +212,14 @@ export default function ProviderProfilePage() {
             {provider.location && (
               <div className="flex items-center gap-1.5">
                 <span>📍</span>
-                <span>{provider.location}</span>
+                <a
+                  href={provider.latitude && provider.longitude ? `https://www.google.com/maps/dir/?api=1&destination=${provider.latitude},${provider.longitude}` : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(provider.location)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-white/70 transition-colors"
+                >
+                  {provider.location}
+                </a>
               </div>
             )}
           </div>
@@ -351,16 +361,66 @@ export default function ProviderProfilePage() {
 
         {/* About Section */}
         {activeTab === 'about' && (
-          <div>
-            <h2
-              className="text-xl font-bold text-gray-900 mb-3.5"
-              style={{ fontFamily: 'Playfair Display, serif', letterSpacing: '-0.01em' }}
-            >
-              About {provider.name}
-            </h2>
-            <div className="text-sm text-gray-700 leading-relaxed">
-              {provider.bio || `Professional service provider offering quality services. Book your appointment today!`}
+          <div className="space-y-6">
+            <div>
+              <h2
+                className="text-xl font-bold text-gray-900 mb-3.5"
+                style={{ fontFamily: 'Playfair Display, serif', letterSpacing: '-0.01em' }}
+              >
+                About {provider.name}
+              </h2>
+              <div className="text-sm text-gray-700 leading-relaxed">
+                {provider.bio || `Professional service provider offering quality services. Book your appointment today!`}
+              </div>
             </div>
+
+            {/* Location Map */}
+            {provider.location && provider.latitude && provider.longitude && (
+              <div>
+                <h3
+                  className="text-lg font-bold text-gray-900 mb-3"
+                  style={{ fontFamily: 'Playfair Display, serif', letterSpacing: '-0.01em' }}
+                >
+                  Location
+                </h3>
+                <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+                  <LocationMap
+                    latitude={provider.latitude}
+                    longitude={provider.longitude}
+                    address={provider.location}
+                    height="350px"
+                    showDirectionsButton={true}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Fallback if no coordinates */}
+            {provider.location && (!provider.latitude || !provider.longitude) && (
+              <div>
+                <h3
+                  className="text-lg font-bold text-gray-900 mb-3"
+                  style={{ fontFamily: 'Playfair Display, serif', letterSpacing: '-0.01em' }}
+                >
+                  Location
+                </h3>
+                <div className="bg-white border border-gray-200 rounded-xl p-5 flex items-center gap-3">
+                  <span className="text-2xl">📍</span>
+                  <div>
+                    <p className="text-gray-900 font-medium">{provider.location}</p>
+                    <a
+                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(provider.location)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-purple-600 hover:text-purple-700 font-semibold mt-1 inline-flex items-center gap-1"
+                    >
+                      <span>🧭</span>
+                      Get Directions
+                    </a>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -460,5 +520,6 @@ export default function ProviderProfilePage() {
         </div>
       )}
     </main>
+    </MapProvider>
   )
 }

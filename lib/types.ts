@@ -14,6 +14,8 @@ export interface Provider {
   email: string
   phone: string
   location?: string
+  latitude?: number
+  longitude?: number
   bio?: string
   avatar_url?: string
   theme_config: ThemeConfig
@@ -98,6 +100,8 @@ export interface OnboardingData {
   phone: string
   password: string
   location?: string
+  latitude?: number
+  longitude?: number
   bio?: string
   services: {
     name: string

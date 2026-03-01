@@ -8,6 +8,8 @@ import { formatDate, formatTime, formatCurrency } from '@/lib/utils'
 import ThemeToggle from '@/components/ThemeToggle'
 import AppointmentCalendar from '@/components/dashboard/AppointmentCalendar'
 import AppointmentDetailsModal from '@/components/dashboard/AppointmentDetailsModal'
+import MapProvider from '@/components/maps/MapProvider'
+import LocationAutocomplete from '@/components/maps/LocationAutocomplete'
 import { View } from 'react-big-calendar'
 import moment from 'moment'
 
@@ -34,6 +36,8 @@ export default function DashboardPage() {
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [location, setLocation] = useState('')
+  const [latitude, setLatitude] = useState<number | undefined>()
+  const [longitude, setLongitude] = useState<number | undefined>()
   const [services, setServices] = useState<any[]>([])
   const [settingsError, setSettingsError] = useState('')
   const [settingsSaving, setSettingsSaving] = useState(false)
@@ -93,6 +97,8 @@ export default function DashboardPage() {
           if (response.ok) {
             const data = await response.json()
             setLocation(data.location || '')
+            setLatitude(data.latitude)
+            setLongitude(data.longitude)
             setServices(data.services || [])
           }
         } catch (err) {
@@ -254,7 +260,11 @@ export default function DashboardPage() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('auth_token') || ''}`,
         },
-        body: JSON.stringify({ location }),
+        body: JSON.stringify({
+          location,
+          latitude,
+          longitude
+        }),
       })
 
       if (!locationResponse.ok) {
@@ -332,6 +342,7 @@ export default function DashboardPage() {
   const todayDate = new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
 
   return (
+    <MapProvider>
     <main className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white text-gray-900 px-6 py-4 border-b border-gray-200 shadow-sm">
@@ -492,12 +503,15 @@ export default function DashboardPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Business Location
                 </label>
-                <input
-                  type="text"
+                <LocationAutocomplete
                   value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
+                  onChange={(address, lat, lng) => {
+                    setLocation(address)
+                    setLatitude(lat)
+                    setLongitude(lng)
+                  }}
                   placeholder="123 Main St, City, State"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
                 />
               </div>
 
@@ -560,5 +574,6 @@ export default function DashboardPage() {
         </div>
       )}
     </main>
+    </MapProvider>
   )
 }

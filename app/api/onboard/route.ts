@@ -33,7 +33,7 @@ async function ensureUniqueSlug(baseSlug: string): Promise<string> {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { name, business_name, service_type, email, phone, location, bio, services, password, google_id } = body;
+    const { name, business_name, service_type, email, phone, location, latitude, longitude, bio, services, password, google_id } = body;
 
     // For Google OAuth users, password is optional
     const isGoogleUser = !!google_id;
@@ -98,12 +98,12 @@ export async function POST(request: NextRequest) {
       `
       INSERT INTO service_providers (
         slug, name, business_name, service_type, email, phone,
-        location, bio, password, services, availability,
+        location, latitude, longitude, bio, password, services, availability,
         oauth_provider, oauth_provider_id
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10::jsonb, $11::jsonb, $12, $13)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12::jsonb, $13::jsonb, $14, $15)
       RETURNING id, slug, name, business_name, service_type, email, phone,
-                location, bio, avatar_url, theme_config, created_at
+                location, latitude, longitude, bio, avatar_url, theme_config, created_at
       `,
       [
         slug,
@@ -113,6 +113,8 @@ export async function POST(request: NextRequest) {
         email,
         phone,
         location,
+        latitude || null,
+        longitude || null,
         bio,
         hashedPassword,
         servicesJson,

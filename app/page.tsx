@@ -4,6 +4,8 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { registerProvider } from '@/lib/api'
 import type { OnboardingData } from '@/lib/types'
+import MapProvider from '@/components/maps/MapProvider'
+import LocationAutocomplete from '@/components/maps/LocationAutocomplete'
 
 const SERVICE_PILLS = [
   { emoji: '✂️', label: 'Barbers' },
@@ -44,6 +46,8 @@ export default function Home() {
   const [phone, setPhone] = useState('')
   const [password, setPassword] = useState('')
   const [location, setLocation] = useState('')
+  const [latitude, setLatitude] = useState<number | undefined>()
+  const [longitude, setLongitude] = useState<number | undefined>()
   const [bio, setBio] = useState('')
   const [services, setServices] = useState<Service[]>([
     { name: 'Classic Cut', duration: 30, price: 35, icon: '✂️' },
@@ -98,6 +102,8 @@ export default function Home() {
         phone,
         password,
         location,
+        latitude,
+        longitude,
         bio,
         services
       }
@@ -113,7 +119,8 @@ export default function Home() {
 
   if (!showOnboarding) {
     return (
-      <div className="min-h-screen bg-white" style={{ fontFamily: "'DM Sans', -apple-system, sans-serif" }}>
+      <MapProvider>
+        <div className="min-h-screen bg-white" style={{ fontFamily: "'DM Sans', -apple-system, sans-serif" }}>
         {/* Navbar */}
         <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200">
           <div className="container mx-auto px-6 h-16 flex items-center justify-between max-w-6xl">
@@ -401,10 +408,13 @@ export default function Home() {
 
           <div>
             <label className="block text-sm font-semibold mb-2 text-gray-900">Location</label>
-            <input
-              type="text"
+            <LocationAutocomplete
               value={location}
-              onChange={(e) => setLocation(e.target.value)}
+              onChange={(address, lat, lng) => {
+                setLocation(address)
+                setLatitude(lat)
+                setLongitude(lng)
+              }}
               placeholder="Brooklyn, NY"
               className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white focus:border-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-600/10 transition"
             />
@@ -540,4 +550,5 @@ const DashboardMockup = () => (
       ))}
     </div>
   </div>
+      </MapProvider>
 )
