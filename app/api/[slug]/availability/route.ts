@@ -44,7 +44,19 @@ export async function GET(
       [providerId, date]
     ).catch(() => ({ rows: [] }));
 
-    const bookedSlots = appointmentsResult.rows.map(row => row.appointment_time);
+    // Parse booked time slots and calculate blocked time ranges
+    const bookedTimeRanges = appointmentsResult.rows.map(row => {
+      // Parse time (handle both HH:MM and HH:MM:SS formats)
+      const timeParts = row.appointment_time.split(':');
+      const startHour = parseInt(timeParts[0]);
+      const startMinute = parseInt(timeParts[1]);
+      const startMinutes = startHour * 60 + startMinute;
+
+      // Calculate end time based on duration
+      const endMinutes = startMinutes + (row.duration || 30);
+
+      return { startMinutes, endMinutes };
+    });
 
     // Generate time slots (9 AM to 6 PM, 30-minute intervals)
     const slots = [];
@@ -54,13 +66,18 @@ export async function GET(
     for (let hour = startHour; hour < endHour; hour++) {
       for (let minute = 0; minute < 60; minute += 30) {
         const timeStr = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+        const slotMinutes = hour * 60 + minute;
 
-        // Check if slot is already booked
-        const isBooked = bookedSlots.includes(timeStr);
+        // Check if this slot conflicts with any booked appointment
+        // A slot is blocked if it overlaps with any existing appointment
+        const isBlocked = bookedTimeRanges.some(range => {
+          // Slot is blocked if it starts during an existing appointment
+          return slotMinutes >= range.startMinutes && slotMinutes < range.endMinutes;
+        });
 
         slots.push({
           time: timeStr,
-          available: !isBooked
+          available: !isBlocked
         });
       }
     }
