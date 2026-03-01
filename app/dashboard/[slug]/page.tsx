@@ -134,17 +134,19 @@ export default function DashboardPage() {
       let startDate, endDate
 
       // Calculate date range based on calendar view
+      // TEMPORARY: Expand range to ensure we catch all appointments
       if (calendarView === 'week') {
-        const weekStart = moment(currentDate).startOf('week')
-        const weekEnd = moment(currentDate).endOf('week')
+        // Use ISO week (Monday start) and expand by 1 day on each side
+        const weekStart = moment(currentDate).startOf('isoWeek').subtract(1, 'day')
+        const weekEnd = moment(currentDate).endOf('isoWeek').add(1, 'day')
         startDate = weekStart.format('YYYY-MM-DD')
         endDate = weekEnd.format('YYYY-MM-DD')
       } else if (calendarView === 'day') {
         startDate = moment(currentDate).format('YYYY-MM-DD')
         endDate = startDate
       } else if (calendarView === 'month') {
-        const monthStart = moment(currentDate).startOf('month')
-        const monthEnd = moment(currentDate).endOf('month')
+        const monthStart = moment(currentDate).startOf('month').subtract(7, 'days')
+        const monthEnd = moment(currentDate).endOf('month').add(7, 'days')
         startDate = monthStart.format('YYYY-MM-DD')
         endDate = monthEnd.format('YYYY-MM-DD')
       }
@@ -157,7 +159,8 @@ export default function DashboardPage() {
         view: calendarView,
         startDate,
         endDate,
-        currentDate: currentDate.toISOString().split('T')[0]
+        currentDate: currentDate.toISOString().split('T')[0],
+        today: moment().format('YYYY-MM-DD')
       })
 
       const url = `/api/dashboard/${slug}/appointments?${params.toString()}`
@@ -174,7 +177,16 @@ export default function DashboardPage() {
 
       if (response.ok) {
         const data = await response.json()
-        console.log('✅ Calendar appointments received:', data.appointments.length, data.appointments)
+        console.log('✅ Calendar appointments received:', {
+          count: data.appointments.length,
+          appointments: data.appointments.map((apt: any) => ({
+            id: apt.id,
+            date: apt.appointment_date,
+            time: apt.appointment_time,
+            customer: `${apt.customer.first_name} ${apt.customer.last_name}`,
+            status: apt.status
+          }))
+        })
         setAppointments(data.appointments || [])
       } else {
         const errorText = await response.text()
