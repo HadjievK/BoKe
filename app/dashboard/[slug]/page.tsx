@@ -8,8 +8,6 @@ import { formatDate, formatTime, formatCurrency } from '@/lib/utils'
 import ThemeToggle from '@/components/ThemeToggle'
 import AppointmentCalendar from '@/components/dashboard/AppointmentCalendar'
 import AppointmentDetailsModal from '@/components/dashboard/AppointmentDetailsModal'
-import MapProvider from '@/components/maps/MapProvider'
-import LocationAutocomplete from '@/components/maps/LocationAutocomplete'
 import { View } from 'react-big-calendar'
 import moment from 'moment'
 
@@ -260,11 +258,7 @@ export default function DashboardPage() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('auth_token') || ''}`,
         },
-        body: JSON.stringify({
-          location,
-          latitude,
-          longitude
-        }),
+        body: JSON.stringify({ location }),
       })
 
       if (!locationResponse.ok) {
@@ -342,7 +336,6 @@ export default function DashboardPage() {
   const todayDate = new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
 
   return (
-    <MapProvider>
     <main className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white text-gray-900 px-6 py-4 border-b border-gray-200 shadow-sm">
@@ -503,15 +496,12 @@ export default function DashboardPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Business Location
                 </label>
-                <LocationAutocomplete
+                <input
+                  type="text"
                   value={location}
-                  onChange={(address, lat, lng) => {
-                    setLocation(address)
-                    setLatitude(lat)
-                    setLongitude(lng)
-                  }}
-                  placeholder="123 Main St, City, State"
+                  onChange={(e) => setLocation(e.target.value)}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
+                  placeholder="123 Main St, City, State"
                 />
               </div>
 
@@ -574,6 +564,5 @@ export default function DashboardPage() {
         </div>
       )}
     </main>
-    </MapProvider>
   )
 }
