@@ -31,41 +31,10 @@ export default function AppointmentCalendar({
 
   // Transform appointments to calendar events
   const events = useMemo<CalendarEvent[]>(() => {
-    console.log('📅 AppointmentCalendar: Transforming appointments to events', {
-      appointmentsCount: appointments.length,
-      appointments: appointments.map(apt => ({
-        date: apt.appointment_date,
-        time: apt.appointment_time,
-        customer: `${apt.customer.first_name} ${apt.customer.last_name}`,
-        status: apt.status
-      }))
-    })
-
-    const events = appointments.map((apt) => {
-      // Parse date - handle both ISO format and YYYY-MM-DD format
-      const dateStr = apt.appointment_date
-      const timeStr = apt.appointment_time
-
-      console.log('🔍 Parsing appointment:', {
-        dateStr,
-        timeStr,
-        dateType: typeof dateStr,
-        timeType: typeof timeStr,
-        combined: `${dateStr}T${timeStr}`
-      })
-
-      // Use moment for reliable date parsing
-      const startTime = moment(`${dateStr} ${timeStr}`, 'YYYY-MM-DD HH:mm:ss').toDate()
+    return appointments.map((apt) => {
+      // Use moment for reliable date parsing from PostgreSQL
+      const startTime = moment(`${apt.appointment_date} ${apt.appointment_time}`, 'YYYY-MM-DD HH:mm:ss').toDate()
       const endTime = new Date(startTime.getTime() + apt.duration * 60000)
-
-      console.log('Event created:', {
-        title: `${apt.customer.first_name} ${apt.customer.last_name} · ${apt.service.name}`,
-        start: startTime,
-        end: endTime,
-        isValid: !isNaN(startTime.getTime()),
-        startISO: startTime.toISOString(),
-        endISO: endTime.toISOString()
-      })
 
       return {
         title: `${apt.customer.first_name} ${apt.customer.last_name} · ${apt.service.name}`,
@@ -75,9 +44,6 @@ export default function AppointmentCalendar({
         status: apt.status,
       }
     })
-
-    console.log('✨ Total events created:', events.length)
-    return events
   }, [appointments])
 
   // Handle event selection

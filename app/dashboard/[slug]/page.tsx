@@ -42,21 +42,14 @@ export default function DashboardPage() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        console.log('🔐 Starting auth check...')
-        const token = localStorage.getItem('auth_token')
-        console.log('🔑 Auth token exists:', !!token)
-
         const auth = await verifyAuth()
-        console.log('✅ Auth verified:', auth)
 
         if (!auth.authenticated) {
-          console.log('❌ Not authenticated, redirecting to signin')
           router.push('/signin')
           return
         }
 
         if (auth.slug !== slug) {
-          console.log('❌ Slug mismatch, redirecting to correct dashboard')
           router.push(`/dashboard/${auth.slug}`)
           return
         }
@@ -64,7 +57,7 @@ export default function DashboardPage() {
         setAuthenticated(true)
         await fetchDashboard()
       } catch (err: any) {
-        console.error('❌ Auth check failed:', err)
+        console.error('Auth check failed:', err)
         router.push('/signin')
       } finally {
         setLoading(false)
@@ -134,7 +127,6 @@ export default function DashboardPage() {
       let startDate, endDate
 
       // Calculate date range based on calendar view
-      // TEMPORARY: Expand range to ensure we catch all appointments
       if (calendarView === 'week') {
         // Use ISO week (Monday start) and expand by 1 day on each side
         const weekStart = moment(currentDate).startOf('isoWeek').subtract(1, 'day')
@@ -155,45 +147,22 @@ export default function DashboardPage() {
       if (startDate) params.append('start_date', startDate)
       if (endDate) params.append('end_date', endDate)
 
-      console.log('🔍 Fetching calendar appointments:', {
-        view: calendarView,
-        startDate,
-        endDate,
-        currentDate: currentDate.toISOString().split('T')[0],
-        today: moment().format('YYYY-MM-DD')
-      })
-
-      const url = `/api/dashboard/${slug}/appointments?${params.toString()}`
-      console.log('📡 Request URL:', url)
-
-      const response = await fetch(url, {
-        credentials: 'include',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('auth_token') || ''}`,
-        },
-      })
-
-      console.log('📥 Response status:', response.status, response.statusText)
+      const response = await fetch(
+        `/api/dashboard/${slug}/appointments?${params.toString()}`,
+        {
+          credentials: 'include',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('auth_token') || ''}`,
+          },
+        }
+      )
 
       if (response.ok) {
         const data = await response.json()
-        console.log('✅ Calendar appointments received:', {
-          count: data.appointments.length,
-          appointments: data.appointments.map((apt: any) => ({
-            id: apt.id,
-            date: apt.appointment_date,
-            time: apt.appointment_time,
-            customer: `${apt.customer.first_name} ${apt.customer.last_name}`,
-            status: apt.status
-          }))
-        })
         setAppointments(data.appointments || [])
-      } else {
-        const errorText = await response.text()
-        console.error('❌ Failed to fetch appointments:', response.status, response.statusText, errorText)
       }
     } catch (err) {
-      console.error('❌ Network error fetching calendar appointments:', err)
+      console.error('Failed to fetch calendar appointments:', err)
     }
   }
 
