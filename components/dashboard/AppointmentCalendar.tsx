@@ -31,9 +31,26 @@ export default function AppointmentCalendar({
 
   // Transform appointments to calendar events
   const events = useMemo<CalendarEvent[]>(() => {
-    return appointments.map((apt) => {
+    console.log('📅 AppointmentCalendar: Transforming appointments to events', {
+      appointmentsCount: appointments.length,
+      appointments: appointments.map(apt => ({
+        date: apt.appointment_date,
+        time: apt.appointment_time,
+        customer: `${apt.customer.first_name} ${apt.customer.last_name}`,
+        status: apt.status
+      }))
+    })
+
+    const events = appointments.map((apt) => {
       const startTime = new Date(`${apt.appointment_date}T${apt.appointment_time}`)
       const endTime = new Date(startTime.getTime() + apt.duration * 60000)
+
+      console.log('Event created:', {
+        title: `${apt.customer.first_name} ${apt.customer.last_name} · ${apt.service.name}`,
+        start: startTime,
+        end: endTime,
+        isValid: !isNaN(startTime.getTime())
+      })
 
       return {
         title: `${apt.customer.first_name} ${apt.customer.last_name} · ${apt.service.name}`,
@@ -43,6 +60,9 @@ export default function AppointmentCalendar({
         status: apt.status,
       }
     })
+
+    console.log('✨ Total events created:', events.length)
+    return events
   }, [appointments])
 
   // Handle event selection

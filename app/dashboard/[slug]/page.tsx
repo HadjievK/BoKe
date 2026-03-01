@@ -146,6 +146,13 @@ export default function DashboardPage() {
       if (startDate) params.append('start_date', startDate)
       if (endDate) params.append('end_date', endDate)
 
+      console.log('🔍 Fetching calendar appointments:', {
+        view: calendarView,
+        startDate,
+        endDate,
+        currentDate: currentDate.toISOString().split('T')[0]
+      })
+
       const response = await fetch(
         `/api/dashboard/${slug}/appointments?${params.toString()}`,
         {
@@ -158,7 +165,10 @@ export default function DashboardPage() {
 
       if (response.ok) {
         const data = await response.json()
+        console.log('✅ Calendar appointments received:', data.appointments.length, data.appointments)
         setAppointments(data.appointments || [])
+      } else {
+        console.error('❌ Failed to fetch appointments:', response.status, response.statusText)
       }
     } catch (err) {
       console.error('Failed to fetch calendar appointments:', err)
