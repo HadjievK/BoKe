@@ -117,10 +117,23 @@ export default function Home() {
     }
   }
 
-  if (!showOnboarding) {
-    return (
-      <MapProvider>
-        <div className="min-h-screen bg-white" style={{ fontFamily: "'DM Sans', -apple-system, sans-serif" }}>
+  const removeService = (index: number) => {
+    if (services.length <= 1) {
+      setError('You must have at least one service')
+      return
+    }
+    setServices(services.filter((_, i) => i !== index))
+    setError('') // Clear error when successfully removing
+  }
+
+  const addService = () => {
+    setServices([...services, { name: '', duration: 30, price: 0, icon: '✂️' }])
+  }
+
+  return (
+    <MapProvider>
+      {!showOnboarding ? (
+      <div className="min-h-screen bg-white" style={{ fontFamily: "'DM Sans', -apple-system, sans-serif" }}>
         {/* Navbar */}
         <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200">
           <div className="container mx-auto px-6 h-16 flex items-center justify-between max-w-6xl">
@@ -307,13 +320,8 @@ export default function Home() {
           </div>
         </footer>
       </div>
-    )
-  }
-
-  // Onboarding Form
-  return (
-    <MapProvider>
-    <div className="min-h-screen bg-gray-50 py-20" style={{ fontFamily: "'DM Sans', -apple-system, sans-serif" }}>
+      ) : (
+      <div className="min-h-screen bg-gray-50 py-20" style={{ fontFamily: "'DM Sans', -apple-system, sans-serif" }}>
       <div className="container mx-auto px-6 max-w-2xl">
         <div className="mb-8">
           <button
@@ -501,6 +509,7 @@ export default function Home() {
         </div>
       </div>
     </div>
+      )}
     </MapProvider>
   )
 }
@@ -552,7 +561,4 @@ const DashboardMockup = () => (
       ))}
     </div>
   </div>
-        </div>
-      </MapProvider>
-    )
-  }
+)
