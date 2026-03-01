@@ -49,11 +49,13 @@ export default function AppointmentCalendar({
       console.log('🔍 Parsing appointment:', {
         dateStr,
         timeStr,
+        dateType: typeof dateStr,
+        timeType: typeof timeStr,
         combined: `${dateStr}T${timeStr}`
       })
 
-      // Create start time using proper date parsing
-      const startTime = new Date(`${dateStr}T${timeStr}`)
+      // Use moment for reliable date parsing
+      const startTime = moment(`${dateStr} ${timeStr}`, 'YYYY-MM-DD HH:mm:ss').toDate()
       const endTime = new Date(startTime.getTime() + apt.duration * 60000)
 
       console.log('Event created:', {
