@@ -42,14 +42,27 @@ export default function AppointmentCalendar({
     })
 
     const events = appointments.map((apt) => {
-      const startTime = new Date(`${apt.appointment_date}T${apt.appointment_time}`)
+      // Parse date - handle both ISO format and YYYY-MM-DD format
+      const dateStr = apt.appointment_date
+      const timeStr = apt.appointment_time
+
+      console.log('🔍 Parsing appointment:', {
+        dateStr,
+        timeStr,
+        combined: `${dateStr}T${timeStr}`
+      })
+
+      // Create start time using proper date parsing
+      const startTime = new Date(`${dateStr}T${timeStr}`)
       const endTime = new Date(startTime.getTime() + apt.duration * 60000)
 
       console.log('Event created:', {
         title: `${apt.customer.first_name} ${apt.customer.last_name} · ${apt.service.name}`,
         start: startTime,
         end: endTime,
-        isValid: !isNaN(startTime.getTime())
+        isValid: !isNaN(startTime.getTime()),
+        startISO: startTime.toISOString(),
+        endISO: endTime.toISOString()
       })
 
       return {
