@@ -32,7 +32,7 @@ export async function GET(
 
     // Get provider details
     const providerResult = await pool.query(
-      'SELECT id, slug, name, business_name FROM service_providers WHERE id = $1',
+      'SELECT id, slug, name, business_name, location, calendar_start_time, calendar_end_time, slot_duration, buffer_time, working_days FROM service_providers WHERE id = $1',
       [providerId]
     );
 

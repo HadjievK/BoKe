@@ -83,7 +83,16 @@ export async function PATCH(
   try {
     const { slug } = await params;
     const body = await request.json();
-    const { location, latitude, longitude } = body;
+    const {
+      location,
+      latitude,
+      longitude,
+      calendar_start_time,
+      calendar_end_time,
+      slot_duration,
+      buffer_time,
+      working_days
+    } = body;
 
     // Authenticate using JWT token
     const auth = authenticateRequest(request);
@@ -128,6 +137,36 @@ export async function PATCH(
       paramIndex++;
     }
 
+    if (calendar_start_time !== undefined) {
+      updateFields.push(`calendar_start_time = $${paramIndex}`);
+      updateValues.push(calendar_start_time);
+      paramIndex++;
+    }
+
+    if (calendar_end_time !== undefined) {
+      updateFields.push(`calendar_end_time = $${paramIndex}`);
+      updateValues.push(calendar_end_time);
+      paramIndex++;
+    }
+
+    if (slot_duration !== undefined) {
+      updateFields.push(`slot_duration = $${paramIndex}`);
+      updateValues.push(slot_duration);
+      paramIndex++;
+    }
+
+    if (buffer_time !== undefined) {
+      updateFields.push(`buffer_time = $${paramIndex}`);
+      updateValues.push(buffer_time);
+      paramIndex++;
+    }
+
+    if (working_days !== undefined) {
+      updateFields.push(`working_days = $${paramIndex}`);
+      updateValues.push(JSON.stringify(working_days));
+      paramIndex++;
+    }
+
     if (updateFields.length === 0) {
       return NextResponse.json(
         { detail: 'No updates provided' },
@@ -142,7 +181,8 @@ export async function PATCH(
       UPDATE service_providers
       SET ${updateFields.join(', ')}
       WHERE id = $${paramIndex}
-      RETURNING id, slug, name, business_name, location, latitude, longitude
+      RETURNING id, slug, name, business_name, location, latitude, longitude,
+                calendar_start_time, calendar_end_time, slot_duration, buffer_time, working_days
     `;
 
     const result = await pool.query(query, updateValues);

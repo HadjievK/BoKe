@@ -116,8 +116,27 @@ export default function DashboardPage() {
   // Initialize settings from dashboardData when modal opens
   useEffect(() => {
     if (showSettings && dashboardData) {
-      setLocation(dashboardData.provider.location || '')
-      // Services would need to be fetched separately if needed
+      const provider = dashboardData.provider
+      setLocation(provider.location || '')
+
+      // Initialize calendar settings
+      if (provider.calendar_start_time) {
+        const timeStr = provider.calendar_start_time.slice(0, 5) // Extract HH:MM from HH:MM:SS
+        setCalendarStartTime(timeStr)
+      }
+      if (provider.calendar_end_time) {
+        const timeStr = provider.calendar_end_time.slice(0, 5)
+        setCalendarEndTime(timeStr)
+      }
+      if (provider.slot_duration) {
+        setSlotDuration(provider.slot_duration.toString())
+      }
+      if (provider.buffer_time !== undefined) {
+        setBufferTime(provider.buffer_time.toString())
+      }
+      if (provider.working_days) {
+        setWorkingDays(provider.working_days)
+      }
     }
   }, [showSettings, dashboardData])
 
@@ -222,20 +241,37 @@ export default function DashboardPage() {
     setSettingsSaving(true)
 
     try {
-      // Update location
-      await updateProviderProfile(slug, { location })
+      // Prepare updates object
+      const updates: any = {}
 
-      // Update password if provided
-      if (currentPassword && newPassword) {
-        if (newPassword !== confirmPassword) {
-          throw new Error('New passwords do not match')
+      // Account settings
+      if (settingsTab === 'account' || !settingsTab) {
+        updates.location = location
+
+        // Update password if provided
+        if (currentPassword && newPassword) {
+          if (newPassword !== confirmPassword) {
+            throw new Error('New passwords do not match')
+          }
+          await updateProviderPassword(slug, currentPassword, newPassword)
         }
-
-        await updateProviderPassword(slug, currentPassword, newPassword)
       }
+
+      // Calendar settings
+      if (settingsTab === 'calendar') {
+        updates.calendar_start_time = calendarStartTime + ':00' // Add seconds
+        updates.calendar_end_time = calendarEndTime + ':00'
+        updates.slot_duration = parseInt(slotDuration)
+        updates.buffer_time = parseInt(bufferTime)
+        updates.working_days = workingDays
+      }
+
+      // Update profile with all changes
+      await updateProviderProfile(slug, updates)
 
       alert('Settings saved successfully!')
       setShowSettings(false)
+      setSettingsTab('account')
       setCurrentPassword('')
       setNewPassword('')
       setConfirmPassword('')

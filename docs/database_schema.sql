@@ -16,6 +16,13 @@ CREATE TABLE IF NOT EXISTS service_providers (
   services JSONB DEFAULT '[]'::jsonb,
   avatar_url TEXT,
 
+  -- Calendar settings
+  calendar_start_time TIME DEFAULT '09:00:00',
+  calendar_end_time TIME DEFAULT '17:00:00',
+  slot_duration INTEGER DEFAULT 30,
+  buffer_time INTEGER DEFAULT 0,
+  working_days JSONB DEFAULT '{"monday": true, "tuesday": true, "wednesday": true, "thursday": true, "friday": true, "saturday": false, "sunday": false}'::jsonb,
+
   -- OAuth fields
   oauth_provider VARCHAR(50),  -- 'google', 'facebook', etc. (NULL for email/password)
   oauth_provider_id VARCHAR(255),  -- Google ID, Facebook ID, etc.

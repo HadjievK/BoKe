@@ -275,7 +275,22 @@ export async function updateAppointmentStatus(
 
 export async function updateProviderProfile(
   slug: string,
-  updates: { location?: string }
+  updates: {
+    location?: string
+    calendar_start_time?: string
+    calendar_end_time?: string
+    slot_duration?: number
+    buffer_time?: number
+    working_days?: {
+      monday: boolean
+      tuesday: boolean
+      wednesday: boolean
+      thursday: boolean
+      friday: boolean
+      saturday: boolean
+      sunday: boolean
+    }
+  }
 ): Promise<void> {
   const res = await fetch(`${API_URL}/api/provider/${slug}`, {
     method: 'PATCH',

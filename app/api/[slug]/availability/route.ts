@@ -18,9 +18,11 @@ export async function GET(
       );
     }
 
-    // Verify provider exists
+    // Verify provider exists and get calendar settings
     const providerResult = await pool.query(
-      'SELECT id, services FROM service_providers WHERE slug = $1',
+      `SELECT id, services, calendar_start_time, calendar_end_time,
+              slot_duration, buffer_time, working_days
+       FROM service_providers WHERE slug = $1`,
       [slug]
     );
 
@@ -33,6 +35,28 @@ export async function GET(
 
     const provider = providerResult.rows[0];
     const providerId = provider.id;
+
+    // Get calendar settings with defaults
+    const calendarStartTime = provider.calendar_start_time || '09:00:00';
+    const calendarEndTime = provider.calendar_end_time || '17:00:00';
+    const slotDuration = provider.slot_duration || 30;
+    const bufferTime = provider.buffer_time || 0;
+    const workingDays = provider.working_days || {
+      monday: true, tuesday: true, wednesday: true, thursday: true, friday: true,
+      saturday: false, sunday: false
+    };
+
+    // Check if the requested date is a working day
+    const requestedDate = new Date(date + 'T00:00:00');
+    const dayName = requestedDate.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+
+    if (!workingDays[dayName]) {
+      return NextResponse.json({
+        date,
+        slots: [],
+        message: 'Provider is not available on this day'
+      });
+    }
 
     // Get existing appointments for the date
     const appointmentsResult = await pool.query(
@@ -52,34 +76,42 @@ export async function GET(
       const startMinute = parseInt(timeParts[1]);
       const startMinutes = startHour * 60 + startMinute;
 
-      // Calculate end time based on duration
-      const endMinutes = startMinutes + (row.duration || 30);
+      // Calculate end time based on duration + buffer time
+      const endMinutes = startMinutes + (row.duration || 30) + bufferTime;
 
       return { startMinutes, endMinutes };
     });
 
-    // Generate time slots (9 AM to 6 PM, 30-minute intervals)
+    // Parse calendar start and end times
+    const [startHourStr, startMinuteStr] = calendarStartTime.split(':');
+    const [endHourStr, endMinuteStr] = calendarEndTime.split(':');
+    const startHour = parseInt(startHourStr);
+    const startMinute = parseInt(startMinuteStr);
+    const endHour = parseInt(endHourStr);
+    const endMinute = parseInt(endMinuteStr);
+
+    const startTotalMinutes = startHour * 60 + startMinute;
+    const endTotalMinutes = endHour * 60 + endMinute;
+
+    // Generate time slots based on provider's settings
     const slots = [];
-    const startHour = 9;
-    const endHour = 18;
 
-    for (let hour = startHour; hour < endHour; hour++) {
-      for (let minute = 0; minute < 60; minute += 30) {
-        const timeStr = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
-        const slotMinutes = hour * 60 + minute;
+    for (let currentMinutes = startTotalMinutes; currentMinutes < endTotalMinutes; currentMinutes += slotDuration) {
+      const hour = Math.floor(currentMinutes / 60);
+      const minute = currentMinutes % 60;
+      const timeStr = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
 
-        // Check if this slot conflicts with any booked appointment
-        // A slot is blocked if it overlaps with any existing appointment
-        const isBlocked = bookedTimeRanges.some(range => {
-          // Slot is blocked if it starts during an existing appointment
-          return slotMinutes >= range.startMinutes && slotMinutes < range.endMinutes;
-        });
+      // Check if this slot conflicts with any booked appointment
+      // A slot is blocked if it overlaps with any existing appointment (including buffer)
+      const isBlocked = bookedTimeRanges.some(range => {
+        // Slot is blocked if it starts during an existing appointment or buffer period
+        return currentMinutes >= range.startMinutes && currentMinutes < range.endMinutes;
+      });
 
-        slots.push({
-          time: timeStr,
-          available: !isBlocked
-        });
-      }
+      slots.push({
+        time: timeStr,
+        available: !isBlocked
+      });
     }
 
     return NextResponse.json({
