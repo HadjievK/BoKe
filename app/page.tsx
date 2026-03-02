@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge'
 import { fadeInUp, staggerContainer, staggerItem, scaleIn } from '@/lib/animations'
 import { ServiceProfessionals } from '@/components/ServiceProfessionals'
 import { BookingDemo } from '@/components/BookingDemo'
+import { Features } from '@/components/Features'
 
 const SERVICE_PILLS = [
   { emoji: '✂️', label: 'Barbers' },
@@ -360,6 +361,9 @@ export default function Home() {
             </motion.div>
           </div>
         </section>
+
+        {/* Features Section */}
+        <Features />
 
         {/* How It Works */}
         <section id="how-it-works" className="py-24 bg-white">
