@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { fadeInUp, staggerContainer, staggerItem, scaleIn } from '@/lib/animations'
 import { ServiceProfessionals } from '@/components/ServiceProfessionals'
+import { BookingDemo } from '@/components/BookingDemo'
 
 const SERVICE_PILLS = [
   { emoji: '✂️', label: 'Barbers' },
@@ -321,6 +322,41 @@ export default function Home() {
                   <p className="text-sm text-gray-600 mt-1">{stat.label}</p>
                 </motion.div>
               ))}
+            </motion.div>
+          </div>
+        </section>
+
+        {/* Booking Demo Section */}
+        <section className="py-24 bg-white">
+          <div className="container mx-auto px-6 max-w-6xl">
+            <motion.div
+              className="text-center mb-16"
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-100px" }}
+              variants={fadeInUp}
+            >
+              <span className="text-sm font-semibold text-indigo-600 tracking-wider uppercase mb-4 block">
+                See it in action
+              </span>
+              <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-4">
+                From booking to{" "}
+                <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                  confirmation
+                </span>
+              </h2>
+              <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+                Watch how seamlessly your clients book appointments while you stay in control
+              </p>
+            </motion.div>
+
+            <motion.div
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-100px" }}
+              variants={scaleIn}
+            >
+              <BookingDemo />
             </motion.div>
           </div>
         </section>
