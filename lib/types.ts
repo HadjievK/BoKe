@@ -19,6 +19,19 @@ export interface Provider {
   bio?: string
   avatar_url?: string
   theme_config: ThemeConfig
+  calendar_start_time?: string
+  calendar_end_time?: string
+  slot_duration?: number
+  buffer_time?: number
+  working_days?: {
+    monday: boolean
+    tuesday: boolean
+    wednesday: boolean
+    thursday: boolean
+    friday: boolean
+    saturday: boolean
+    sunday: boolean
+  }
   created_at: string
 }
 
@@ -141,6 +154,19 @@ export interface DashboardData {
     name: string
     business_name: string
     location?: string
+    calendar_start_time?: string
+    calendar_end_time?: string
+    slot_duration?: number
+    buffer_time?: number
+    working_days?: {
+      monday: boolean
+      tuesday: boolean
+      wednesday: boolean
+      thursday: boolean
+      friday: boolean
+      saturday: boolean
+      sunday: boolean
+    }
   }
   stats: DashboardStats
   appointments: AppointmentWithDetails[]
