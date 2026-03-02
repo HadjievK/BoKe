@@ -38,6 +38,9 @@ export default function DashboardPage() {
   const [settingsError, setSettingsError] = useState('')
   const [settingsSaving, setSettingsSaving] = useState(false)
 
+  // Share modal state
+  const [showShare, setShowShare] = useState(false)
+
   // Move useMemo to top level before any early returns
   const todayDate = useMemo(() => formatDateShort(new Date()), [])
 
@@ -273,6 +276,12 @@ export default function DashboardPage() {
           <div className="flex items-center gap-4">
             <ThemeToggle />
             <button
+              onClick={() => setShowShare(true)}
+              className="px-4 py-2 hover:bg-gray-100 rounded-lg transition text-sm font-medium"
+            >
+              🔗 Share
+            </button>
+            <button
               onClick={() => setShowSettings(true)}
               className="px-4 py-2 hover:bg-gray-100 rounded-lg transition text-sm font-medium"
             >
@@ -396,6 +405,128 @@ export default function DashboardPage() {
         onCancel={handleCancelAppointment}
         onComplete={handleCompleteAppointment}
       />
+
+      {/* Share Modal */}
+      {showShare && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-2xl w-full">
+            <div className="sticky top-0 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-t-2xl px-6 py-4 flex items-center justify-between">
+              <h2 className="text-2xl font-bold">Share Your Booking Page</h2>
+              <button
+                onClick={() => setShowShare(false)}
+                className="text-2xl hover:bg-white/20 rounded-lg w-8 h-8 flex items-center justify-center transition"
+              >
+                ×
+              </button>
+            </div>
+            <div className="p-6 space-y-6">
+              {/* Preview Card */}
+              <div className="bg-gradient-to-r from-purple-50 to-purple-100 rounded-xl p-6 border border-purple-200">
+                <div className="text-sm font-medium text-purple-900 mb-3">
+                  Your Public Booking Page
+                </div>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="flex-1 bg-white px-4 py-3 rounded-lg font-mono text-sm text-gray-700 break-all border border-purple-200">
+                    {typeof window !== 'undefined' ? window.location.origin : ''}/{slug}
+                  </div>
+                </div>
+                <p className="text-sm text-purple-900/70">
+                  Share this link with your customers so they can book appointments with you
+                </p>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="grid grid-cols-2 gap-4">
+                <button
+                  onClick={() => {
+                    const url = `${window.location.origin}/${slug}`
+                    navigator.clipboard.writeText(url)
+                    alert('Link copied to clipboard! 📋')
+                  }}
+                  className="flex items-center justify-center gap-2 px-6 py-4 bg-purple-600 text-white rounded-xl font-semibold hover:bg-purple-700 transition shadow-lg shadow-purple-600/25"
+                >
+                  <span className="text-xl">📋</span>
+                  Copy Link
+                </button>
+                <a
+                  href={`/${slug}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 px-6 py-4 bg-white text-purple-700 border-2 border-purple-600 rounded-xl font-semibold hover:bg-purple-50 transition"
+                >
+                  <span className="text-xl">👁️</span>
+                  Preview
+                </a>
+              </div>
+
+              {/* QR Code Placeholder */}
+              <div className="bg-gray-50 rounded-xl p-6 border border-gray-200 text-center">
+                <div className="text-sm font-medium text-gray-700 mb-3">
+                  Share via QR Code
+                </div>
+                <div className="w-48 h-48 mx-auto bg-white rounded-lg border-2 border-gray-300 flex items-center justify-center">
+                  <div className="text-gray-400 text-sm">
+                    QR Code<br />Coming Soon
+                  </div>
+                </div>
+                <p className="text-xs text-gray-600 mt-3">
+                  Customers can scan this QR code to book instantly
+                </p>
+              </div>
+
+              {/* Social Share Options */}
+              <div>
+                <div className="text-sm font-medium text-gray-700 mb-3">
+                  Share on Social Media
+                </div>
+                <div className="grid grid-cols-3 gap-3">
+                  <button
+                    onClick={() => {
+                      const url = `${window.location.origin}/${slug}`
+                      const text = `Book an appointment with ${provider.name}`
+                      window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank')
+                    }}
+                    className="flex items-center justify-center gap-2 px-4 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
+                  >
+                    <span className="text-xl">𝕏</span>
+                    Twitter
+                  </button>
+                  <button
+                    onClick={() => {
+                      const url = `${window.location.origin}/${slug}`
+                      window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank')
+                    }}
+                    className="flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                  >
+                    <span className="text-xl">f</span>
+                    Facebook
+                  </button>
+                  <button
+                    onClick={() => {
+                      const url = `${window.location.origin}/${slug}`
+                      const text = `Book an appointment with ${provider.name}`
+                      window.open(`https://wa.me/?text=${encodeURIComponent(text + ' ' + url)}`, '_blank')
+                    }}
+                    className="flex items-center justify-center gap-2 px-4 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
+                  >
+                    <span className="text-xl">💬</span>
+                    WhatsApp
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="border-t border-gray-200 px-6 py-4 bg-gray-50 rounded-b-2xl flex items-center justify-end">
+              <button
+                onClick={() => setShowShare(false)}
+                className="px-6 py-2 text-gray-700 hover:bg-gray-200 rounded-lg transition font-medium"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Settings Modal */}
       {showSettings && (
