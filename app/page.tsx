@@ -12,6 +12,7 @@ import { fadeInUp, staggerContainer, staggerItem, scaleIn } from '@/lib/animatio
 import { ServiceProfessionals } from '@/components/ServiceProfessionals'
 import { BookingDemo } from '@/components/BookingDemo'
 import { Features } from '@/components/Features'
+import { HowItWorks } from '@/components/HowItWorks'
 
 const SERVICE_PILLS = [
   { emoji: '✂️', label: 'Barbers' },
@@ -366,77 +367,7 @@ export default function Home() {
         <Features />
 
         {/* How It Works */}
-        <section id="how-it-works" className="py-24 bg-white">
-          <div className="container mx-auto px-6 max-w-6xl">
-            <motion.div
-              className="text-center mb-16"
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, margin: "-100px" }}
-              variants={fadeInUp}
-            >
-              <span className="text-sm font-semibold text-indigo-600 tracking-wider uppercase">
-                How it works
-              </span>
-              <h2 className="text-4xl sm:text-5xl font-bold mt-4 text-gray-900">
-                Up and running in{" "}
-                <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                  three steps
-                </span>
-              </h2>
-            </motion.div>
-
-            <motion.div
-              className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto"
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, margin: "-100px" }}
-              variants={staggerContainer}
-            >
-              {[
-                {
-                  number: "01",
-                  icon: Calendar,
-                  title: "Create your profile",
-                  description: "Tell us your name, business type, services, and location. Takes under 5 minutes — no technical knowledge needed.",
-                },
-                {
-                  number: "02",
-                  icon: Share2,
-                  title: "Share your link",
-                  description: "You get a personal booking page instantly. Share it on Instagram, WhatsApp, or anywhere your clients are.",
-                },
-                {
-                  number: "03",
-                  icon: Zap,
-                  title: "Clients book & you manage",
-                  description: "Clients pick their slot. You see everything in your dashboard. Reminders sent automatically. You focus on your craft.",
-                },
-              ].map((step, index) => {
-                const Icon = step.icon
-                return (
-                  <motion.div
-                    key={step.number}
-                    className="relative rounded-2xl border border-gray-200 bg-white p-8 hover:shadow-xl hover:border-indigo-200 transition-all group"
-                    variants={staggerItem}
-                    whileHover={{ y: -5, scale: 1.02 }}
-                  >
-                    <span className="text-xs font-bold text-indigo-600 tracking-widest">
-                      {step.number}
-                    </span>
-                    <div className="my-4 w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center group-hover:scale-110 transition-transform">
-                      <Icon className="w-7 h-7 text-white" />
-                    </div>
-                    <h3 className="text-xl font-bold mb-3 text-gray-900">{step.title}</h3>
-                    <p className="text-sm text-gray-600 leading-relaxed">
-                      {step.description}
-                    </p>
-                  </motion.div>
-                )
-              })}
-            </motion.div>
-          </div>
-        </section>
+        <HowItWorks />
 
         {/* Service Professionals Section */}
         <ServiceProfessionals />
