@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { AppointmentWithDetails } from '@/lib/types'
+import { AppointmentWithDetails, AppointmentStatus } from '@/lib/types'
 import { format } from 'date-fns'
 
 interface AppointmentDetailsModalProps {
@@ -44,9 +44,9 @@ export default function AppointmentDetailsModal({
 
   const getStatusBadge = (status: string) => {
     const styles = {
-      confirmed: 'bg-purple-100 text-purple-800 border-purple-200',
-      completed: 'bg-green-100 text-green-800 border-green-200',
-      cancelled: 'bg-gray-100 text-gray-800 border-gray-200',
+      [AppointmentStatus.CONFIRMED]: 'bg-purple-100 text-purple-800 border-purple-200',
+      [AppointmentStatus.COMPLETED]: 'bg-green-100 text-green-800 border-green-200',
+      [AppointmentStatus.CANCELLED]: 'bg-gray-100 text-gray-800 border-gray-200',
     }
 
     return (
@@ -237,7 +237,7 @@ export default function AppointmentDetailsModal({
           {/* Actions */}
           <div className="border-t border-gray-200 px-6 py-4 bg-gray-50 flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              {appointment.status === 'confirmed' && (
+              {appointment.status === AppointmentStatus.CONFIRMED && (
                 <>
                   <button
                     onClick={handleCancel}
@@ -256,7 +256,7 @@ export default function AppointmentDetailsModal({
               )}
             </div>
             <div className="flex items-center gap-3">
-              {appointment.status === 'confirmed' && (
+              {appointment.status === AppointmentStatus.CONFIRMED && (
                 <button
                   onClick={handleComplete}
                   className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
