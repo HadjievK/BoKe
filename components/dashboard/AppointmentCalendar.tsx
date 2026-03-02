@@ -31,19 +31,37 @@ export default function AppointmentCalendar({
 
   // Transform appointments to calendar events
   const events = useMemo<CalendarEvent[]>(() => {
-    return appointments.map((apt) => {
+    const validEvents: CalendarEvent[] = []
+
+    for (const apt of appointments) {
+      // Skip appointments with invalid date/time
+      if (!apt.appointment_date || !apt.appointment_time) {
+        console.warn('Missing appointment date/time:', apt)
+        continue
+      }
+
       // Use moment for reliable date parsing from PostgreSQL
-      const startTime = moment(`${apt.appointment_date} ${apt.appointment_time}`, 'YYYY-MM-DD HH:mm:ss').toDate()
+      const momentDate = moment(`${apt.appointment_date} ${apt.appointment_time}`, 'YYYY-MM-DD HH:mm:ss')
+
+      // Validate the date is valid
+      if (!momentDate.isValid()) {
+        console.warn('Invalid appointment date/time:', apt)
+        continue
+      }
+
+      const startTime = momentDate.toDate()
       const endTime = new Date(startTime.getTime() + apt.duration * 60000)
 
-      return {
+      validEvents.push({
         title: `${apt.customer.first_name} ${apt.customer.last_name} · ${apt.service.name}`,
         start: startTime,
         end: endTime,
         resource: apt,
         status: apt.status,
-      }
-    })
+      })
+    }
+
+    return validEvents
   }, [appointments])
 
   // Handle event selection
