@@ -4,7 +4,6 @@ import React, { useMemo, useState, useCallback } from 'react'
 import { Calendar, momentLocalizer, View, Event } from 'react-big-calendar'
 import moment from 'moment'
 import { AppointmentWithDetails } from '@/lib/types'
-import AppointmentPreview from './AppointmentPreview'
 import '@/components/dashboard/calendar-styles.css'
 
 const localizer = momentLocalizer(moment)
@@ -29,8 +28,6 @@ export default function AppointmentCalendar({
 }: AppointmentCalendarProps) {
   const [currentView, setCurrentView] = useState<View>('week')
   const [currentDate, setCurrentDate] = useState(new Date())
-  const [previewAppointment, setPreviewAppointment] = useState<AppointmentWithDetails | null>(null)
-  const [previewPosition, setPreviewPosition] = useState<{ x: number; y: number } | null>(null)
 
   // Transform appointments to calendar events
   const events = useMemo<CalendarEvent[]>(() => {
@@ -67,35 +64,13 @@ export default function AppointmentCalendar({
     return validEvents
   }, [appointments])
 
-  // Handle event selection - show preview at click position
+  // Handle event selection - directly open modal
   const handleSelectEvent = useCallback(
-    (event: CalendarEvent, e: React.SyntheticEvent<HTMLElement>) => {
-      const target = e.target as HTMLElement
-      const rect = target.getBoundingClientRect()
-
-      // Position preview near the clicked event
-      setPreviewPosition({
-        x: rect.left + rect.width / 2,
-        y: rect.top
-      })
-      setPreviewAppointment(event.resource)
+    (event: CalendarEvent) => {
+      onSelectAppointment(event.resource)
     },
-    []
+    [onSelectAppointment]
   )
-
-  // Close preview
-  const handleClosePreview = useCallback(() => {
-    setPreviewAppointment(null)
-    setPreviewPosition(null)
-  }, [])
-
-  // Open full details modal
-  const handleOpenDetails = useCallback(() => {
-    if (previewAppointment) {
-      onSelectAppointment(previewAppointment)
-      handleClosePreview()
-    }
-  }, [previewAppointment, onSelectAppointment, handleClosePreview])
 
   // Handle navigation
   const handleNavigate = useCallback(
@@ -174,14 +149,6 @@ export default function AppointmentCalendar({
           day: 'Day',
           showMore: (total) => `+${total} more`,
         }}
-      />
-
-      {/* Appointment Preview Popup */}
-      <AppointmentPreview
-        appointment={previewAppointment}
-        position={previewPosition}
-        onClose={handleClosePreview}
-        onOpenDetails={handleOpenDetails}
       />
     </div>
   )

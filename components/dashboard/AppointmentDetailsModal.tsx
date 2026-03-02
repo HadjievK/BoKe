@@ -235,29 +235,42 @@ export default function AppointmentDetailsModal({
           </div>
 
           {/* Actions */}
-          <div className="border-t border-gray-200 px-6 py-4 bg-gray-50 flex items-center justify-end gap-3">
-            {appointment.status === 'confirmed' && (
-              <>
-                <button
-                  onClick={handleCancel}
-                  className="px-4 py-2 border border-red-300 text-red-700 rounded-lg hover:bg-red-50 transition-colors font-medium"
-                >
-                  Cancel Appointment
-                </button>
+          <div className="border-t border-gray-200 px-6 py-4 bg-gray-50 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              {appointment.status === 'confirmed' && (
+                <>
+                  <button
+                    onClick={handleCancel}
+                    className="px-4 py-2 border border-red-300 text-red-700 rounded-lg hover:bg-red-50 transition-colors font-medium"
+                  >
+                    Cancel Appointment
+                  </button>
+                  <button
+                    disabled
+                    className="px-4 py-2 border border-gray-300 text-gray-400 rounded-lg cursor-not-allowed font-medium"
+                    title="Reject functionality coming soon"
+                  >
+                    Reject (Coming Soon)
+                  </button>
+                </>
+              )}
+            </div>
+            <div className="flex items-center gap-3">
+              {appointment.status === 'confirmed' && (
                 <button
                   onClick={handleComplete}
                   className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
                 >
                   Mark Complete
                 </button>
-              </>
-            )}
-            <button
-              onClick={onClose}
-              className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
-            >
-              Close
-            </button>
+              )}
+              <button
+                onClick={onClose}
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
       </div>
