@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
-import { query } from '@/lib/db';
+import pool from '@/lib/db';
 import { generateCustomerToken } from '@/lib/auth';
 import { CustomerSignInRequest, CustomerAuthResponse } from '@/lib/types';
 
@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Find customer by email
-    const result = await query(
+    const result = await pool.query(
       'SELECT id, email, password, first_name, last_name FROM customers WHERE email = $1',
       [email.toLowerCase()]
     );
@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Update last login timestamp
-    await query(
+    await pool.query(
       'UPDATE customers SET last_login_at = NOW() WHERE id = $1',
       [customer.id]
     );

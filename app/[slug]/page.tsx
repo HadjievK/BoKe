@@ -172,7 +172,7 @@ export default function ProviderProfilePage() {
 
         {/* My Bookings Link - Top Right */}
         <div className="absolute top-4 right-4 z-20">
-          <a
+          <Link
             href={`/${slug}/my-bookings`}
             className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white text-sm font-semibold rounded-full backdrop-blur-sm border border-white/20 transition flex items-center gap-2"
           >
@@ -180,7 +180,7 @@ export default function ProviderProfilePage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
             My Bookings
-          </a>
+          </Link>
         </div>
 
         {/* Hero Content */}

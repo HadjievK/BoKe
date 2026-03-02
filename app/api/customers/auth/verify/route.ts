@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authenticateCustomer } from '@/lib/auth';
-import { query } from '@/lib/db';
+import pool from '@/lib/db';
 
 export async function GET(request: NextRequest) {
   try {
@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Fetch customer details from database
-    const result = await query(
+    const result = await pool.query(
       'SELECT id, email, first_name, last_name FROM customers WHERE id = $1',
       [customerAuth.customerId]
     );

@@ -3,52 +3,11 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-
-interface Service {
-  id: string
-  name: string
-  duration: number
-  price: number
-  description?: string
-  icon?: string
-}
-
-interface Customer {
-  id: string
-  email: string
-  first_name: string
-  last_name: string
-  phone: string
-  created_at: string
-}
-
-interface Appointment {
-  id: string
-  appointment_date: string
-  appointment_time: string
-  duration: number
-  price: number
-  customer_notes?: string
-  status: 'confirmed' | 'cancelled' | 'completed'
-  created_at: string
-  service: Service
-  customer: Customer
-}
-
-interface Provider {
-  name: string
-  business_name: string | null
-  slug: string
-}
-
-interface BookingsData {
-  provider: Provider
-  appointments: Appointment[]
-}
+import { AppointmentWithDetails, AppointmentStatus, AppointmentStatusType, CustomerBookingsResponse } from '@/lib/types'
 
 export default function CustomerBookingsPage({ params }: { params: { slug: string } }) {
   const router = useRouter()
-  const [bookingsData, setBookingsData] = useState<BookingsData | null>(null)
+  const [bookingsData, setBookingsData] = useState<CustomerBookingsResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [cancellingId, setCancellingId] = useState<string | null>(null)
@@ -66,20 +25,7 @@ export default function CustomerBookingsPage({ params }: { params: { slug: strin
     }
 
     try {
-      // Verify token is valid
-      const verifyResponse = await fetch('/api/customers/auth/verify', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      })
-
-      if (!verifyResponse.ok) {
-        localStorage.removeItem('customer_token')
-        router.push(`/${params.slug}/signin`)
-        return
-      }
-
-      // Fetch bookings
+      // Fetch bookings (endpoint will authenticate)
       const bookingsResponse = await fetch(`/api/${params.slug}/my-bookings`, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -87,6 +33,12 @@ export default function CustomerBookingsPage({ params }: { params: { slug: strin
       })
 
       if (!bookingsResponse.ok) {
+        // If unauthorized, remove token and redirect
+        if (bookingsResponse.status === 401) {
+          localStorage.removeItem('customer_token')
+          router.push(`/${params.slug}/signin`)
+          return
+        }
         const data = await bookingsResponse.json()
         setError(data.error || 'Failed to fetch bookings')
         setLoading(false)
@@ -131,8 +83,16 @@ export default function CustomerBookingsPage({ params }: { params: { slug: strin
         return
       }
 
-      // Refresh bookings list
-      await checkAuthAndFetchBookings()
+      // Update state locally instead of refetching
+      setBookingsData(prev => {
+        if (!prev) return prev
+        return {
+          ...prev,
+          appointments: prev.appointments.map(apt =>
+            apt.id === appointmentId ? { ...apt, status: AppointmentStatus.CANCELLED } : apt
+          )
+        }
+      })
       setCancellingId(null)
       alert('Appointment cancelled successfully')
     } catch (err) {
@@ -158,13 +118,13 @@ export default function CustomerBookingsPage({ params }: { params: { slug: strin
     return `${hour12}:${minutes} ${ampm}`
   }
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: AppointmentStatusType) => {
     switch (status) {
-      case 'confirmed':
+      case AppointmentStatus.CONFIRMED:
         return 'bg-purple-100 text-purple-800'
-      case 'cancelled':
+      case AppointmentStatus.CANCELLED:
         return 'bg-gray-100 text-gray-800'
-      case 'completed':
+      case AppointmentStatus.COMPLETED:
         return 'bg-green-100 text-green-800'
       default:
         return 'bg-gray-100 text-gray-800'
@@ -295,7 +255,7 @@ export default function CustomerBookingsPage({ params }: { params: { slug: strin
                       </div>
                     </div>
                     <div className="flex flex-col gap-2">
-                      {appointment.status === 'confirmed' && (
+                      {appointment.status === AppointmentStatus.CONFIRMED && (
                         <button
                           onClick={() => handleCancelAppointment(appointment.id)}
                           disabled={cancellingId === appointment.id}

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
-import { query } from '@/lib/db';
+import pool from '@/lib/db';
 import { generateCustomerToken } from '@/lib/auth';
 import { CustomerSignUpRequest, CustomerAuthResponse } from '@/lib/types';
 
@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if customer already exists
-    const existingCustomer = await query(
+    const existingCustomer = await pool.query(
       'SELECT id FROM customers WHERE email = $1',
       [email.toLowerCase()]
     );
@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Insert new customer
-    const result = await query(
+    const result = await pool.query(
       `INSERT INTO customers (email, password, first_name, last_name, phone, email_verified)
        VALUES ($1, $2, $3, $4, $5, false)
        RETURNING id, email, first_name, last_name, created_at`,

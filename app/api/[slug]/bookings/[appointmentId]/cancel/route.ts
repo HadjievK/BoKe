@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authenticateCustomer } from '@/lib/auth';
-import { query } from '@/lib/db';
+import pool from '@/lib/db';
 
 export async function PATCH(
   request: NextRequest,
@@ -20,7 +20,7 @@ export async function PATCH(
     }
 
     // Get provider by slug
-    const providerResult = await query(
+    const providerResult = await pool.query(
       'SELECT id FROM service_providers WHERE slug = $1',
       [slug]
     );
@@ -35,7 +35,7 @@ export async function PATCH(
     const providerId = providerResult.rows[0].id;
 
     // Get appointment and verify it belongs to this customer
-    const appointmentResult = await query(
+    const appointmentResult = await pool.query(
       `SELECT
         a.id,
         a.customer_id,
@@ -84,7 +84,7 @@ export async function PATCH(
     }
 
     // Update appointment status to cancelled
-    const updateResult = await query(
+    const updateResult = await pool.query(
       `UPDATE appointments
        SET status = 'cancelled', updated_at = NOW()
        WHERE id = $1 AND customer_id = $2 AND status = 'confirmed'
@@ -100,7 +100,7 @@ export async function PATCH(
     }
 
     // Fetch complete appointment details with customer and service info
-    const detailsResult = await query(
+    const detailsResult = await pool.query(
       `SELECT
         a.id,
         a.provider_id,

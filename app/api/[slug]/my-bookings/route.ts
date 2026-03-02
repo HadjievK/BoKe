@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authenticateCustomer } from '@/lib/auth';
-import { query } from '@/lib/db';
+import pool from '@/lib/db';
 import { CustomerBookingsResponse } from '@/lib/types';
 
 export async function GET(
@@ -21,7 +21,7 @@ export async function GET(
     }
 
     // Get provider by slug
-    const providerResult = await query(
+    const providerResult = await pool.query(
       'SELECT id, name, business_name, slug FROM service_providers WHERE slug = $1',
       [slug]
     );
@@ -36,7 +36,7 @@ export async function GET(
     const provider = providerResult.rows[0];
 
     // Get all appointments for this customer with this provider
-    const appointmentsResult = await query(
+    const appointmentsResult = await pool.query(
       `SELECT
         a.id,
         a.provider_id,
