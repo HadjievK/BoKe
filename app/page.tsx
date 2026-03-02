@@ -15,6 +15,7 @@ import { Features } from '@/components/Features'
 import { HowItWorks } from '@/components/HowItWorks'
 import { CTA } from '@/components/CTA'
 import ThemeToggle from '@/components/ThemeToggle'
+import ReCAPTCHA from 'react-google-recaptcha'
 
 const SERVICE_CATEGORIES = [
   'Barbers',
@@ -54,12 +55,14 @@ export default function Home() {
   const [showOnboarding, setShowOnboarding] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const recaptchaRef = useRef<ReCAPTCHA>(null)
 
   // Form state
   const [serviceType, setServiceType] = useState('')
   const [customServiceType, setCustomServiceType] = useState('')
   const [isOver18, setIsOver18] = useState(false)
   const [captchaVerified, setCaptchaVerified] = useState(false)
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null)
   const [name, setName] = useState('')
   const [businessName, setBusinessName] = useState('')
   const [email, setEmail] = useState('')
@@ -92,6 +95,11 @@ export default function Home() {
 
   const addService = () => {
     setServices([...services, { name: '', duration: 30, price: 0, icon: '✂️' }])
+  }
+
+  const handleCaptchaChange = (token: string | null) => {
+    setCaptchaToken(token)
+    setCaptchaVerified(!!token)
   }
 
   const handleSubmit = async () => {
@@ -659,32 +667,18 @@ export default function Home() {
             </label>
           </motion.div>
 
-          {/* Simple CAPTCHA */}
+          {/* Google reCAPTCHA */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="p-4 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50"
+            className="flex justify-center"
           >
-            <div className="flex items-center gap-3">
-              <input
-                type="checkbox"
-                id="captcha"
-                checked={captchaVerified}
-                onChange={(e) => setCaptchaVerified(e.target.checked)}
-                className="w-5 h-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600 focus:ring-2 cursor-pointer"
-              />
-              <label htmlFor="captcha" className="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
-                I'm not a robot
-              </label>
-              <div className="ml-auto">
-                <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                </svg>
-              </div>
-            </div>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-              reCAPTCHA verification
-            </p>
+            <ReCAPTCHA
+              ref={recaptchaRef}
+              sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || ''}
+              onChange={handleCaptchaChange}
+              theme="light"
+            />
           </motion.div>
 
           <Button
