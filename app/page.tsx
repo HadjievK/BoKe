@@ -28,12 +28,17 @@ const SERVICE_CATEGORIES = [
 ]
 
 const SERVICE_TYPES = [
-  { value: 'barber', label: 'Barber', icon: '✂️' },
-  { value: 'dentist', label: 'Dentist', icon: '🦷' },
-  { value: 'nail_artist', label: 'Nail Artist', icon: '💅' },
-  { value: 'massage', label: 'Massage', icon: '💆' },
-  { value: 'trainer', label: 'Trainer', icon: '💪' },
-  { value: 'other', label: 'Other', icon: '✨' },
+  'Barber',
+  'Dentist',
+  'Nail Artist',
+  'Massage Therapist',
+  'Personal Trainer',
+  'Hair Stylist',
+  'Beautician',
+  'Tattoo Artist',
+  'Physical Therapist',
+  'Yoga Instructor',
+  'Other',
 ]
 
 interface Service {
@@ -51,7 +56,10 @@ export default function Home() {
   const [error, setError] = useState('')
 
   // Form state
-  const [serviceType, setServiceType] = useState('barber')
+  const [serviceType, setServiceType] = useState('')
+  const [customServiceType, setCustomServiceType] = useState('')
+  const [isOver18, setIsOver18] = useState(false)
+  const [captchaVerified, setCaptchaVerified] = useState(false)
   const [name, setName] = useState('')
   const [businessName, setBusinessName] = useState('')
   const [email, setEmail] = useState('')
@@ -90,6 +98,31 @@ export default function Home() {
     setError('')
     setLoading(true)
 
+    // Validate 18+ confirmation
+    if (!isOver18) {
+      setError('You must confirm that you are 18 years or older')
+      setLoading(false)
+      return
+    }
+
+    // Validate CAPTCHA
+    if (!captchaVerified) {
+      setError('Please complete the CAPTCHA verification')
+      setLoading(false)
+      return
+    }
+
+    // Validate service type
+    const finalServiceType = serviceType === 'Other' && customServiceType
+      ? customServiceType
+      : serviceType
+
+    if (!finalServiceType) {
+      setError('Please select or enter a service type')
+      setLoading(false)
+      return
+    }
+
     // Validate at least one service
     if (services.length === 0) {
       setError('You must add at least one service')
@@ -109,7 +142,7 @@ export default function Home() {
       const data: OnboardingData = {
         name,
         business_name: businessName,
-        service_type: serviceType,
+        service_type: finalServiceType,
         email,
         phone,
         password,
@@ -407,28 +440,41 @@ export default function Home() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
           >
-            <label className="block text-sm font-semibold mb-3 text-gray-900">Service Type</label>
-            <div className="grid grid-cols-3 gap-3">
-              {SERVICE_TYPES.map((type, index) => (
-                <motion.button
-                  key={type.value}
-                  onClick={() => setServiceType(type.value)}
-                  className={`p-4 rounded-xl border-2 transition-all ${
-                    serviceType === type.value
-                      ? 'border-indigo-600 bg-gradient-to-br from-indigo-50 to-purple-50'
-                      : 'border-gray-200 hover:border-gray-300 hover:shadow-md'
-                  }`}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.4 + index * 0.05 }}
-                >
-                  <div className="text-2xl mb-1">{type.icon}</div>
-                  <div className="text-sm font-medium text-gray-900">{type.label}</div>
-                </motion.button>
+            <label className="block text-sm font-semibold mb-2 text-gray-900 dark:text-white">Service Type</label>
+            <select
+              value={serviceType}
+              onChange={(e) => {
+                setServiceType(e.target.value)
+                if (e.target.value !== 'Other') {
+                  setCustomServiceType('')
+                }
+              }}
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-600/10 transition"
+            >
+              <option value="">Select a service type...</option>
+              {SERVICE_TYPES.map((type) => (
+                <option key={type} value={type}>
+                  {type}
+                </option>
               ))}
-            </div>
+            </select>
+
+            {serviceType === 'Other' && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="mt-3"
+              >
+                <input
+                  type="text"
+                  value={customServiceType}
+                  onChange={(e) => setCustomServiceType(e.target.value)}
+                  placeholder="Enter your service type..."
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-600/10 transition"
+                />
+              </motion.div>
+            )}
           </motion.div>
 
           {/* Basic Info */}
@@ -585,7 +631,7 @@ export default function Home() {
           <AnimatePresence>
             {error && (
               <motion.div
-                className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm"
+                className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-3 rounded-xl text-sm"
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
@@ -594,6 +640,52 @@ export default function Home() {
               </motion.div>
             )}
           </AnimatePresence>
+
+          {/* 18+ Confirmation */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-start gap-3 p-4 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50"
+          >
+            <input
+              type="checkbox"
+              id="age-confirm"
+              checked={isOver18}
+              onChange={(e) => setIsOver18(e.target.checked)}
+              className="mt-1 w-5 h-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600 focus:ring-2 cursor-pointer"
+            />
+            <label htmlFor="age-confirm" className="text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
+              I confirm that I am <strong>18 years of age or older</strong> and agree to the Terms of Service and Privacy Policy.
+            </label>
+          </motion.div>
+
+          {/* Simple CAPTCHA */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="p-4 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50"
+          >
+            <div className="flex items-center gap-3">
+              <input
+                type="checkbox"
+                id="captcha"
+                checked={captchaVerified}
+                onChange={(e) => setCaptchaVerified(e.target.checked)}
+                className="w-5 h-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600 focus:ring-2 cursor-pointer"
+              />
+              <label htmlFor="captcha" className="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
+                I'm not a robot
+              </label>
+              <div className="ml-auto">
+                <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
+              </div>
+            </div>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+              reCAPTCHA verification
+            </p>
+          </motion.div>
 
           <Button
             onClick={handleSubmit}
