@@ -13,6 +13,7 @@ import { ServiceProfessionals } from '@/components/ServiceProfessionals'
 import { BookingDemo } from '@/components/BookingDemo'
 import { Features } from '@/components/Features'
 import { HowItWorks } from '@/components/HowItWorks'
+import { CTA } from '@/components/CTA'
 
 const SERVICE_PILLS = [
   { emoji: '✂️', label: 'Barbers' },
@@ -373,93 +374,7 @@ export default function Home() {
         <ServiceProfessionals />
 
         {/* CTA Section */}
-        <section className="py-24 bg-gradient-to-b from-white to-indigo-50/30">
-          <div className="container mx-auto px-6 max-w-6xl">
-            <motion.div
-              className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 text-white p-12 sm:p-16 text-center shadow-2xl"
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-              variants={scaleIn}
-            >
-              {/* Animated floating circles */}
-              <motion.div
-                className="absolute top-10 left-10 w-20 h-20 rounded-full bg-white/10 backdrop-blur-sm"
-                animate={{
-                  y: [0, -20, 0],
-                  scale: [1, 1.1, 1],
-                }}
-                transition={{
-                  duration: 4,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-              />
-              <motion.div
-                className="absolute bottom-10 right-10 w-32 h-32 rounded-full bg-white/10 backdrop-blur-sm"
-                animate={{
-                  y: [0, 20, 0],
-                  scale: [1, 1.15, 1],
-                }}
-                transition={{
-                  duration: 5,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-              />
-              <motion.div
-                className="absolute top-1/2 right-1/4 w-16 h-16 rounded-full bg-white/10 backdrop-blur-sm"
-                animate={{
-                  y: [0, -15, 0],
-                  x: [0, 10, 0],
-                }}
-                transition={{
-                  duration: 6,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-              />
-
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.1),transparent)] pointer-events-none" />
-
-              <div className="relative z-10">
-                <motion.h2
-                  className="text-3xl sm:text-5xl font-bold mb-4"
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: 0.2 }}
-                >
-                  Ready to get <span className="text-indigo-200">booked?</span>
-                </motion.h2>
-                <motion.p
-                  className="text-indigo-100 text-lg mb-8 max-w-md mx-auto"
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: 0.3 }}
-                >
-                  Join thousands of professionals already growing their business with BuKe.
-                </motion.p>
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: 0.4 }}
-                >
-                  <Button
-                    onClick={() => setShowOnboarding(true)}
-                    size="lg"
-                    className="bg-white text-indigo-600 hover:bg-indigo-50 shadow-xl hover:shadow-2xl group"
-                  >
-                    Create your free page
-                    <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                  </Button>
-                </motion.div>
-              </div>
-            </motion.div>
-          </div>
-        </section>
+        <CTA onGetStarted={() => setShowOnboarding(true)} />
 
         {/* Footer */}
         <footer className="border-t border-gray-200 bg-gray-50/50 py-12">
