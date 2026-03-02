@@ -47,6 +47,12 @@ export default function CustomerSignInPage({ params }: { params: { slug: string 
       const data = await response.json()
 
       if (!response.ok) {
+        if (data.needsSignup) {
+          // Redirect to signup with email pre-filled
+          router.push(`/${params.slug}/signup?email=${encodeURIComponent(data.email)}`)
+          return
+        }
+
         setError(data.error || 'Failed to sign in')
         setLoading(false)
         return

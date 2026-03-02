@@ -34,6 +34,13 @@ export default function CustomerSignUpPage({ params }: { params: { slug: string 
         }
       })
       .catch(err => console.error('Error fetching provider:', err))
+
+    // Pre-fill email from query param if present
+    const urlParams = new URLSearchParams(window.location.search)
+    const emailParam = urlParams.get('email')
+    if (emailParam) {
+      setFormData(prev => ({ ...prev, email: emailParam }))
+    }
   }, [params.slug])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -87,9 +94,20 @@ export default function CustomerSignUpPage({ params }: { params: { slug: string 
       const data = await response.json()
 
       if (!response.ok) {
-        setError(data.error || 'Failed to create account')
+        if (data.requiresVerification) {
+          setError('An account with this email exists but with a different name. Please contact support if this is your email.')
+        } else if (data.error?.includes('already registered')) {
+          setError('This email is already registered with a password. Please sign in instead.')
+        } else {
+          setError(data.error || 'Failed to create account')
+        }
         setLoading(false)
         return
+      }
+
+      // Check if this was an account upgrade
+      if (response.status === 200 && data.upgraded) {
+        console.log('Account upgraded successfully')
       }
 
       // Store JWT token in localStorage
@@ -120,6 +138,9 @@ export default function CustomerSignUpPage({ params }: { params: { slug: string 
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
           Book appointments with {provider?.business_name || provider?.name || 'us'}
+        </p>
+        <p className="mt-1 text-center text-sm text-gray-500">
+          Already booked with us? Create a password to access and manage your appointments.
         </p>
       </div>
 

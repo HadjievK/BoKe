@@ -200,6 +200,7 @@ export interface CustomerAuthResponse {
     last_name: string
   }
   token: string
+  upgraded?: boolean // Indicates if this was an account upgrade vs new signup
 }
 
 export interface CustomerBookingsResponse {

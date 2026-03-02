@@ -36,17 +36,67 @@ export async function POST(request: NextRequest) {
 
     // Check if customer already exists
     const existingCustomer = await pool.query(
-      'SELECT id FROM customers WHERE email = $1',
+      'SELECT id, password, first_name, last_name FROM customers WHERE email = $1',
       [email.toLowerCase()]
     );
 
     if (existingCustomer.rows.length > 0) {
+      const customer = existingCustomer.rows[0];
+
+      // If password already exists → normal duplicate error
+      if (customer.password !== null) {
+        return NextResponse.json(
+          { error: 'Email already registered. Please sign in instead.' },
+          { status: 400 }
+        );
+      }
+
+      // Password is NULL → verify identity via name matching
+      const normalizeName = (name: string) =>
+        name.toLowerCase().trim().replace(/\s+/g, ' ');
+
+      const nameMatch =
+        normalizeName(customer.first_name) === normalizeName(first_name) &&
+        normalizeName(customer.last_name) === normalizeName(last_name);
+
+      if (!nameMatch) {
+        return NextResponse.json(
+          {
+            error: 'An account exists with this email but different name. Please contact support if this is your email.',
+            requiresVerification: true
+          },
+          { status: 403 }
+        );
+      }
+
+      // Names match → upgrade account by setting password
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      const result = await pool.query(
+        `UPDATE customers
+         SET password = $1, phone = $2, updated_at = NOW()
+         WHERE id = $3
+         RETURNING id, email, first_name, last_name`,
+        [hashedPassword, phone, customer.id]
+      );
+
+      // Generate token (same as normal signup)
+      const token = generateCustomerToken({
+        customerId: customer.id,
+        email: result.rows[0].email
+      });
+
       return NextResponse.json(
-        { error: 'Email already registered' },
-        { status: 400 }
+        {
+          customer: result.rows[0],
+          token,
+          upgraded: true
+        },
+        { status: 200 } // 200 instead of 201 indicates upgrade
       );
     }
 
+    // New customer → continue with INSERT logic
     // Hash password with bcrypt (10 rounds)
     const hashedPassword = await bcrypt.hash(password, 10);
 

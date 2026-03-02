@@ -35,7 +35,11 @@ export async function POST(request: NextRequest) {
     // Check if password exists (might be null for customers who haven't set password yet)
     if (!customer.password) {
       return NextResponse.json(
-        { error: 'Please set your password first. Check your email for instructions.' },
+        {
+          error: 'No password set for this account. Please complete registration first.',
+          needsSignup: true,
+          email: customer.email
+        },
         { status: 401 }
       );
     }
