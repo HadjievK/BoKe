@@ -29,12 +29,17 @@ export default function AppointmentDetailsModal({
 
   let appointmentDateTime: Date
   try {
+    // Extract date part (YYYY-MM-DD) if appointment_date is ISO string
+    const dateStr = typeof appointment.appointment_date === 'string'
+      ? appointment.appointment_date.split('T')[0]
+      : appointment.appointment_date
+
     appointmentDateTime = new Date(
-      `${appointment.appointment_date}T${appointment.appointment_time}`
+      `${dateStr}T${appointment.appointment_time}`
     )
     // Check if date is valid
     if (isNaN(appointmentDateTime.getTime())) {
-      console.error('Invalid date created:', appointment.appointment_date, appointment.appointment_time)
+      console.error('Invalid date created:', dateStr, appointment.appointment_time)
       return null
     }
   } catch (error) {
