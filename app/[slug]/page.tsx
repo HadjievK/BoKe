@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { getProviderProfile, getAvailability, bookAppointment } from '@/lib/api'
 import type { ProviderWithServices, Service, Customer, BookingRequest } from '@/lib/types'
 import { formatDateISO } from '@/lib/utils'
