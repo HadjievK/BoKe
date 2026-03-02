@@ -286,16 +286,16 @@ export default function DashboardPage() {
   // Loading Screen
   if (loading) {
     return (
-      <main className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-lg p-8 max-w-md w-full border border-gray-200">
+      <main className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 max-w-md w-full border border-gray-200 dark:border-gray-700">
           <div className="text-center">
             <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
-              <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-8 h-8 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
             </div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">Loading Dashboard</h1>
-            <p className="text-gray-600">Please wait...</p>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">Loading Dashboard</h1>
+            <p className="text-gray-600 dark:text-gray-400">Please wait...</p>
           </div>
         </div>
       </main>
@@ -304,10 +304,10 @@ export default function DashboardPage() {
 
   if (!dashboardData) {
     return (
-      <main className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <main className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading dashboard...</p>
+          <p className="text-gray-600 dark:text-gray-400">Loading dashboard...</p>
         </div>
       </main>
     )
@@ -316,32 +316,32 @@ export default function DashboardPage() {
   const provider = dashboardData.provider
 
   return (
-    <main className="min-h-screen bg-gray-50">
+    <main className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Header */}
-      <header className="bg-white text-gray-900 px-6 py-4 border-b border-gray-200 shadow-sm">
+      <header className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-6 py-4 border-b border-gray-200 dark:border-gray-700 shadow-sm">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="text-2xl font-bold">
-              Bo<span className="text-purple-600">Ke</span>
+              Bo<span className="text-purple-600 dark:text-purple-400">Ke</span>
             </div>
           </div>
           <div className="flex items-center gap-4">
             <ThemeToggle />
             <button
               onClick={() => setShowShare(true)}
-              className="px-4 py-2 hover:bg-gray-100 rounded-lg transition text-sm font-medium"
+              className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition text-sm font-medium"
             >
               Share
             </button>
             <button
               onClick={() => setShowSettings(true)}
-              className="px-4 py-2 hover:bg-gray-100 rounded-lg transition text-sm font-medium"
+              className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition text-sm font-medium"
             >
               Settings
             </button>
             <button
               onClick={handleLogout}
-              className="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-semibold hover:bg-purple-700 transition shadow-lg shadow-purple-600/25"
+              className="px-4 py-2 bg-purple-600 dark:bg-purple-500 text-white rounded-lg text-sm font-semibold hover:bg-purple-700 transition shadow-lg shadow-purple-600/25"
             >
               Logout
             </button>
@@ -352,53 +352,53 @@ export default function DashboardPage() {
       <div className="max-w-7xl mx-auto p-6">
         {/* Greeting Section */}
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 mb-1">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-1">
             {getGreeting()}, {provider.name.split(' ')[0]}
           </h1>
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
             {todayDate} · {dashboardData.appointments.length} appointments today
           </p>
         </div>
 
         {/* Stats Cards - Collapsible */}
         <details className="mb-6" open>
-          <summary className="cursor-pointer text-lg font-semibold text-gray-900 mb-4">
+          <summary className="cursor-pointer text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
             📊 Quick Stats
           </summary>
           <div className="grid grid-cols-3 gap-4">
-            <div className="bg-white rounded-xl p-6 border border-gray-200">
-              <div className="text-sm text-gray-600 mb-2">TODAY</div>
-              <div className="text-4xl font-bold text-gray-900 mb-1">
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+              <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">TODAY</div>
+              <div className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-1">
                 {dashboardData.stats.today_appointments}
               </div>
-              <div className="text-xs text-gray-600">appointments</div>
+              <div className="text-xs text-gray-600 dark:text-gray-400">appointments</div>
             </div>
 
-            <div className="bg-white rounded-xl p-6 border border-gray-200">
-              <div className="text-sm text-gray-600 mb-2">THIS WEEK</div>
-              <div className="text-4xl font-bold text-gray-900 mb-1">
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+              <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">THIS WEEK</div>
+              <div className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-1">
                 {dashboardData.stats.week_appointments}
               </div>
-              <div className="text-xs text-gray-600">appointments</div>
+              <div className="text-xs text-gray-600 dark:text-gray-400">appointments</div>
             </div>
 
-            <div className="bg-white rounded-xl p-6 border border-gray-200">
-              <div className="text-sm text-gray-600 mb-2">TOTAL CLIENTS</div>
-              <div className="text-4xl font-bold text-gray-900 mb-1">
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+              <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">TOTAL CLIENTS</div>
+              <div className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-1">
                 {dashboardData.stats.total_customers}
               </div>
-              <div className="text-xs text-gray-600">all time</div>
+              <div className="text-xs text-gray-600 dark:text-gray-400">all time</div>
             </div>
           </div>
         </details>
 
         {/* Calendar - Main View */}
-        <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 shadow-sm">
           <div className="mb-4">
             <h2 className="text-2xl font-bold text-gray-900">
               Appointment Calendar
             </h2>
-            <p className="text-sm text-gray-600 mt-1">
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
               Click on any appointment to view details or take actions
             </p>
           </div>
@@ -426,7 +426,7 @@ export default function DashboardPage() {
       {/* Share Modal */}
       {showShare && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl max-w-2xl w-full">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl max-w-2xl w-full">
             <div className="sticky top-0 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-t-2xl px-6 py-4 flex items-center justify-between">
               <h2 className="text-2xl font-bold">Share Your Booking Page</h2>
               <button
@@ -460,7 +460,7 @@ export default function DashboardPage() {
                     navigator.clipboard.writeText(url)
                     alert('Link copied to clipboard!')
                   }}
-                  className="flex items-center justify-center gap-2 px-6 py-4 bg-purple-600 text-white rounded-xl font-semibold hover:bg-purple-700 transition shadow-lg shadow-purple-600/25"
+                  className="flex items-center justify-center gap-2 px-6 py-4 bg-purple-600 dark:bg-purple-500 text-white rounded-xl font-semibold hover:bg-purple-700 transition shadow-lg shadow-purple-600/25"
                 >
                   Copy Link
                 </button>
@@ -475,7 +475,7 @@ export default function DashboardPage() {
               </div>
 
               {/* QR Code Placeholder */}
-              <div className="bg-gray-50 rounded-xl p-6 border border-gray-200 text-center">
+              <div className="bg-gray-50 rounded-xl p-6 border border-gray-200 dark:border-gray-700 text-center">
                 <div className="text-sm font-medium text-gray-700 mb-3">
                   Share via QR Code
                 </div>
@@ -484,7 +484,7 @@ export default function DashboardPage() {
                     QR Code<br />Coming Soon
                   </div>
                 </div>
-                <p className="text-xs text-gray-600 mt-3">
+                <p className="text-xs text-gray-600 dark:text-gray-400 mt-3">
                   Customers can scan this QR code to book instantly
                 </p>
               </div>
@@ -528,7 +528,7 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            <div className="border-t border-gray-200 px-6 py-4 bg-gray-50 rounded-b-2xl flex items-center justify-end">
+            <div className="border-t border-gray-200 dark:border-gray-700 px-6 py-4 bg-gray-50 rounded-b-2xl flex items-center justify-end">
               <button
                 onClick={() => setShowShare(false)}
                 className="px-6 py-2 text-gray-700 hover:bg-gray-200 rounded-lg transition font-medium"
@@ -543,29 +543,29 @@ export default function DashboardPage() {
       {/* Settings Modal */}
       {showSettings && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col">
             {/* Header */}
-            <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+            <div className="sticky top-0 bg-white border-b border-gray-200 dark:border-gray-700 px-6 py-4 flex items-center justify-between">
               <h2 className="text-2xl font-bold text-gray-900">Settings</h2>
               <button
                 onClick={() => {
                   setShowSettings(false)
                   setSettingsTab('account')
                 }}
-                className="text-2xl text-gray-600 hover:text-gray-900 transition"
+                className="text-2xl text-gray-600 dark:text-gray-400 hover:text-gray-900 transition"
               >
                 ×
               </button>
             </div>
 
             {/* Tabs */}
-            <div className="flex border-b border-gray-200 bg-gray-50 px-6">
+            <div className="flex border-b border-gray-200 dark:border-gray-700 bg-gray-50 px-6">
               <button
                 onClick={() => setSettingsTab('account')}
                 className={`px-6 py-3 text-sm font-semibold border-b-2 transition ${
                   settingsTab === 'account'
                     ? 'border-purple-600 text-purple-600'
-                    : 'border-transparent text-gray-600 hover:text-gray-900'
+                    : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900'
                 }`}
               >
                 Account Settings
@@ -575,7 +575,7 @@ export default function DashboardPage() {
                 className={`px-6 py-3 text-sm font-semibold border-b-2 transition ${
                   settingsTab === 'calendar'
                     ? 'border-purple-600 text-purple-600'
-                    : 'border-transparent text-gray-600 hover:text-gray-900'
+                    : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900'
                 }`}
               >
                 Calendar Settings
@@ -609,8 +609,8 @@ export default function DashboardPage() {
                     </p>
                   </div>
 
-                  <div className="border-t border-gray-200 pt-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Change Password</h3>
+                  <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Change Password</h3>
                     <div className="space-y-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -655,7 +655,7 @@ export default function DashboardPage() {
                 <div className="space-y-6">
                   {/* Working Hours */}
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Working Hours</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Working Hours</h3>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -686,8 +686,8 @@ export default function DashboardPage() {
                   </div>
 
                   {/* Time Slot Settings */}
-                  <div className="border-t border-gray-200 pt-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Time Slot Settings</h3>
+                  <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Time Slot Settings</h3>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -729,8 +729,8 @@ export default function DashboardPage() {
                   </div>
 
                   {/* Working Days */}
-                  <div className="border-t border-gray-200 pt-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Working Days</h3>
+                  <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Working Days</h3>
                     <div className="space-y-3">
                       {Object.entries(workingDays).map(([day, isWorking]) => (
                         <label key={day} className="flex items-center gap-3 cursor-pointer">
@@ -755,7 +755,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Footer */}
-            <div className="border-t border-gray-200 px-6 py-4 bg-gray-50 flex items-center justify-end gap-3">
+            <div className="border-t border-gray-200 dark:border-gray-700 px-6 py-4 bg-gray-50 flex items-center justify-end gap-3">
               <button
                 onClick={() => {
                   setShowSettings(false)
@@ -768,7 +768,7 @@ export default function DashboardPage() {
               <button
                 onClick={handleSaveSettings}
                 disabled={settingsSaving}
-                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition font-medium disabled:opacity-50"
+                className="px-4 py-2 bg-purple-600 dark:bg-purple-500 text-white rounded-lg hover:bg-purple-700 transition font-medium disabled:opacity-50"
               >
                 {settingsSaving ? 'Saving...' : 'Save Changes'}
               </button>
