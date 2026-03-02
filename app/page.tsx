@@ -14,6 +14,7 @@ import { BookingDemo } from '@/components/BookingDemo'
 import { Features } from '@/components/Features'
 import { HowItWorks } from '@/components/HowItWorks'
 import { CTA } from '@/components/CTA'
+import ThemeToggle from '@/components/ThemeToggle'
 
 const SERVICE_CATEGORIES = [
   'Barbers',
@@ -130,19 +131,20 @@ export default function Home() {
 
   if (!showOnboarding) {
     return (
-      <div className="min-h-screen bg-white" style={{ fontFamily: "'DM Sans', -apple-system, sans-serif" }}>
+      <div className="min-h-screen bg-white dark:bg-gray-900" style={{ fontFamily: "'DM Sans', -apple-system, sans-serif" }}>
         {/* Navbar */}
-        <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200">
+        <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800">
           <div className="container mx-auto px-6 h-16 flex items-center justify-between max-w-6xl">
             <motion.a
               href="/"
-              className="text-2xl font-bold tracking-tight text-gray-900"
+              className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white"
               whileHover={{ scale: 1.05 }}
             >
               Bu<span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">Ke</span>
             </motion.a>
             <div className="flex items-center gap-4">
-              <a href="/signin" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
+              <ThemeToggle />
+              <a href="/signin" className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
                 Sign in
               </a>
               <Button
@@ -200,7 +202,7 @@ export default function Home() {
                 variants={staggerContainer}
               >
                 <motion.h1
-                  className="text-5xl sm:text-6xl lg:text-7xl font-bold leading-[1.05] tracking-tight mb-6 text-gray-900"
+                  className="text-5xl sm:text-6xl lg:text-7xl font-bold leading-[1.05] tracking-tight mb-6 text-gray-900 dark:text-white"
                   variants={staggerItem}
                 >
                   Your booking page.<br />
@@ -211,7 +213,7 @@ export default function Home() {
                 </motion.h1>
 
                 <motion.p
-                  className="text-lg text-gray-600 max-w-md mb-6 leading-relaxed"
+                  className="text-lg text-gray-600 dark:text-gray-300 max-w-md mb-6 leading-relaxed"
                   variants={staggerItem}
                 >
                   BuKe gives barbers, dentists, nail artists, and trainers a beautiful booking page — no code, no hassle. Your clients book. You earn.
@@ -288,7 +290,7 @@ export default function Home() {
         </section>
 
         {/* Booking Demo Section */}
-        <section className="py-24 bg-white">
+        <section className="py-24 bg-white dark:bg-gray-900">
           <div className="container mx-auto px-6 max-w-6xl">
             <motion.div
               className="text-center mb-16"
@@ -297,16 +299,16 @@ export default function Home() {
               viewport={{ once: true, margin: "-100px" }}
               variants={fadeInUp}
             >
-              <span className="text-sm font-semibold text-indigo-600 tracking-wider uppercase mb-4 block">
+              <span className="text-sm font-semibold text-indigo-600 dark:text-indigo-400 tracking-wider uppercase mb-4 block">
                 See it in action
               </span>
-              <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-4">
+              <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-white mb-4">
                 From booking to{" "}
                 <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
                   confirmation
                 </span>
               </h2>
-              <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
                 Watch how seamlessly your clients book appointments while you stay in control
               </p>
             </motion.div>
@@ -656,19 +658,19 @@ const DashboardMockup = () => {
   }
 
   return (
-    <div className="rounded-3xl shadow-2xl border border-gray-200 p-6 max-w-lg ml-auto bg-white">
+    <div className="rounded-3xl shadow-2xl border border-gray-200 dark:border-gray-700 p-6 max-w-lg ml-auto bg-white dark:bg-gray-800">
       {/* Calendar Header */}
       <div className="mb-6">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-bold text-gray-900">{currentMonth} {currentYear}</h3>
+          <h3 className="text-lg font-bold text-gray-900 dark:text-white">{currentMonth} {currentYear}</h3>
           <div className="flex gap-2">
-            <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-              <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+              <svg className="w-4 h-4 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
             </button>
-            <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-              <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+              <svg className="w-4 h-4 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
             </button>
@@ -678,7 +680,7 @@ const DashboardMockup = () => {
         {/* Day labels */}
         <div className="grid grid-cols-7 gap-2 mb-2">
           {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map((day) => (
-            <div key={day} className="text-center text-xs font-semibold text-gray-500">
+            <div key={day} className="text-center text-xs font-semibold text-gray-500 dark:text-gray-400">
               {day}
             </div>
           ))}
@@ -697,8 +699,8 @@ const DashboardMockup = () => {
                   aspect-square flex items-center justify-center rounded-lg text-sm font-medium
                   ${!day ? 'invisible' : ''}
                   ${isToday ? 'bg-indigo-600 text-white' : ''}
-                  ${hasAppointments && !isToday ? 'bg-purple-100 text-purple-700 border-2 border-purple-300' : ''}
-                  ${!hasAppointments && !isToday ? 'text-gray-700 hover:bg-gray-100' : ''}
+                  ${hasAppointments && !isToday ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 border-2 border-purple-300 dark:border-purple-600' : ''}
+                  ${!hasAppointments && !isToday ? 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' : ''}
                   transition-colors cursor-pointer relative
                 `}
               >
@@ -714,7 +716,7 @@ const DashboardMockup = () => {
 
       {/* Upcoming appointments */}
       <div>
-        <h4 className="text-sm font-semibold text-gray-900 mb-3">Upcoming Appointments</h4>
+        <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">Upcoming Appointments</h4>
         <div className="space-y-2">
           {[
             { date: "Today", time: "2:00 PM", client: "Mike R.", service: "Beard Trim", color: "indigo" },
@@ -723,16 +725,16 @@ const DashboardMockup = () => {
           ].map((apt, index) => (
             <div
               key={index}
-              className="flex items-center justify-between rounded-xl border border-gray-200 bg-white px-4 py-3 hover:shadow-md transition-shadow"
+              className="flex items-center justify-between rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-3 hover:shadow-md transition-shadow"
             >
               <div className="flex items-center gap-3">
                 <div className={`w-2 h-2 rounded-full bg-${apt.color}-600`} />
                 <div>
-                  <div className="text-sm font-semibold text-gray-900">{apt.client}</div>
-                  <div className="text-xs text-gray-600">{apt.date} · {apt.time}</div>
+                  <div className="text-sm font-semibold text-gray-900 dark:text-white">{apt.client}</div>
+                  <div className="text-xs text-gray-600 dark:text-gray-400">{apt.date} · {apt.time}</div>
                 </div>
               </div>
-              <div className="text-xs font-medium text-gray-600">{apt.service}</div>
+              <div className="text-xs font-medium text-gray-600 dark:text-gray-400">{apt.service}</div>
             </div>
           ))}
         </div>
