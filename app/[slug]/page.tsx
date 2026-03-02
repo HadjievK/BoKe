@@ -203,12 +203,10 @@ export default function ProviderProfilePage() {
 
           <div className="flex items-center gap-4 text-sm text-white/50 flex-wrap">
             <div className="flex items-center gap-1.5">
-              <span>✂️</span>
               <span>{provider.name}</span>
             </div>
             {provider.location && (
               <div className="flex items-center gap-1.5">
-                <span>📍</span>
                 <a
                   href={provider.latitude && provider.longitude ? `https://www.google.com/maps/dir/?api=1&destination=${provider.latitude},${provider.longitude}` : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(provider.location)}`}
                   target="_blank"
@@ -247,14 +245,12 @@ export default function ProviderProfilePage() {
         {/* Quick Info Cards */}
         <div className="grid grid-cols-2 gap-3 mb-7">
           <div className="bg-white border border-gray-200 rounded-xl p-4 text-center shadow-sm">
-            <div className="text-xl mb-1.5">✂️</div>
             <div className="text-xl font-bold text-gray-900 mb-0.5">
               {provider.services.length}
             </div>
             <div className="text-xs text-gray-600">Services</div>
           </div>
           <div className="bg-white border border-gray-200 rounded-xl p-4 text-center shadow-sm">
-            <div className="text-xl mb-1.5">👥</div>
             <div className="text-xl font-bold text-gray-900 mb-0.5">
               New
             </div>
@@ -281,11 +277,13 @@ export default function ProviderProfilePage() {
                   >
                     <div className="flex items-start gap-3.5">
                       {/* Icon */}
-                      <div
-                        className="w-11 h-11 rounded-xl bg-purple-50 flex items-center justify-center text-lg flex-shrink-0"
-                      >
-                        {service.icon || '✂️'}
-                      </div>
+                      {service.icon && (
+                        <div
+                          className="w-11 h-11 rounded-xl bg-purple-50 flex items-center justify-center text-lg flex-shrink-0"
+                        >
+                          {service.icon}
+                        </div>
+                      )}
 
                       {/* Service Info */}
                       <div className="flex-1">
