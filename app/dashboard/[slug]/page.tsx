@@ -38,6 +38,9 @@ export default function DashboardPage() {
   const [settingsError, setSettingsError] = useState('')
   const [settingsSaving, setSettingsSaving] = useState(false)
 
+  // Move useMemo to top level before any early returns
+  const todayDate = useMemo(() => formatDateShort(new Date()), [])
+
   const checkAuth = useCallback(async () => {
     try {
       const auth = await verifyAuth()
@@ -243,7 +246,6 @@ export default function DashboardPage() {
   }
 
   const provider = dashboardData.provider
-  const todayDate = useMemo(() => formatDateShort(new Date()), [])
 
   return (
     <main className="min-h-screen bg-gray-50">
