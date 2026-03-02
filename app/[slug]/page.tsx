@@ -124,10 +124,10 @@ export default function ProviderProfilePage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-white flex items-center justify-center" style={{ fontFamily: "'DM Sans', -apple-system, sans-serif" }}>
+      <main className="min-h-screen bg-white dark:bg-gray-900 flex items-center justify-center" style={{ fontFamily: "'DM Sans', -apple-system, sans-serif" }}>
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
+          <p className="text-gray-600 dark:text-gray-300">Loading...</p>
         </div>
       </main>
     )
@@ -135,13 +135,13 @@ export default function ProviderProfilePage() {
 
   if (error || !provider) {
     return (
-      <main className="min-h-screen bg-gray-50 flex items-center justify-center p-4" style={{ fontFamily: "'DM Sans', -apple-system, sans-serif" }}>
-        <div className="bg-white rounded-2xl shadow-lg p-8 text-center max-w-md border border-gray-200">
+      <main className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4" style={{ fontFamily: "'DM Sans', -apple-system, sans-serif" }}>
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 text-center max-w-md border border-gray-200 dark:border-gray-700">
           <div className="text-6xl mb-4">😕</div>
-          <h1 className="text-2xl font-bold mb-2 text-gray-900">
+          <h1 className="text-2xl font-bold mb-2 text-gray-900 dark:text-white">
             Provider Not Found
           </h1>
-          <p className="text-gray-600 mb-6">{error || 'This booking page does not exist'}</p>
+          <p className="text-gray-600 dark:text-gray-300 mb-6">{error || 'This booking page does not exist'}</p>
           <a
             href="/"
             className="inline-block bg-purple-600 text-white px-8 py-3 rounded-full font-semibold hover:bg-purple-700 transition shadow-lg shadow-purple-600/25"
@@ -154,7 +154,7 @@ export default function ProviderProfilePage() {
   }
 
   return (
-    <main className="min-h-screen bg-white" style={{ fontFamily: "'DM Sans', -apple-system, sans-serif" }}>
+    <main className="min-h-screen bg-white dark:bg-gray-900" style={{ fontFamily: "'DM Sans', -apple-system, sans-serif" }}>
       {/* Hero Section */}
       <div className="relative h-80 overflow-hidden bg-gray-900">
         {/* Background Pattern */}
