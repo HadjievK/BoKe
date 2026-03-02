@@ -1,7 +1,10 @@
 import { Resend } from 'resend';
 import { formatDate, formatTime } from '@/lib/utils';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Initialize Resend only if API key is available
+const resend = process.env.RESEND_API_KEY
+  ? new Resend(process.env.RESEND_API_KEY)
+  : null;
 
 export interface BookingEmailData {
   customer: {
@@ -32,6 +35,12 @@ export interface BookingEmailData {
 }
 
 export async function sendBookingConfirmationEmail(data: BookingEmailData) {
+  // Skip email sending if Resend is not configured
+  if (!resend) {
+    console.warn('Resend API key not configured - skipping email send');
+    return { success: false, message: 'Email service not configured' };
+  }
+
   const { customer, provider, service, appointment, magicLink } = data;
 
   const subject = `Booking Confirmed: ${service.name} with ${provider.business_name || provider.name}`;
@@ -47,6 +56,12 @@ export async function sendBookingConfirmationEmail(data: BookingEmailData) {
 export async function sendCancellationEmail(
   data: Omit<BookingEmailData, 'magicLink'>
 ) {
+  // Skip email sending if Resend is not configured
+  if (!resend) {
+    console.warn('Resend API key not configured - skipping email send');
+    return { success: false, message: 'Email service not configured' };
+  }
+
   const { customer, provider, service, appointment } = data;
 
   const subject = `Booking Cancelled: ${service.name}`;
