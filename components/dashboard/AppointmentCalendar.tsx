@@ -137,8 +137,8 @@ export default function AppointmentCalendar({
         toolbar={true}
         popup={true}
         tooltipAccessor={(event: CalendarEvent) => {
-          const { customer, service, status } = event.resource
-          return `${customer.first_name} ${customer.last_name}\n${service.name}\nStatus: ${status}`
+          const apt = event.resource
+          return `${apt.customer_first_name} ${apt.customer_last_name}\n${apt.service.name}\nStatus: ${apt.status}`
         }}
         messages={{
           today: 'Today',
