@@ -41,6 +41,19 @@ export default function DashboardPage() {
   // Move useMemo to top level before any early returns
   const todayDate = useMemo(() => formatDateShort(new Date()), [])
 
+  // Get greeting based on current time
+  const getGreeting = useCallback(() => {
+    const hour = new Date().getHours()
+
+    if (hour < 12) {
+      return 'Good morning'
+    } else if (hour < 19) {
+      return 'Good afternoon'
+    } else {
+      return 'Good evening'
+    }
+  }, [])
+
   const checkAuth = useCallback(async () => {
     try {
       const auth = await verifyAuth()
@@ -279,7 +292,7 @@ export default function DashboardPage() {
         {/* Greeting Section */}
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-gray-900 mb-1">
-            Good morning, {provider.name.split(' ')[0]} ✨
+            {getGreeting()}, {provider.name.split(' ')[0]} ✨
           </h1>
           <p className="text-sm text-gray-600">
             {todayDate} · {dashboardData.appointments.length} appointments today
