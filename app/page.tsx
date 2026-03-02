@@ -199,13 +199,6 @@ export default function Home() {
                 animate="visible"
                 variants={staggerContainer}
               >
-                <motion.div variants={staggerItem}>
-                  <Badge className="inline-flex items-center gap-2 mb-6">
-                    <Sparkles className="w-4 h-4" />
-                    Trusted by 3,200+ professionals
-                  </Badge>
-                </motion.div>
-
                 <motion.h1
                   className="text-5xl sm:text-6xl lg:text-7xl font-bold leading-[1.05] tracking-tight mb-6 text-gray-900"
                   variants={staggerItem}
@@ -223,20 +216,6 @@ export default function Home() {
                 >
                   BuKe gives barbers, dentists, nail artists, and trainers a beautiful booking page — no code, no hassle. Your clients book. You earn.
                 </motion.p>
-
-                <motion.div
-                  className="flex flex-col gap-3 mb-10"
-                  variants={staggerItem}
-                >
-                  <div className="flex items-center gap-2 text-sm text-gray-700">
-                    <Check className="w-5 h-5 text-indigo-600" />
-                    <span>No credit card required</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-gray-700">
-                    <Check className="w-5 h-5 text-indigo-600" />
-                    <span>Free forever plan</span>
-                  </div>
-                </motion.div>
 
                 {/* Sliding text animation */}
                 <motion.div
@@ -305,37 +284,6 @@ export default function Home() {
                 </div>
               </motion.div>
             </div>
-          </div>
-        </section>
-
-        {/* Stats Bar */}
-        <section className="border-y border-gray-200 bg-gradient-to-r from-indigo-50/50 via-white to-purple-50/50">
-          <div className="container mx-auto px-6 py-12 max-w-6xl">
-            <motion.div
-              className="flex flex-col sm:flex-row items-center justify-center gap-8 sm:gap-16"
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, margin: "-100px" }}
-              variants={staggerContainer}
-            >
-              {[
-                { value: "3.2k+", label: "Active professionals" },
-                { value: "89k", label: "Bookings processed" },
-                { value: "4.9★", label: "Average rating" },
-              ].map((stat) => (
-                <motion.div
-                  key={stat.label}
-                  className="text-center"
-                  variants={staggerItem}
-                  whileHover={{ scale: 1.05 }}
-                >
-                  <p className="text-4xl font-bold tracking-tight bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                    {stat.value}
-                  </p>
-                  <p className="text-sm text-gray-600 mt-1">{stat.label}</p>
-                </motion.div>
-              ))}
-            </motion.div>
           </div>
         </section>
 
@@ -680,11 +628,11 @@ const DashboardMockup = () => (
     <div className="flex items-center justify-between mb-6">
       <div className="flex items-center gap-3">
         <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center font-bold text-purple-700">
-          K
+          B
         </div>
         <div>
-          <p className="font-semibold text-sm text-gray-900">King&apos;s Cuts</p>
-          <p className="text-xs text-gray-600">buke.app/kingcuts</p>
+          <p className="font-semibold text-sm text-gray-900">Your Business</p>
+          <p className="text-xs text-gray-600">buke.app/yourslug</p>
         </div>
       </div>
       <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2.5 py-1 text-xs font-medium text-green-700">
