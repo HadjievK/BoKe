@@ -49,7 +49,7 @@ export function Features() {
   const isInView = useInView(ref, { once: true, amount: 0.2 })
 
   return (
-    <section ref={ref} className="py-24 bg-white">
+    <section ref={ref} className="py-24 bg-white dark:bg-gray-900">
       <div className="container mx-auto px-6 max-w-6xl">
         <motion.div
           className="text-center mb-16"
@@ -57,13 +57,13 @@ export function Features() {
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
           transition={{ duration: 0.6 }}
         >
-          <h2 className="text-4xl sm:text-5xl font-bold mb-4 text-gray-900">
+          <h2 className="text-4xl sm:text-5xl font-bold mb-4 text-gray-900 dark:text-white">
             Everything you need to{" "}
             <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
               get booked
             </span>
           </h2>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
             Powerful features that help you manage appointments effortlessly
           </p>
         </motion.div>
@@ -78,14 +78,14 @@ export function Features() {
                 animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
                 transition={{ delay: index * 0.1, duration: 0.5 }}
               >
-                <Card className="p-8 h-full hover:shadow-xl transition-shadow duration-300 border-gray-100 group">
+                <Card className="p-8 h-full hover:shadow-xl transition-shadow duration-300 border-gray-100 dark:border-gray-700 group bg-white dark:bg-gray-800">
                   <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}>
                     <Icon className="w-7 h-7 text-white" />
                   </div>
-                  <h3 className="text-xl font-bold mb-3 text-gray-900">
+                  <h3 className="text-xl font-bold mb-3 text-gray-900 dark:text-white">
                     {feature.title}
                   </h3>
-                  <p className="text-gray-600">
+                  <p className="text-gray-600 dark:text-gray-300">
                     {feature.description}
                   </p>
                 </Card>

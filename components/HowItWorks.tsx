@@ -30,10 +30,10 @@ export function HowItWorks() {
   const isInView = useInView(ref, { once: true, amount: 0.3 })
 
   return (
-    <section ref={ref} className="py-24 bg-white relative overflow-hidden">
+    <section ref={ref} className="py-24 bg-white dark:bg-gray-900 relative overflow-hidden">
       {/* Background decoration */}
       <div className="absolute inset-0">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-indigo-100 rounded-full blur-3xl opacity-30" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-indigo-100 dark:bg-indigo-900/20 rounded-full blur-3xl opacity-30" />
       </div>
 
       <div className="container mx-auto px-6 max-w-6xl relative z-10">
@@ -43,13 +43,13 @@ export function HowItWorks() {
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
           transition={{ duration: 0.6 }}
         >
-          <h2 className="text-4xl sm:text-5xl font-bold mb-4 text-gray-900">
+          <h2 className="text-4xl sm:text-5xl font-bold mb-4 text-gray-900 dark:text-white">
             Get started in{" "}
             <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
               3 simple steps
             </span>
           </h2>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
             From signup to first booking in under 60 seconds
           </p>
         </motion.div>
@@ -68,7 +68,7 @@ export function HowItWorks() {
                 >
                   {/* Connector line */}
                   {index < steps.length - 1 && (
-                    <div className="hidden md:block absolute top-16 left-[60%] w-full h-0.5 bg-gradient-to-r from-indigo-200 to-transparent" />
+                    <div className="hidden md:block absolute top-16 left-[60%] w-full h-0.5 bg-gradient-to-r from-indigo-200 dark:from-indigo-800 to-transparent" />
                   )}
 
                   <div className="text-center">
@@ -80,15 +80,15 @@ export function HowItWorks() {
                       >
                         <Icon className="w-12 h-12 text-white" />
                       </motion.div>
-                      <div className="absolute -top-3 -right-3 w-12 h-12 rounded-full bg-white border-4 border-indigo-600 flex items-center justify-center shadow-lg">
-                        <span className="text-indigo-600 text-sm font-bold">{step.step}</span>
+                      <div className="absolute -top-3 -right-3 w-12 h-12 rounded-full bg-white dark:bg-gray-800 border-4 border-indigo-600 flex items-center justify-center shadow-lg">
+                        <span className="text-indigo-600 dark:text-indigo-400 text-sm font-bold">{step.step}</span>
                       </div>
                     </div>
 
-                    <h3 className="text-2xl font-bold mb-3 text-gray-900">
+                    <h3 className="text-2xl font-bold mb-3 text-gray-900 dark:text-white">
                       {step.title}
                     </h3>
-                    <p className="text-gray-600">
+                    <p className="text-gray-600 dark:text-gray-300">
                       {step.description}
                     </p>
                   </div>
@@ -103,9 +103,9 @@ export function HowItWorks() {
             animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
             transition={{ delay: 0.8 }}
           >
-            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-indigo-50 to-purple-50 px-6 py-3 rounded-full border border-indigo-200">
-              <Clock className="w-5 h-5 text-indigo-600" />
-              <span className="text-indigo-900 font-medium">Average setup time: 47 seconds</span>
+            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 px-6 py-3 rounded-full border border-indigo-200 dark:border-indigo-800">
+              <Clock className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+              <span className="text-indigo-900 dark:text-indigo-300 font-medium">Average setup time: 47 seconds</span>
             </div>
           </motion.div>
         </div>

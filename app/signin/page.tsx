@@ -70,11 +70,11 @@ export default function SignInPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 relative overflow-hidden" style={{ fontFamily: "'DM Sans', -apple-system, sans-serif" }}>
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 relative overflow-hidden" style={{ fontFamily: "'DM Sans', -apple-system, sans-serif" }}>
       {/* Animated gradient blobs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div
-          className="absolute top-20 right-20 w-[400px] h-[400px] rounded-full bg-gradient-to-br from-indigo-400/20 to-purple-400/20 blur-3xl"
+          className="absolute top-20 right-20 w-[400px] h-[400px] rounded-full bg-gradient-to-br from-indigo-400/20 to-purple-400/20 dark:from-indigo-600/20 dark:to-purple-600/20 blur-3xl"
           animate={{
             scale: [1, 1.2, 1],
             opacity: [0.3, 0.5, 0.3],
@@ -86,7 +86,7 @@ export default function SignInPage() {
           }}
         />
         <motion.div
-          className="absolute bottom-20 left-20 w-[500px] h-[500px] rounded-full bg-gradient-to-tr from-purple-400/20 to-pink-400/20 blur-3xl"
+          className="absolute bottom-20 left-20 w-[500px] h-[500px] rounded-full bg-gradient-to-tr from-purple-400/20 to-pink-400/20 dark:from-purple-600/20 dark:to-pink-600/20 blur-3xl"
           animate={{
             scale: [1, 1.3, 1],
             opacity: [0.3, 0.5, 0.3],
@@ -100,14 +100,14 @@ export default function SignInPage() {
       </div>
 
       {/* Nav */}
-      <nav className="relative z-10 flex items-center justify-between px-[60px] py-7 bg-white/80 backdrop-blur-md border-b border-gray-200">
+      <nav className="relative z-10 flex items-center justify-between px-[60px] py-7 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800">
         <motion.div whileHover={{ scale: 1.05 }}>
-          <Link href="/" className="text-[22px] font-bold tracking-tight text-gray-900">
+          <Link href="/" className="text-[22px] font-bold tracking-tight text-gray-900 dark:text-white">
             Bu<span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">Ke</span>
           </Link>
         </motion.div>
         <div className="flex items-center gap-8">
-          <Link href="/#how-it-works" className="text-sm text-gray-600 hover:text-gray-900 font-medium transition-colors">
+          <Link href="/#how-it-works" className="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white font-medium transition-colors">
             How it works
           </Link>
           <Button size="sm" asChild>
@@ -121,7 +121,7 @@ export default function SignInPage() {
       {/* Sign In Form */}
       <div className="max-w-md mx-auto px-6 py-20 relative z-10">
         <motion.div
-          className="bg-white rounded-2xl shadow-2xl p-8 border border-gray-200"
+          className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 border border-gray-200 dark:border-gray-700"
           initial="hidden"
           animate="visible"
           variants={scaleIn}
@@ -132,10 +132,10 @@ export default function SignInPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
           >
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
               Welcome <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">back</span>
             </h1>
-            <p className="text-gray-600">Sign in to access your dashboard</p>
+            <p className="text-gray-600 dark:text-gray-300">Sign in to access your dashboard</p>
           </motion.div>
 
           <form onSubmit={handleSignIn} className="space-y-5">
@@ -144,18 +144,18 @@ export default function SignInPage() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.3 }}
             >
-              <label className="block text-sm font-medium text-gray-900 mb-2">
+              <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
                 Email address
               </label>
               <div className="relative">
-                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" />
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@email.com"
                   required
-                  className="w-full bg-white border border-gray-200 rounded-lg pl-10 pr-3.5 py-3 text-sm focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/10 outline-none transition"
+                  className="w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg pl-10 pr-3.5 py-3 text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/10 outline-none transition"
                 />
               </div>
             </motion.div>
@@ -165,11 +165,11 @@ export default function SignInPage() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.4 }}
             >
-              <label className="block text-sm font-medium text-gray-900 mb-2">
+              <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
                 Password
               </label>
               <div className="relative">
-                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" />
                 <input
                   type="password"
                   value={password}
@@ -177,7 +177,7 @@ export default function SignInPage() {
                   placeholder="Enter your password"
                   required
                   minLength={6}
-                  className="w-full bg-white border border-gray-200 rounded-lg pl-10 pr-3.5 py-3 text-sm focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/10 outline-none transition"
+                  className="w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg pl-10 pr-3.5 py-3 text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/10 outline-none transition"
                 />
               </div>
             </motion.div>
@@ -185,7 +185,7 @@ export default function SignInPage() {
             <AnimatePresence>
               {error && (
                 <motion.div
-                  className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm"
+                  className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-3 rounded-lg text-sm"
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
