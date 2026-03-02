@@ -15,6 +15,24 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              try {
+                const theme = localStorage.getItem('theme') || 'system';
+                let activeTheme = theme;
+
+                if (theme === 'system') {
+                  activeTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                }
+
+                document.documentElement.classList.add(activeTheme);
+              } catch (e) {}
+            `,
+          }}
+        />
+      </head>
       <body>
         <AuthProvider>
           <ThemeProvider>{children}</ThemeProvider>

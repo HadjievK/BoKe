@@ -191,13 +191,13 @@ export default function AppointmentPreview({
           </div>
 
           {/* Notes */}
-          {appointment.notes && (
+          {appointment.customer_notes && (
             <div>
               <div className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
                 Notes
               </div>
               <p className="text-sm text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg">
-                {appointment.notes}
+                {appointment.customer_notes}
               </p>
             </div>
           )}
