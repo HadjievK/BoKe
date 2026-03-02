@@ -279,13 +279,13 @@ export default function DashboardPage() {
               onClick={() => setShowShare(true)}
               className="px-4 py-2 hover:bg-gray-100 rounded-lg transition text-sm font-medium"
             >
-              🔗 Share
+              Share
             </button>
             <button
               onClick={() => setShowSettings(true)}
               className="px-4 py-2 hover:bg-gray-100 rounded-lg transition text-sm font-medium"
             >
-              ⚙️ Settings
+              Settings
             </button>
             <button
               onClick={handleLogout}
@@ -305,41 +305,6 @@ export default function DashboardPage() {
           </h1>
           <p className="text-sm text-gray-600">
             {todayDate} · {dashboardData.appointments.length} appointments today
-          </p>
-        </div>
-
-        {/* Public Booking Link */}
-        <div className="bg-gradient-to-r from-purple-600 to-purple-700 rounded-xl p-6 mb-6 text-white shadow-xl">
-          <div className="flex items-center justify-between">
-            <div className="flex-1">
-              <div className="text-sm font-medium mb-2 opacity-90">Your Public Booking Page</div>
-              <div className="flex items-center gap-3">
-                <div className="text-lg font-bold bg-white/20 px-4 py-2 rounded-lg backdrop-blur-sm">
-                  {typeof window !== 'undefined' ? window.location.origin : ''}/{slug}
-                </div>
-                <button
-                  onClick={() => {
-                    const url = `${window.location.origin}/${slug}`
-                    navigator.clipboard.writeText(url)
-                    alert('Link copied to clipboard! 📋')
-                  }}
-                  className="px-4 py-2 bg-white text-purple-700 font-semibold rounded-lg hover:bg-gray-100 transition"
-                >
-                  📋 Copy Link
-                </button>
-                <a
-                  href={`/${slug}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-4 py-2 bg-white/20 backdrop-blur-sm font-semibold rounded-lg hover:bg-white/30 transition"
-                >
-                  👁️ Preview
-                </a>
-              </div>
-            </div>
-          </div>
-          <p className="text-sm mt-3 opacity-80">
-            Share this link with your customers so they can book appointments with you
           </p>
         </div>
 
