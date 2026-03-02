@@ -120,11 +120,6 @@ export async function GET(
         },
       };
     });
-          is_active: service.is_active !== false,
-          created_at: row.created_at,
-        },
-      };
-    });
 
     // Calculate appointment counts by date
     const appointmentsByDate: Record<string, number> = {};
