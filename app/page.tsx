@@ -15,12 +15,15 @@ import { Features } from '@/components/Features'
 import { HowItWorks } from '@/components/HowItWorks'
 import { CTA } from '@/components/CTA'
 
-const SERVICE_PILLS = [
-  { emoji: '✂️', label: 'Barbers' },
-  { emoji: '🦷', label: 'Dentists' },
-  { emoji: '💅', label: 'Nail Artists' },
-  { emoji: '💪', label: 'Trainers' },
-  { emoji: '💆', label: 'Massage' },
+const SERVICE_CATEGORIES = [
+  'Barbers',
+  'Dentists',
+  'Nail Artists',
+  'Trainers',
+  'Massage Therapists',
+  'Hair Stylists',
+  'Personal Trainers',
+  'Beauty Specialists',
 ]
 
 const SERVICE_TYPES = [
@@ -235,30 +238,37 @@ export default function Home() {
                   </div>
                 </motion.div>
 
+                {/* Sliding text animation */}
                 <motion.div
-                  className="flex flex-wrap gap-2 mb-10"
+                  className="relative overflow-hidden h-12 mb-10"
                   variants={staggerItem}
                 >
-                  {SERVICE_PILLS.map((pill, index) => (
-                    <motion.span
-                      key={pill.label}
-                      className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:shadow-md hover:scale-105 transition-all cursor-default"
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: 0.6 + index * 0.1 }}
-                      whileHover={{ scale: 1.05 }}
+                  <div className="absolute inset-0 flex items-center">
+                    <motion.div
+                      className="flex gap-8 whitespace-nowrap"
+                      animate={{
+                        x: [0, -1000],
+                      }}
+                      transition={{
+                        x: {
+                          repeat: Infinity,
+                          repeatType: "loop",
+                          duration: 20,
+                          ease: "linear",
+                        },
+                      }}
                     >
-                      {pill.emoji} {pill.label}
-                    </motion.span>
-                  ))}
-                  <motion.span
-                    className="inline-flex items-center rounded-full border border-gray-200 bg-white px-4 py-2 text-sm text-gray-500 shadow-sm"
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 1.1 }}
-                  >
-                    + more
-                  </motion.span>
+                      {/* Duplicate the array twice for seamless loop */}
+                      {[...SERVICE_CATEGORIES, ...SERVICE_CATEGORIES].map((category, index) => (
+                        <span
+                          key={index}
+                          className="text-lg font-medium bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent"
+                        >
+                          {category}
+                        </span>
+                      ))}
+                    </motion.div>
+                  </div>
                 </motion.div>
 
                 <motion.div
