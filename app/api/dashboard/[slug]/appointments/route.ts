@@ -34,12 +34,14 @@ export async function GET(
     const providerId = auth.providerId;
 
     // Build query based on date filters
+    // Note: Handles both old (customer_id FK) and new (inline customer data) appointments
     let query = `
       SELECT
         a.id,
         a.provider_id,
         a.customer_id,
         a.service_id,
+        a.service_name,
         a.appointment_date,
         a.appointment_time,
         a.duration,
@@ -47,14 +49,12 @@ export async function GET(
         a.customer_notes,
         a.status,
         a.created_at,
-        c.id as customer_id,
-        c.email as customer_email,
-        c.first_name as customer_first_name,
-        c.last_name as customer_last_name,
-        c.phone as customer_phone,
-        c.created_at as customer_created_at
+        COALESCE(a.customer_email, c.email) as customer_email,
+        COALESCE(a.customer_first_name, c.first_name) as customer_first_name,
+        COALESCE(a.customer_last_name, c.last_name) as customer_last_name,
+        COALESCE(a.customer_phone, c.phone) as customer_phone
       FROM appointments a
-      JOIN customers c ON a.customer_id = c.id
+      LEFT JOIN customers c ON a.customer_id = c.id
       WHERE a.provider_id = $1
     `;
 
@@ -95,6 +95,7 @@ export async function GET(
         provider_id: row.provider_id,
         customer_id: row.customer_id,
         service_id: row.service_id,
+        service_name: row.service_name || service.name,
         appointment_date: row.appointment_date,
         appointment_time: row.appointment_time,
         duration: row.duration,
@@ -102,14 +103,10 @@ export async function GET(
         customer_notes: row.customer_notes,
         status: row.status,
         created_at: row.created_at,
-        customer: {
-          id: row.customer_id,
-          email: row.customer_email,
-          first_name: row.customer_first_name,
-          last_name: row.customer_last_name,
-          phone: row.customer_phone,
-          created_at: row.customer_created_at,
-        },
+        customer_email: row.customer_email,
+        customer_first_name: row.customer_first_name,
+        customer_last_name: row.customer_last_name,
+        customer_phone: row.customer_phone,
         service: {
           id: row.service_id,
           provider_id: row.provider_id,
@@ -118,6 +115,11 @@ export async function GET(
           price: service.price || row.price,
           description: service.description,
           icon: service.icon || '✂️',
+          is_active: service.is_active !== undefined ? service.is_active : true,
+          created_at: row.created_at,
+        },
+      };
+    });
           is_active: service.is_active !== false,
           created_at: row.created_at,
         },
