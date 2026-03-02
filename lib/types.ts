@@ -172,3 +172,41 @@ export interface DashboardData {
   appointments: AppointmentWithDetails[]
   recent_customers: CustomerPublic[]
 }
+
+// Customer Authentication Types
+export interface CustomerJWTPayload {
+  customerId: number
+  email: string
+}
+
+export interface CustomerSignUpRequest {
+  email: string
+  password: string
+  first_name: string
+  last_name: string
+  phone: string
+}
+
+export interface CustomerSignInRequest {
+  email: string
+  password: string
+}
+
+export interface CustomerAuthResponse {
+  customer: {
+    id: number
+    email: string
+    first_name: string
+    last_name: string
+  }
+  token: string
+}
+
+export interface CustomerBookingsResponse {
+  provider: {
+    name: string
+    business_name: string | null
+    slug: string
+  }
+  appointments: AppointmentWithDetails[]
+}
