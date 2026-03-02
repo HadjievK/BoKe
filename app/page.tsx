@@ -623,51 +623,120 @@ export default function Home() {
   )
 }
 
-const DashboardMockup = () => (
-  <div className="rounded-3xl shadow-2xl border border-gray-200 p-6 max-w-md ml-auto bg-white">
-    <div className="flex items-center justify-between mb-6">
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center font-bold text-purple-700">
-          B
+const DashboardMockup = () => {
+  const today = new Date()
+  const currentMonth = today.toLocaleString('default', { month: 'long' })
+  const currentYear = today.getFullYear()
+
+  // Get days in current month
+  const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate()
+  const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1).getDay()
+
+  // Example appointments on specific days
+  const appointments = {
+    8: [{ time: "9:00 AM", client: "Sarah M.", service: "Haircut" }],
+    12: [
+      { time: "10:00 AM", client: "John D.", service: "Fade" },
+      { time: "2:00 PM", client: "Mike R.", service: "Beard Trim" }
+    ],
+    15: [{ time: "11:30 AM", client: "Emma W.", service: "Color" }],
+    20: [
+      { time: "9:30 AM", client: "Alex P.", service: "Haircut" },
+      { time: "1:00 PM", client: "Chris L.", service: "Style" }
+    ],
+    23: [{ time: "3:00 PM", client: "Lisa K.", service: "Treatment" }],
+  }
+
+  const days = []
+  for (let i = 0; i < firstDayOfMonth; i++) {
+    days.push(null)
+  }
+  for (let i = 1; i <= daysInMonth; i++) {
+    days.push(i)
+  }
+
+  return (
+    <div className="rounded-3xl shadow-2xl border border-gray-200 p-6 max-w-lg ml-auto bg-white">
+      {/* Calendar Header */}
+      <div className="mb-6">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-bold text-gray-900">{currentMonth} {currentYear}</h3>
+          <div className="flex gap-2">
+            <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+              <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+              <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          </div>
         </div>
-        <div>
-          <p className="font-semibold text-sm text-gray-900">Your Business</p>
-          <p className="text-xs text-gray-600">buke.app/yourslug</p>
+
+        {/* Day labels */}
+        <div className="grid grid-cols-7 gap-2 mb-2">
+          {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map((day) => (
+            <div key={day} className="text-center text-xs font-semibold text-gray-500">
+              {day}
+            </div>
+          ))}
+        </div>
+
+        {/* Calendar grid */}
+        <div className="grid grid-cols-7 gap-2">
+          {days.map((day, index) => {
+            const hasAppointments = day && appointments[day as keyof typeof appointments]
+            const isToday = day === today.getDate()
+
+            return (
+              <div
+                key={index}
+                className={`
+                  aspect-square flex items-center justify-center rounded-lg text-sm font-medium
+                  ${!day ? 'invisible' : ''}
+                  ${isToday ? 'bg-indigo-600 text-white' : ''}
+                  ${hasAppointments && !isToday ? 'bg-purple-100 text-purple-700 border-2 border-purple-300' : ''}
+                  ${!hasAppointments && !isToday ? 'text-gray-700 hover:bg-gray-100' : ''}
+                  transition-colors cursor-pointer relative
+                `}
+              >
+                {day}
+                {hasAppointments && (
+                  <span className="absolute bottom-1 w-1 h-1 rounded-full bg-current" />
+                )}
+              </div>
+            )
+          })}
         </div>
       </div>
-      <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2.5 py-1 text-xs font-medium text-green-700">
-        <span className="w-1.5 h-1.5 rounded-full bg-green-600" />
-        Live
-      </span>
-    </div>
 
-    <div className="grid grid-cols-3 gap-3 mb-6">
-      {[
-        { value: "7", label: "Today" },
-        { value: "$486", label: "Revenue" },
-        { value: "4.9★", label: "Rating" }
-      ].map((stat) => (
-        <div key={stat.label} className="rounded-xl border border-gray-200 bg-gray-50 p-3 text-center">
-          <p className="text-xl font-bold text-gray-900">{stat.value}</p>
-          <p className="text-xs text-gray-600">{stat.label}</p>
+      {/* Upcoming appointments */}
+      <div>
+        <h4 className="text-sm font-semibold text-gray-900 mb-3">Upcoming Appointments</h4>
+        <div className="space-y-2">
+          {[
+            { date: "Today", time: "2:00 PM", client: "Mike R.", service: "Beard Trim", color: "indigo" },
+            { date: "Mar 15", time: "11:30 AM", client: "Emma W.", service: "Color", color: "purple" },
+            { date: "Mar 20", time: "9:30 AM", client: "Alex P.", service: "Haircut", color: "purple" },
+          ].map((apt, index) => (
+            <div
+              key={index}
+              className="flex items-center justify-between rounded-xl border border-gray-200 bg-white px-4 py-3 hover:shadow-md transition-shadow"
+            >
+              <div className="flex items-center gap-3">
+                <div className={`w-2 h-2 rounded-full bg-${apt.color}-600`} />
+                <div>
+                  <div className="text-sm font-semibold text-gray-900">{apt.client}</div>
+                  <div className="text-xs text-gray-600">{apt.date} · {apt.time}</div>
+                </div>
+              </div>
+              <div className="text-xs font-medium text-gray-600">{apt.service}</div>
+            </div>
+          ))}
         </div>
-      ))}
+      </div>
     </div>
-
-    <div className="space-y-2">
-      {[
-        { time: "9:00", name: "Marcus W. — Fade", price: "$45" },
-        { time: "10:30", name: "Jordan L. — Cut", price: "$35" },
-        { time: "12:00", name: "Andre T. — Trim", price: "$25" }
-      ].map((apt) => (
-        <div key={apt.time} className="flex items-center justify-between rounded-xl border border-gray-200 bg-white px-4 py-3">
-          <div className="flex items-center gap-3">
-            <span className="text-sm font-bold text-gray-900">{apt.time}</span>
-            <span className="text-sm text-gray-600">{apt.name}</span>
-          </div>
-          <span className="text-sm font-semibold text-purple-600">{apt.price}</span>
-        </div>
-      ))}
-    </div>
-  </div>
-)
+  )
+}
