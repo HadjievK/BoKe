@@ -50,6 +50,14 @@ export interface CustomerPublic extends Customer {
   created_at: string
 }
 
+export const AppointmentStatus = {
+  CONFIRMED: 'confirmed',
+  CANCELLED: 'cancelled',
+  COMPLETED: 'completed'
+} as const
+
+export type AppointmentStatusType = typeof AppointmentStatus[keyof typeof AppointmentStatus]
+
 export interface Appointment {
   id: string
   provider_id: string
@@ -60,7 +68,7 @@ export interface Appointment {
   duration: number
   price: number
   customer_notes?: string
-  status: 'confirmed' | 'cancelled' | 'completed'
+  status: AppointmentStatusType
   created_at: string
 }
 

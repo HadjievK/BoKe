@@ -1,15 +1,15 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { getDashboardData, verifyAuth, signOut } from '@/lib/api'
+import { getDashboardData, verifyAuth, signOut, getAppointments, updateAppointmentStatus, updateProviderProfile, updateProviderPassword } from '@/lib/api'
 import type { DashboardData, AppointmentWithDetails } from '@/lib/types'
-import { formatDate, formatTime, formatCurrency } from '@/lib/utils'
+import { AppointmentStatus } from '@/lib/types'
+import { formatDate, formatTime, formatCurrency, getCalendarDateRange, formatDateShort } from '@/lib/utils'
 import ThemeToggle from '@/components/ThemeToggle'
 import AppointmentCalendar from '@/components/dashboard/AppointmentCalendar'
 import AppointmentDetailsModal from '@/components/dashboard/AppointmentDetailsModal'
 import { View } from 'react-big-calendar'
-import moment from 'moment'
 
 export default function DashboardPage() {
   const params = useParams()
@@ -34,80 +34,59 @@ export default function DashboardPage() {
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [location, setLocation] = useState('')
-  const [latitude, setLatitude] = useState<number | undefined>()
-  const [longitude, setLongitude] = useState<number | undefined>()
   const [services, setServices] = useState<any[]>([])
   const [settingsError, setSettingsError] = useState('')
   const [settingsSaving, setSettingsSaving] = useState(false)
 
-  // Check authentication on mount
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const auth = await verifyAuth()
+  const checkAuth = useCallback(async () => {
+    try {
+      const auth = await verifyAuth()
 
-        if (!auth.authenticated) {
-          router.push('/signin')
-          return
-        }
-
-        if (auth.slug !== slug) {
-          router.push(`/dashboard/${auth.slug}`)
-          return
-        }
-
-        setAuthenticated(true)
-        await fetchDashboard()
-      } catch (err: any) {
-        console.error('Auth check failed:', err)
+      if (!auth.authenticated) {
         router.push('/signin')
-      } finally {
-        setLoading(false)
+        return
       }
-    }
 
-    checkAuth()
+      if (auth.slug !== slug) {
+        router.push(`/dashboard/${auth.slug}`)
+        return
+      }
+
+      setAuthenticated(true)
+      await fetchDashboard()
+    } catch (err: any) {
+      console.error('Auth check failed:', err)
+      router.push('/signin')
+    } finally {
+      setLoading(false)
+    }
   }, [slug, router])
 
-  // Auto-refresh dashboard every 30 seconds
+  // Check authentication on mount
+  useEffect(() => {
+    checkAuth()
+  }, [checkAuth])
+
+  // Auto-refresh dashboard every 60 seconds (optimized from 30s)
   useEffect(() => {
     if (!authenticated) return
 
     const interval = setInterval(() => {
       fetchDashboard(true)
-    }, 30000)
+    }, 60000)
 
     return () => clearInterval(interval)
   }, [authenticated, slug])
 
-  // Fetch calendar appointments when view/date changes
-  useEffect(() => {
-    if (authenticated) {
-      fetchCalendarAppointments()
-    }
-  }, [authenticated, calendarView, currentDate])
-
+  // Initialize settings from dashboardData when modal opens
   useEffect(() => {
     if (showSettings && dashboardData) {
-      const fetchSettings = async () => {
-        try {
-          const response = await fetch(`/api/provider/${slug}`)
-          if (response.ok) {
-            const data = await response.json()
-            setLocation(data.location || '')
-            setLatitude(data.latitude)
-            setLongitude(data.longitude)
-            setServices(data.services || [])
-          }
-        } catch (err) {
-          console.error('Failed to load settings:', err)
-        }
-      }
-      fetchSettings()
+      setLocation(dashboardData.provider.location || '')
+      // Services would need to be fetched separately if needed
     }
-  }, [showSettings, slug])
+  }, [showSettings, dashboardData])
 
-  const fetchDashboard = async (silent = false) => {
+  const fetchDashboard = useCallback(async (silent = false) => {
     if (!silent) setLoading(true)
     setError('')
 
@@ -124,51 +103,24 @@ export default function DashboardPage() {
     } finally {
       if (!silent) setLoading(false)
     }
-  }
+  }, [slug, router])
 
-  const fetchCalendarAppointments = async () => {
+  const fetchCalendarAppointments = useCallback(async () => {
     try {
-      let startDate, endDate
-
-      // Calculate date range based on calendar view
-      if (calendarView === 'week') {
-        // Use ISO week (Monday start) and expand by 1 day on each side
-        const weekStart = moment(currentDate).startOf('isoWeek').subtract(1, 'day')
-        const weekEnd = moment(currentDate).endOf('isoWeek').add(1, 'day')
-        startDate = weekStart.format('YYYY-MM-DD')
-        endDate = weekEnd.format('YYYY-MM-DD')
-      } else if (calendarView === 'day') {
-        startDate = moment(currentDate).format('YYYY-MM-DD')
-        endDate = startDate
-      } else if (calendarView === 'month') {
-        const monthStart = moment(currentDate).startOf('month').subtract(7, 'days')
-        const monthEnd = moment(currentDate).endOf('month').add(7, 'days')
-        startDate = monthStart.format('YYYY-MM-DD')
-        endDate = monthEnd.format('YYYY-MM-DD')
-      }
-
-      const params = new URLSearchParams()
-      if (startDate) params.append('start_date', startDate)
-      if (endDate) params.append('end_date', endDate)
-
-      const response = await fetch(
-        `/api/dashboard/${slug}/appointments?${params.toString()}`,
-        {
-          credentials: 'include',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('auth_token') || ''}`,
-          },
-        }
-      )
-
-      if (response.ok) {
-        const data = await response.json()
-        setAppointments(data.appointments || [])
-      }
+      const { startDate, endDate } = getCalendarDateRange(calendarView, currentDate)
+      const data = await getAppointments(slug, undefined, startDate, endDate)
+      setAppointments(data.appointments || [])
     } catch (err) {
       console.error('Failed to fetch calendar appointments:', err)
     }
-  }
+  }, [slug, calendarView, currentDate])
+
+  // Fetch calendar appointments when view/date changes
+  useEffect(() => {
+    if (authenticated) {
+      fetchCalendarAppointments()
+    }
+  }, [authenticated, fetchCalendarAppointments])
 
   const handleLogout = async () => {
     try {
@@ -195,55 +147,40 @@ export default function DashboardPage() {
     setCalendarView(view)
   }, [])
 
-  const handleCancelAppointment = async (appointmentId: string) => {
+  const handleUpdateAppointmentStatus = useCallback(async (
+    appointmentId: string,
+    status: string,
+    successMessage: string
+  ) => {
     try {
-      const response = await fetch(`/api/dashboard/${slug}/appointments/${appointmentId}`, {
-        method: 'PATCH',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('auth_token') || ''}`,
-        },
-        body: JSON.stringify({ status: 'cancelled' }),
-      })
-
-      if (response.ok) {
-        await fetchCalendarAppointments()
-        await fetchDashboard(true)
-        alert('Appointment cancelled successfully')
-      } else {
-        alert('Failed to cancel appointment')
-      }
-    } catch (err) {
-      console.error('Failed to cancel appointment:', err)
-      alert('Failed to cancel appointment')
-    }
-  }
-
-  const handleCompleteAppointment = async (appointmentId: string) => {
-    try {
-      const response = await fetch(`/api/dashboard/${slug}/appointments/${appointmentId}`, {
-        method: 'PATCH',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('auth_token') || ''}`,
-        },
-        body: JSON.stringify({ status: 'completed' }),
-      })
-
-      if (response.ok) {
-        await fetchCalendarAppointments()
-        await fetchDashboard(true)
-        alert('Appointment marked as complete')
-      } else {
-        alert('Failed to update appointment')
-      }
+      await updateAppointmentStatus(slug, appointmentId, status)
+      // Run refreshes in parallel for faster updates
+      await Promise.all([
+        fetchCalendarAppointments(),
+        fetchDashboard(true)
+      ])
+      alert(successMessage)
     } catch (err) {
       console.error('Failed to update appointment:', err)
       alert('Failed to update appointment')
     }
-  }
+  }, [slug, fetchCalendarAppointments, fetchDashboard])
+
+  const handleCancelAppointment = useCallback((appointmentId: string) => {
+    return handleUpdateAppointmentStatus(
+      appointmentId,
+      AppointmentStatus.CANCELLED,
+      'Appointment cancelled successfully'
+    )
+  }, [handleUpdateAppointmentStatus])
+
+  const handleCompleteAppointment = useCallback((appointmentId: string) => {
+    return handleUpdateAppointmentStatus(
+      appointmentId,
+      AppointmentStatus.COMPLETED,
+      'Appointment marked as complete'
+    )
+  }, [handleUpdateAppointmentStatus])
 
   const handleSaveSettings = async () => {
     setSettingsError('')
@@ -251,19 +188,7 @@ export default function DashboardPage() {
 
     try {
       // Update location
-      const locationResponse = await fetch(`/api/provider/${slug}`, {
-        method: 'PATCH',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('auth_token') || ''}`,
-        },
-        body: JSON.stringify({ location }),
-      })
-
-      if (!locationResponse.ok) {
-        throw new Error('Failed to update location')
-      }
+      await updateProviderProfile(slug, { location })
 
       // Update password if provided
       if (currentPassword && newPassword) {
@@ -271,22 +196,7 @@ export default function DashboardPage() {
           throw new Error('New passwords do not match')
         }
 
-        const passwordResponse = await fetch(`/api/provider/${slug}/password`, {
-          method: 'POST',
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('auth_token') || ''}`,
-          },
-          body: JSON.stringify({
-            current_password: currentPassword,
-            new_password: newPassword,
-          }),
-        })
-
-        if (!passwordResponse.ok) {
-          throw new Error('Failed to update password')
-        }
+        await updateProviderPassword(slug, currentPassword, newPassword)
       }
 
       alert('Settings saved successfully!')
@@ -333,7 +243,7 @@ export default function DashboardPage() {
   }
 
   const provider = dashboardData.provider
-  const todayDate = new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
+  const todayDate = useMemo(() => formatDateShort(new Date()), [])
 
   return (
     <main className="min-h-screen bg-gray-50">

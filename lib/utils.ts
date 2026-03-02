@@ -66,3 +66,41 @@ export function getDateRange(startDate: Date, days: number): Date[] {
 export function cn(...classes: (string | boolean | undefined)[]): string {
   return classes.filter(Boolean).join(' ')
 }
+
+export function formatDateShort(date: Date): string {
+  return date.toLocaleDateString('en-US', {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric'
+  })
+}
+
+export function getCalendarDateRange(
+  view: 'week' | 'day' | 'month',
+  currentDate: Date
+): { startDate: string; endDate: string } {
+  // Lazy load moment only when needed
+  const moment = require('moment')
+
+  if (view === 'week') {
+    const weekStart = moment(currentDate).startOf('isoWeek').subtract(1, 'day')
+    const weekEnd = moment(currentDate).endOf('isoWeek').add(1, 'day')
+    return {
+      startDate: weekStart.format('YYYY-MM-DD'),
+      endDate: weekEnd.format('YYYY-MM-DD')
+    }
+  } else if (view === 'day') {
+    const dateStr = moment(currentDate).format('YYYY-MM-DD')
+    return {
+      startDate: dateStr,
+      endDate: dateStr
+    }
+  } else { // month
+    const monthStart = moment(currentDate).startOf('month').subtract(7, 'days')
+    const monthEnd = moment(currentDate).endOf('month').add(7, 'days')
+    return {
+      startDate: monthStart.format('YYYY-MM-DD'),
+      endDate: monthEnd.format('YYYY-MM-DD')
+    }
+  }
+}

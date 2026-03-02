@@ -253,3 +253,58 @@ export async function verifyAuth(): Promise<{ authenticated: boolean; providerId
 
   return res.json();
 }
+
+// ============ Appointment Management API ============
+
+export async function updateAppointmentStatus(
+  slug: string,
+  appointmentId: string,
+  status: string
+): Promise<void> {
+  const res = await fetch(`${API_URL}/api/dashboard/${slug}/appointments/${appointmentId}`, {
+    method: 'PATCH',
+    headers: getAuthHeaders(),
+    credentials: 'include',
+    body: JSON.stringify({ status }),
+  })
+
+  if (!res.ok) {
+    throw new Error('Failed to update appointment status')
+  }
+}
+
+export async function updateProviderProfile(
+  slug: string,
+  updates: { location?: string }
+): Promise<void> {
+  const res = await fetch(`${API_URL}/api/provider/${slug}`, {
+    method: 'PATCH',
+    headers: getAuthHeaders(),
+    credentials: 'include',
+    body: JSON.stringify(updates),
+  })
+
+  if (!res.ok) {
+    throw new Error('Failed to update provider profile')
+  }
+}
+
+export async function updateProviderPassword(
+  slug: string,
+  currentPassword: string,
+  newPassword: string
+): Promise<void> {
+  const res = await fetch(`${API_URL}/api/provider/${slug}/password`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    credentials: 'include',
+    body: JSON.stringify({
+      current_password: currentPassword,
+      new_password: newPassword,
+    }),
+  })
+
+  if (!res.ok) {
+    throw new Error('Failed to update password')
+  }
+}
