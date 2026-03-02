@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import pool from '@/lib/db';
+import { sendBookingConfirmationEmail } from '@/lib/email';
+import { AppointmentStatus } from '@/lib/types';
+import { validateEmail } from '@/lib/utils';
+import crypto from 'crypto';
 
 export async function POST(
   request: NextRequest,
@@ -12,20 +16,28 @@ export async function POST(
 
     if (!service_id || !appointment_date || !appointment_time || !customer) {
       return NextResponse.json(
-        { detail: 'Missing required fields' },
+        { error: 'Missing required fields' },
+        { status: 400 }
+      );
+    }
+
+    // Validate customer email
+    if (!validateEmail(customer.email)) {
+      return NextResponse.json(
+        { error: 'Invalid email address' },
         { status: 400 }
       );
     }
 
     // Verify provider exists and get service details
     const providerResult = await pool.query(
-      'SELECT id, name, business_name, services FROM service_providers WHERE slug = $1',
+      'SELECT id, name, business_name, location, phone, services FROM service_providers WHERE slug = $1',
       [slug]
     );
 
     if (providerResult.rows.length === 0) {
       return NextResponse.json(
-        { detail: 'Provider not found' },
+        { error: 'Provider not found' },
         { status: 404 }
       );
     }
@@ -49,7 +61,7 @@ export async function POST(
 
     if (!service) {
       return NextResponse.json(
-        { detail: 'Service not found' },
+        { error: 'Service not found' },
         { status: 404 }
       );
     }
@@ -60,93 +72,120 @@ export async function POST(
        WHERE provider_id = $1
          AND appointment_date = $2
          AND appointment_time = $3
-         AND status != 'cancelled'`,
-      [providerId, appointment_date, appointment_time]
+         AND status = $4`,
+      [providerId, appointment_date, appointment_time, AppointmentStatus.CONFIRMED]
     ).catch(() => ({ rows: [] }));
 
     if (existingResult.rows.length > 0) {
       return NextResponse.json(
-        { detail: 'This time slot is no longer available' },
+        { error: 'This time slot is no longer available' },
         { status: 409 }
       );
     }
 
-    // Create or get customer
-    let customerId;
-    const customerResult = await pool.query(
-      'SELECT id FROM customers WHERE email = $1',
-      [customer.email]
-    ).catch(() => ({ rows: [] }));
-
-    if (customerResult.rows.length > 0) {
-      customerId = customerResult.rows[0].id;
-    } else {
-      const newCustomerResult = await pool.query(
-        `INSERT INTO customers (email, first_name, last_name, phone)
-         VALUES ($1, $2, $3, $4)
-         RETURNING id`,
-        [customer.email, customer.first_name, customer.last_name, customer.phone]
-      );
-      customerId = newCustomerResult.rows[0].id;
-    }
-
-    // Create appointment
+    // Create appointment with inline customer data (no customer table lookup)
     const appointmentResult = await pool.query(
       `INSERT INTO appointments (
-        provider_id, customer_id, service_id, service_name, appointment_date, appointment_time,
-        duration, service_duration, price, service_price, customer_notes, status
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
-      RETURNING id, created_at`,
+        provider_id, service_id, service_name, appointment_date, appointment_time,
+        duration, price, customer_notes, status,
+        customer_email, customer_first_name, customer_last_name, customer_phone
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+      RETURNING *`,
       [
         providerId,
-        customerId,
         service_id,
-        service.name,  // service_name
+        service.name,
         appointment_date,
         appointment_time,
-        service.duration,  // duration
-        service.duration,  // service_duration (duplicate for compatibility)
-        service.price,     // price
-        service.price,     // service_price (duplicate for compatibility)
+        service.duration,
+        service.price,
         customer.notes || null,
-        'confirmed'
+        AppointmentStatus.CONFIRMED,
+        customer.email.toLowerCase(),
+        customer.first_name,
+        customer.last_name,
+        customer.phone || null,
       ]
     );
 
     const appointment = appointmentResult.rows[0];
 
-    // Return confirmation
-    return NextResponse.json({
-      id: appointment.id,
-      provider: {
-        name: provider.name,
-        business_name: provider.business_name,
-        slug: slug
-      },
-      appointment: {
+    // Generate secure token
+    const token = crypto.randomBytes(32).toString('hex');
+
+    // Calculate expiration (24 hours after appointment)
+    const appointmentDateTime = new Date(`${appointment_date}T${appointment_time}`);
+    const expiresAt = new Date(appointmentDateTime);
+    expiresAt.setHours(expiresAt.getHours() + 24);
+
+    // Store token
+    await pool.query(
+      `INSERT INTO booking_tokens (token, appointment_id, expires_at)
+       VALUES ($1, $2, $3)`,
+      [token, appointment.id, expiresAt]
+    );
+
+    // Generate magic link
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || `${request.nextUrl.protocol}//${request.nextUrl.host}`;
+    const magicLink = `${baseUrl}/${slug}/booking/${token}`;
+
+    // Send confirmation email
+    try {
+      await sendBookingConfirmationEmail({
+        customer: {
+          email: customer.email,
+          first_name: customer.first_name,
+          last_name: customer.last_name,
+          phone: customer.phone || '',
+        },
+        provider: {
+          name: provider.name,
+          business_name: provider.business_name,
+          location: provider.location,
+          phone: provider.phone,
+          slug: slug,
+        },
         service: {
           name: service.name,
           duration: service.duration,
-          price: service.price
+          price: service.price,
         },
+        appointment: {
+          id: appointment.id,
+          appointment_date: appointment.appointment_date,
+          appointment_time: appointment.appointment_time,
+          customer_notes: appointment.customer_notes,
+        },
+        magicLink,
+      });
+    } catch (emailError) {
+      console.error('Failed to send confirmation email:', emailError);
+      // Continue - booking was created successfully
+    }
+
+    // Return confirmation with token for immediate access
+    return NextResponse.json({
+      appointment: {
+        id: appointment.id,
+        service_name: service.name,
         appointment_date,
         appointment_time,
         duration: service.duration,
         price: service.price,
         status: 'confirmed',
-        created_at: appointment.created_at
+        customer_email: customer.email,
+        customer_first_name: customer.first_name,
+        customer_last_name: customer.last_name,
+        created_at: appointment.created_at,
       },
-      customer: {
-        first_name: customer.first_name,
-        last_name: customer.last_name,
-        email: customer.email
-      }
-    });
+      token,
+      message: 'Booking confirmed! Check your email for a link to manage your booking.',
+    }, { status: 201 });
 
   } catch (error: any) {
     console.error('Booking API error:', error);
     return NextResponse.json(
-      { detail: `Failed to create booking: ${error.message}` },
+      { error: `Failed to create booking: ${error.message}` },
       { status: 500 }
     );
   }

@@ -171,19 +171,6 @@ export default function ProviderProfilePage() {
           }}
         />
 
-        {/* My Bookings Link - Top Right */}
-        <div className="absolute top-4 right-4 z-20">
-          <Link
-            href={`/${slug}/my-bookings`}
-            className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white text-sm font-semibold rounded-full backdrop-blur-sm border border-white/20 transition flex items-center gap-2"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-            My Bookings
-          </Link>
-        </div>
-
         {/* Hero Content */}
         <div className="relative z-10 h-full flex flex-col justify-end p-8 max-w-[680px] mx-auto">
           <div className="flex items-end gap-5 mb-4">
@@ -427,7 +414,7 @@ export default function ProviderProfilePage() {
 
         {/* Success Section */}
         {bookingStep === 'success' && confirmation && (
-          <div id="success-section" className="text-center py-8 scroll-mt-8">
+          <div id="success-section" className="text-center py-8 scroll-mt-8 max-w-2xl mx-auto">
             <div className="text-6xl mb-4">✅</div>
             <h2
               className="text-2xl font-bold text-gray-900 mb-2"
@@ -435,15 +422,24 @@ export default function ProviderProfilePage() {
             >
               Booking Confirmed!
             </h2>
-            <p className="text-gray-600 mb-6">
-              Your appointment has been successfully booked.
-            </p>
 
-            <div className="bg-white border border-gray-200 rounded-xl p-6 max-w-md mx-auto mb-6 text-left">
+            <div className="bg-purple-50 border border-purple-200 rounded-xl p-6 mb-6">
+              <p className="text-lg text-gray-900 mb-2">
+                ✉️ Check your email
+              </p>
+              <p className="text-gray-600 mb-4">
+                We've sent a confirmation to <strong>{confirmation.appointment.customer_email}</strong>
+              </p>
+              <p className="text-sm text-gray-600">
+                The email includes your booking details and a secure link to view or cancel your appointment.
+              </p>
+            </div>
+
+            <div className="bg-white border border-gray-200 rounded-xl p-6 mb-6 text-left">
               <div className="space-y-3">
                 <div>
                   <div className="text-xs text-gray-600 mb-1">Service</div>
-                  <div className="font-semibold text-gray-900">{confirmation.appointment.service.name}</div>
+                  <div className="font-semibold text-gray-900">{confirmation.appointment.service_name}</div>
                 </div>
                 <div className="border-t border-gray-200 pt-3">
                   <div className="text-xs text-gray-600 mb-1">Date & Time</div>
@@ -466,36 +462,23 @@ export default function ProviderProfilePage() {
               </div>
             </div>
 
-            {/* Customer Account Management */}
-            <div className="bg-purple-50 border border-purple-200 rounded-xl p-6 max-w-md mx-auto mb-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                Manage Your Bookings
-              </h3>
-              <p className="text-sm text-gray-600 mb-4">
-                Create an account to view, manage, and cancel your appointments anytime.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-3">
-                <a
-                  href={`/${slug}/signup`}
-                  className="flex-1 bg-purple-600 text-white px-6 py-2.5 rounded-full text-sm font-semibold hover:bg-purple-700 transition"
+            <div className="space-y-3">
+              {confirmation.token && (
+                <Link
+                  href={`/${slug}/booking/${confirmation.token}`}
+                  className="block w-full bg-purple-600 text-white py-3 px-6 rounded-full hover:bg-purple-700 font-semibold text-sm"
                 >
-                  Create Account
-                </a>
-                <a
-                  href={`/${slug}/signin`}
-                  className="flex-1 bg-white text-purple-600 px-6 py-2.5 rounded-full text-sm font-semibold border border-purple-300 hover:bg-purple-50 transition"
-                >
-                  Sign In
-                </a>
-              </div>
-            </div>
+                  View Booking Details
+                </Link>
+              )}
 
-            <button
-              onClick={handleBookAnother}
-              className="bg-gray-900 text-white px-8 py-3 rounded-full text-sm font-semibold hover:bg-purple-600 transition"
-            >
-              Book Another Appointment
-            </button>
+              <button
+                onClick={handleBookAnother}
+                className="block w-full bg-white text-purple-600 py-3 px-6 rounded-full border-2 border-purple-600 hover:bg-purple-50 font-semibold text-sm"
+              >
+                Book Another Appointment
+              </button>
+            </div>
           </div>
         )}
       </div>

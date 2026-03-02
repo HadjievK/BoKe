@@ -74,8 +74,9 @@ export type AppointmentStatusType = typeof AppointmentStatus[keyof typeof Appoin
 export interface Appointment {
   id: string
   provider_id: string
-  customer_id: string
+  customer_id?: string // Optional for backward compatibility
   service_id: string
+  service_name: string // Denormalized
   appointment_date: string // YYYY-MM-DD
   appointment_time: string // HH:MM:SS
   duration: number
@@ -83,10 +84,14 @@ export interface Appointment {
   customer_notes?: string
   status: AppointmentStatusType
   created_at: string
+  // Inline customer fields (stateless booking)
+  customer_email: string
+  customer_first_name: string
+  customer_last_name: string
+  customer_phone?: string
 }
 
 export interface AppointmentWithDetails extends Appointment {
-  customer: CustomerPublic
   service: Service
 }
 
@@ -109,8 +114,58 @@ export interface BookingRequest {
 }
 
 export interface BookingConfirmation {
-  appointment: AppointmentWithDetails
+  appointment: Appointment
+  token: string
   message: string
+}
+
+// Booking Token Types
+export interface BookingToken {
+  id: string
+  token: string
+  appointment_id: string
+  expires_at: string
+  used_count: number
+  last_used_at: string | null
+  created_at: string
+}
+
+export interface BookingTokenValidation {
+  valid: boolean
+  expired?: boolean
+  notFound?: boolean
+  rateLimited?: boolean
+}
+
+export interface BookingManagementData {
+  appointment: {
+    id: string
+    appointment_date: string
+    appointment_time: string
+    duration: number
+    price: number
+    status: AppointmentStatusType
+    customer_notes?: string
+    customer_email: string
+    customer_first_name: string
+    customer_last_name: string
+    customer_phone?: string
+  }
+  provider: {
+    name: string
+    business_name: string
+    location?: string
+    phone?: string
+  }
+  service: {
+    name: string
+    duration: number
+    price: number
+  }
+  token: {
+    expires_at: string
+    is_expired: boolean
+  }
 }
 
 export interface OnboardingData {
@@ -173,7 +228,8 @@ export interface DashboardData {
   recent_customers: CustomerPublic[]
 }
 
-// Customer Authentication Types
+// DEPRECATED: Customer authentication types - will be removed
+// System now uses stateless token-based booking management
 export interface CustomerJWTPayload {
   customerId: number
   email: string
