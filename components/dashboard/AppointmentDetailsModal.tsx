@@ -162,7 +162,7 @@ export default function AppointmentDetailsModal({
                 <div className="flex items-center gap-4 mt-2 text-sm text-gray-600">
                   <span>{appointment.duration} minutes</span>
                   <span>•</span>
-                  <span>${appointment.price.toFixed(2)}</span>
+                  <span>${Number(appointment.price).toFixed(2)}</span>
                 </div>
               </div>
             </div>
