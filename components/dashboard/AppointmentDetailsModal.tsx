@@ -21,9 +21,26 @@ export default function AppointmentDetailsModal({
 }: AppointmentDetailsModalProps) {
   if (!isOpen || !appointment) return null
 
-  const appointmentDateTime = new Date(
-    `${appointment.appointment_date}T${appointment.appointment_time}`
-  )
+  // Validate appointment date and time before creating Date object
+  if (!appointment.appointment_date || !appointment.appointment_time) {
+    console.error('Invalid appointment data:', appointment)
+    return null
+  }
+
+  let appointmentDateTime: Date
+  try {
+    appointmentDateTime = new Date(
+      `${appointment.appointment_date}T${appointment.appointment_time}`
+    )
+    // Check if date is valid
+    if (isNaN(appointmentDateTime.getTime())) {
+      console.error('Invalid date created:', appointment.appointment_date, appointment.appointment_time)
+      return null
+    }
+  } catch (error) {
+    console.error('Error creating appointment date:', error)
+    return null
+  }
 
   const getStatusBadge = (status: string) => {
     const styles = {
