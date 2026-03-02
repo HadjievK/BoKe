@@ -30,6 +30,7 @@ export default function DashboardPage() {
 
   // Settings modal states
   const [showSettings, setShowSettings] = useState(false)
+  const [settingsTab, setSettingsTab] = useState<'account' | 'calendar'>('account')
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -37,6 +38,21 @@ export default function DashboardPage() {
   const [services, setServices] = useState<any[]>([])
   const [settingsError, setSettingsError] = useState('')
   const [settingsSaving, setSettingsSaving] = useState(false)
+
+  // Calendar settings states
+  const [calendarStartTime, setCalendarStartTime] = useState('09:00')
+  const [calendarEndTime, setCalendarEndTime] = useState('17:00')
+  const [slotDuration, setSlotDuration] = useState('30')
+  const [bufferTime, setBufferTime] = useState('0')
+  const [workingDays, setWorkingDays] = useState({
+    monday: true,
+    tuesday: true,
+    wednesday: true,
+    thursday: true,
+    friday: true,
+    saturday: false,
+    sunday: false
+  })
 
   // Share modal state
   const [showShare, setShowShare] = useState(false)
@@ -496,79 +512,224 @@ export default function DashboardPage() {
       {/* Settings Modal */}
       {showSettings && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+            {/* Header */}
             <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
               <h2 className="text-2xl font-bold text-gray-900">Settings</h2>
               <button
-                onClick={() => setShowSettings(false)}
+                onClick={() => {
+                  setShowSettings(false)
+                  setSettingsTab('account')
+                }}
                 className="text-2xl text-gray-600 hover:text-gray-900 transition"
               >
                 ×
               </button>
             </div>
-            <div className="p-6 space-y-6">
+
+            {/* Tabs */}
+            <div className="flex border-b border-gray-200 bg-gray-50 px-6">
+              <button
+                onClick={() => setSettingsTab('account')}
+                className={`px-6 py-3 text-sm font-semibold border-b-2 transition ${
+                  settingsTab === 'account'
+                    ? 'border-purple-600 text-purple-600'
+                    : 'border-transparent text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                Account Settings
+              </button>
+              <button
+                onClick={() => setSettingsTab('calendar')}
+                className={`px-6 py-3 text-sm font-semibold border-b-2 transition ${
+                  settingsTab === 'calendar'
+                    ? 'border-purple-600 text-purple-600'
+                    : 'border-transparent text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                Calendar Settings
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="flex-1 overflow-y-auto p-6">
               {settingsError && (
-                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
                   {settingsError}
                 </div>
               )}
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Business Location
-                </label>
-                <input
-                  type="text"
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
-                  placeholder="123 Main St, City, State"
-                />
-              </div>
+              {/* Account Settings Tab */}
+              {settingsTab === 'account' && (
+                <div className="space-y-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Business Location
+                    </label>
+                    <input
+                      type="text"
+                      value={location}
+                      onChange={(e) => setLocation(e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
+                      placeholder="123 Main St, City, State"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      This will be displayed on your public booking page
+                    </p>
+                  </div>
 
-              <div className="border-t border-gray-200 pt-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Change Password</h3>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Current Password
-                    </label>
-                    <input
-                      type="password"
-                      value={currentPassword}
-                      onChange={(e) => setCurrentPassword(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      New Password
-                    </label>
-                    <input
-                      type="password"
-                      value={newPassword}
-                      onChange={(e) => setNewPassword(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Confirm New Password
-                    </label>
-                    <input
-                      type="password"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
-                    />
+                  <div className="border-t border-gray-200 pt-6">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Change Password</h3>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Current Password
+                        </label>
+                        <input
+                          type="password"
+                          value={currentPassword}
+                          onChange={(e) => setCurrentPassword(e.target.value)}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          New Password
+                        </label>
+                        <input
+                          type="password"
+                          value={newPassword}
+                          onChange={(e) => setNewPassword(e.target.value)}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Confirm New Password
+                        </label>
+                        <input
+                          type="password"
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
+                        />
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
+
+              {/* Calendar Settings Tab */}
+              {settingsTab === 'calendar' && (
+                <div className="space-y-6">
+                  {/* Working Hours */}
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Working Hours</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Start Time
+                        </label>
+                        <input
+                          type="time"
+                          value={calendarStartTime}
+                          onChange={(e) => setCalendarStartTime(e.target.value)}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          End Time
+                        </label>
+                        <input
+                          type="time"
+                          value={calendarEndTime}
+                          onChange={(e) => setCalendarEndTime(e.target.value)}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
+                        />
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-2">
+                      Define your daily working hours for appointments
+                    </p>
+                  </div>
+
+                  {/* Time Slot Settings */}
+                  <div className="border-t border-gray-200 pt-6">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Time Slot Settings</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Slot Duration (minutes)
+                        </label>
+                        <select
+                          value={slotDuration}
+                          onChange={(e) => setSlotDuration(e.target.value)}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
+                        >
+                          <option value="15">15 minutes</option>
+                          <option value="30">30 minutes</option>
+                          <option value="45">45 minutes</option>
+                          <option value="60">1 hour</option>
+                          <option value="90">1.5 hours</option>
+                          <option value="120">2 hours</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Buffer Time (minutes)
+                        </label>
+                        <select
+                          value={bufferTime}
+                          onChange={(e) => setBufferTime(e.target.value)}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
+                        >
+                          <option value="0">No buffer</option>
+                          <option value="5">5 minutes</option>
+                          <option value="10">10 minutes</option>
+                          <option value="15">15 minutes</option>
+                          <option value="30">30 minutes</option>
+                        </select>
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-2">
+                      Buffer time is added between appointments for preparation
+                    </p>
+                  </div>
+
+                  {/* Working Days */}
+                  <div className="border-t border-gray-200 pt-6">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Working Days</h3>
+                    <div className="space-y-3">
+                      {Object.entries(workingDays).map(([day, isWorking]) => (
+                        <label key={day} className="flex items-center gap-3 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={isWorking}
+                            onChange={(e) => setWorkingDays({ ...workingDays, [day]: e.target.checked })}
+                            className="w-5 h-5 text-purple-600 border-gray-300 rounded focus:ring-2 focus:ring-purple-600"
+                          />
+                          <span className="text-sm font-medium text-gray-700 capitalize">
+                            {day}
+                          </span>
+                        </label>
+                      ))}
+                    </div>
+                    <p className="text-xs text-gray-500 mt-3">
+                      Select the days you're available for appointments
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
 
+            {/* Footer */}
             <div className="border-t border-gray-200 px-6 py-4 bg-gray-50 flex items-center justify-end gap-3">
               <button
-                onClick={() => setShowSettings(false)}
+                onClick={() => {
+                  setShowSettings(false)
+                  setSettingsTab('account')
+                }}
                 className="px-4 py-2 text-gray-700 hover:bg-gray-200 rounded-lg transition font-medium"
               >
                 Cancel
