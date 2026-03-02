@@ -24,11 +24,21 @@ export default function SignInPage() {
   useEffect(() => {
     // Check if Google provider is available
     fetch('/api/auth/providers')
-      .then(res => res.json())
-      .then(providers => {
-        setGoogleEnabled('google' in providers)
+      .then(res => {
+        if (!res.ok) {
+          throw new Error('Failed to fetch providers')
+        }
+        return res.json()
       })
-      .catch(() => setGoogleEnabled(false))
+      .then(providers => {
+        if (providers && typeof providers === 'object') {
+          setGoogleEnabled('google' in providers)
+        }
+      })
+      .catch((error) => {
+        console.warn('Failed to check auth providers:', error)
+        setGoogleEnabled(false)
+      })
   }, [])
 
   const handleSignIn = async (e: React.FormEvent) => {
