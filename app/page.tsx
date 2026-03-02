@@ -1,9 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { registerProvider } from '@/lib/api'
 import type { OnboardingData } from '@/lib/types'
+import { motion, useInView, AnimatePresence } from 'framer-motion'
+import { ArrowRight, Sparkles, Check, Calendar, Zap, Share2 } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { fadeInUp, staggerContainer, staggerItem, scaleIn } from '@/lib/animations'
 
 const SERVICE_PILLS = [
   { emoji: '✂️', label: 'Barbers' },
@@ -121,174 +126,363 @@ export default function Home() {
         {/* Navbar */}
         <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200">
           <div className="container mx-auto px-6 h-16 flex items-center justify-between max-w-6xl">
-            <a href="/" className="text-2xl font-bold tracking-tight text-gray-900">
-              Bu<span className="text-purple-600">Ke</span>
-            </a>
+            <motion.a
+              href="/"
+              className="text-2xl font-bold tracking-tight text-gray-900"
+              whileHover={{ scale: 1.05 }}
+            >
+              Bu<span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">Ke</span>
+            </motion.a>
             <div className="flex items-center gap-4">
               <a href="/signin" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
                 Sign in
               </a>
-              <button
+              <Button
                 onClick={() => setShowOnboarding(true)}
-                className="inline-flex items-center justify-center rounded-full bg-purple-600 text-white px-5 py-2.5 text-sm font-semibold hover:bg-purple-700 transition-colors shadow-sm"
+                size="sm"
               >
                 Get started free
-              </button>
+              </Button>
             </div>
           </div>
         </nav>
 
         {/* Hero Section */}
         <section className="relative pt-32 pb-20 overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-b from-purple-50/50 to-white pointer-events-none" />
+          {/* Animated Gradient Blobs */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <motion.div
+              className="absolute top-0 -right-48 w-[500px] h-[500px] rounded-full bg-gradient-to-br from-indigo-400/30 to-purple-400/30 blur-3xl"
+              animate={{
+                scale: [1, 1.2, 1],
+                opacity: [0.3, 0.5, 0.3],
+                x: [0, 50, 0],
+                y: [0, 30, 0]
+              }}
+              transition={{
+                duration: 8,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+            />
+            <motion.div
+              className="absolute -bottom-48 -left-48 w-[600px] h-[600px] rounded-full bg-gradient-to-tr from-purple-400/30 to-pink-400/30 blur-3xl"
+              animate={{
+                scale: [1, 1.3, 1],
+                opacity: [0.3, 0.5, 0.3],
+                x: [0, -50, 0],
+                y: [0, -30, 0]
+              }}
+              transition={{
+                duration: 10,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+            />
+          </div>
+
+          <div className="absolute inset-0 bg-gradient-to-b from-indigo-50/50 via-white to-white pointer-events-none" />
+
           <div className="container mx-auto px-6 max-w-6xl relative">
             <div className="grid lg:grid-cols-2 gap-16 items-center">
               {/* Left column */}
-              <div>
-                <div className="inline-flex items-center gap-2 rounded-full border border-purple-200 bg-purple-50 px-4 py-1.5 text-sm font-medium text-purple-700 mb-6">
-                  <span className="w-2 h-2 rounded-full bg-purple-600 animate-pulse" />
-                  Trusted by 3,200+ professionals
-                </div>
+              <motion.div
+                initial="hidden"
+                animate="visible"
+                variants={staggerContainer}
+              >
+                <motion.div variants={staggerItem}>
+                  <Badge className="inline-flex items-center gap-2 mb-6">
+                    <Sparkles className="w-4 h-4" />
+                    Trusted by 3,200+ professionals
+                  </Badge>
+                </motion.div>
 
-                <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold leading-[1.05] tracking-tight mb-6 text-gray-900">
+                <motion.h1
+                  className="text-5xl sm:text-6xl lg:text-7xl font-bold leading-[1.05] tracking-tight mb-6 text-gray-900"
+                  variants={staggerItem}
+                >
                   Your booking page.<br />
-                  Ready in{" "}
-                  <span className="text-purple-600">60 seconds.</span>
-                </h1>
+                  Ready{" "}
+                  <span className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+                    in 1 minute
+                  </span>
+                </motion.h1>
 
-                <p className="text-lg text-gray-600 max-w-md mb-8 leading-relaxed">
+                <motion.p
+                  className="text-lg text-gray-600 max-w-md mb-6 leading-relaxed"
+                  variants={staggerItem}
+                >
                   BuKe gives barbers, dentists, nail artists, and trainers a beautiful booking page — no code, no hassle. Your clients book. You earn.
-                </p>
+                </motion.p>
 
-                <div className="flex flex-wrap gap-2 mb-10">
-                  {SERVICE_PILLS.map((pill) => (
-                    <span
+                <motion.div
+                  className="flex flex-col gap-3 mb-10"
+                  variants={staggerItem}
+                >
+                  <div className="flex items-center gap-2 text-sm text-gray-700">
+                    <Check className="w-5 h-5 text-indigo-600" />
+                    <span>No credit card required</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-gray-700">
+                    <Check className="w-5 h-5 text-indigo-600" />
+                    <span>Free forever plan</span>
+                  </div>
+                </motion.div>
+
+                <motion.div
+                  className="flex flex-wrap gap-2 mb-10"
+                  variants={staggerItem}
+                >
+                  {SERVICE_PILLS.map((pill, index) => (
+                    <motion.span
                       key={pill.label}
-                      className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm"
+                      className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:shadow-md hover:scale-105 transition-all cursor-default"
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: 0.6 + index * 0.1 }}
+                      whileHover={{ scale: 1.05 }}
                     >
                       {pill.emoji} {pill.label}
-                    </span>
+                    </motion.span>
                   ))}
-                  <span className="inline-flex items-center rounded-full border border-gray-200 bg-white px-4 py-2 text-sm text-gray-500 shadow-sm">
+                  <motion.span
+                    className="inline-flex items-center rounded-full border border-gray-200 bg-white px-4 py-2 text-sm text-gray-500 shadow-sm"
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 1.1 }}
+                  >
                     + more
-                  </span>
-                </div>
+                  </motion.span>
+                </motion.div>
 
-                <div className="flex flex-wrap gap-4">
-                  <button
+                <motion.div
+                  className="flex flex-wrap gap-4"
+                  variants={staggerItem}
+                >
+                  <Button
                     onClick={() => setShowOnboarding(true)}
-                    className="inline-flex items-center justify-center rounded-full bg-purple-600 text-white px-8 py-4 text-base font-semibold hover:bg-purple-700 transition-all shadow-lg shadow-purple-600/25 hover:shadow-xl hover:shadow-purple-600/30"
+                    size="lg"
+                    className="group"
                   >
                     Create your page
-                  </button>
-                  <a
-                    href="#how-it-works"
-                    className="inline-flex items-center justify-center rounded-full border-2 border-gray-300 text-gray-700 px-8 py-4 text-base font-semibold hover:border-gray-400 transition-colors"
+                    <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    onClick={() => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })}
                   >
                     See how it works
-                  </a>
-                </div>
-              </div>
+                  </Button>
+                </motion.div>
+              </motion.div>
 
               {/* Right column — Dashboard Mockup */}
-              <div className="relative hidden lg:block">
+              <motion.div
+                className="relative hidden lg:block"
+                initial={{ opacity: 0, x: 50 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.8, delay: 0.3 }}
+              >
                 <div className="relative">
                   <DashboardMockup />
                 </div>
-              </div>
+              </motion.div>
             </div>
           </div>
         </section>
 
         {/* Stats Bar */}
-        <section className="border-y border-gray-200 bg-gray-50/50">
+        <section className="border-y border-gray-200 bg-gradient-to-r from-indigo-50/50 via-white to-purple-50/50">
           <div className="container mx-auto px-6 py-12 max-w-6xl">
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-8 sm:gap-16">
+            <motion.div
+              className="flex flex-col sm:flex-row items-center justify-center gap-8 sm:gap-16"
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-100px" }}
+              variants={staggerContainer}
+            >
               {[
                 { value: "3.2k+", label: "Active professionals" },
                 { value: "89k", label: "Bookings processed" },
                 { value: "4.9★", label: "Average rating" },
               ].map((stat) => (
-                <div key={stat.label} className="text-center">
-                  <p className="text-4xl font-bold tracking-tight text-gray-900">{stat.value}</p>
+                <motion.div
+                  key={stat.label}
+                  className="text-center"
+                  variants={staggerItem}
+                  whileHover={{ scale: 1.05 }}
+                >
+                  <p className="text-4xl font-bold tracking-tight bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                    {stat.value}
+                  </p>
                   <p className="text-sm text-gray-600 mt-1">{stat.label}</p>
-                </div>
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
           </div>
         </section>
 
         {/* How It Works */}
         <section id="how-it-works" className="py-24 bg-white">
           <div className="container mx-auto px-6 max-w-6xl">
-            <div className="text-center mb-16">
-              <span className="text-sm font-semibold text-purple-600 tracking-wider uppercase">
+            <motion.div
+              className="text-center mb-16"
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-100px" }}
+              variants={fadeInUp}
+            >
+              <span className="text-sm font-semibold text-indigo-600 tracking-wider uppercase">
                 How it works
               </span>
               <h2 className="text-4xl sm:text-5xl font-bold mt-4 text-gray-900">
-                Up and running in <span className="text-purple-600">three steps</span>
+                Up and running in{" "}
+                <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                  three steps
+                </span>
               </h2>
-            </div>
+            </motion.div>
 
-            <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            <motion.div
+              className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto"
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-100px" }}
+              variants={staggerContainer}
+            >
               {[
                 {
                   number: "01",
-                  emoji: "📝",
+                  icon: Calendar,
                   title: "Create your profile",
                   description: "Tell us your name, business type, services, and location. Takes under 5 minutes — no technical knowledge needed.",
                 },
                 {
                   number: "02",
-                  emoji: "🔗",
+                  icon: Share2,
                   title: "Share your link",
                   description: "You get a personal booking page instantly. Share it on Instagram, WhatsApp, or anywhere your clients are.",
                 },
                 {
                   number: "03",
-                  emoji: "📅",
+                  icon: Zap,
                   title: "Clients book & you manage",
                   description: "Clients pick their slot. You see everything in your dashboard. Reminders sent automatically. You focus on your craft.",
                 },
-              ].map((step) => (
-                <div
-                  key={step.number}
-                  className="relative rounded-2xl border border-gray-200 bg-white p-8 hover:shadow-lg hover:border-purple-200 transition-all"
-                >
-                  <span className="text-xs font-bold text-purple-600 tracking-widest">
-                    {step.number}
-                  </span>
-                  <div className="text-4xl my-4">{step.emoji}</div>
-                  <h3 className="text-xl font-bold mb-3 text-gray-900">{step.title}</h3>
-                  <p className="text-sm text-gray-600 leading-relaxed">
-                    {step.description}
-                  </p>
-                </div>
-              ))}
-            </div>
+              ].map((step, index) => {
+                const Icon = step.icon
+                return (
+                  <motion.div
+                    key={step.number}
+                    className="relative rounded-2xl border border-gray-200 bg-white p-8 hover:shadow-xl hover:border-indigo-200 transition-all group"
+                    variants={staggerItem}
+                    whileHover={{ y: -5, scale: 1.02 }}
+                  >
+                    <span className="text-xs font-bold text-indigo-600 tracking-widest">
+                      {step.number}
+                    </span>
+                    <div className="my-4 w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <Icon className="w-7 h-7 text-white" />
+                    </div>
+                    <h3 className="text-xl font-bold mb-3 text-gray-900">{step.title}</h3>
+                    <p className="text-sm text-gray-600 leading-relaxed">
+                      {step.description}
+                    </p>
+                  </motion.div>
+                )
+              })}
+            </motion.div>
           </div>
         </section>
 
         {/* CTA Section */}
-        <section className="py-24 bg-gradient-to-b from-white to-purple-50/30">
+        <section className="py-24 bg-gradient-to-b from-white to-indigo-50/30">
           <div className="container mx-auto px-6 max-w-6xl">
-            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-purple-600 to-purple-700 text-white p-12 sm:p-16 text-center shadow-2xl shadow-purple-600/25">
+            <motion.div
+              className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 text-white p-12 sm:p-16 text-center shadow-2xl"
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              variants={scaleIn}
+            >
+              {/* Animated floating circles */}
+              <motion.div
+                className="absolute top-10 left-10 w-20 h-20 rounded-full bg-white/10 backdrop-blur-sm"
+                animate={{
+                  y: [0, -20, 0],
+                  scale: [1, 1.1, 1],
+                }}
+                transition={{
+                  duration: 4,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+              />
+              <motion.div
+                className="absolute bottom-10 right-10 w-32 h-32 rounded-full bg-white/10 backdrop-blur-sm"
+                animate={{
+                  y: [0, 20, 0],
+                  scale: [1, 1.15, 1],
+                }}
+                transition={{
+                  duration: 5,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+              />
+              <motion.div
+                className="absolute top-1/2 right-1/4 w-16 h-16 rounded-full bg-white/10 backdrop-blur-sm"
+                animate={{
+                  y: [0, -15, 0],
+                  x: [0, 10, 0],
+                }}
+                transition={{
+                  duration: 6,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+              />
+
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.1),transparent)] pointer-events-none" />
+
               <div className="relative z-10">
-                <h2 className="text-3xl sm:text-5xl font-bold mb-4">
-                  Ready to get <span className="text-purple-200">booked?</span>
-                </h2>
-                <p className="text-purple-100 text-lg mb-8 max-w-md mx-auto">
-                  Join thousands of professionals already growing their business with BuKe.
-                </p>
-                <button
-                  onClick={() => setShowOnboarding(true)}
-                  className="inline-flex items-center justify-center rounded-full bg-white text-purple-600 px-8 py-4 text-base font-semibold hover:bg-purple-50 transition-colors shadow-lg"
+                <motion.h2
+                  className="text-3xl sm:text-5xl font-bold mb-4"
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.2 }}
                 >
-                  Create your free page
-                </button>
+                  Ready to get <span className="text-indigo-200">booked?</span>
+                </motion.h2>
+                <motion.p
+                  className="text-indigo-100 text-lg mb-8 max-w-md mx-auto"
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.3 }}
+                >
+                  Join thousands of professionals already growing their business with BuKe.
+                </motion.p>
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.4 }}
+                >
+                  <Button
+                    onClick={() => setShowOnboarding(true)}
+                    size="lg"
+                    className="bg-white text-indigo-600 hover:bg-indigo-50 shadow-xl hover:shadow-2xl group"
+                  >
+                    Create your free page
+                    <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </Button>
+                </motion.div>
               </div>
-            </div>
+            </motion.div>
           </div>
         </section>
 
@@ -296,7 +490,7 @@ export default function Home() {
         <footer className="border-t border-gray-200 bg-gray-50/50 py-12">
           <div className="container mx-auto px-6 max-w-6xl text-center">
             <p className="text-2xl font-bold mb-4 text-gray-900">
-              Bu<span className="text-purple-600">Ke</span>
+              Bu<span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">Ke</span>
             </p>
             <p className="text-sm text-gray-600">
               © 2026 BuKe. Simple booking for service professionals.
@@ -309,40 +503,83 @@ export default function Home() {
 
   // Onboarding Form
   return (
-    <div className="min-h-screen bg-gray-50 py-20" style={{ fontFamily: "'DM Sans', -apple-system, sans-serif" }}>
-      <div className="container mx-auto px-6 max-w-2xl">
-        <div className="mb-8">
+    <motion.div
+      className="min-h-screen bg-gradient-to-b from-indigo-50/50 to-white py-20"
+      style={{ fontFamily: "'DM Sans', -apple-system, sans-serif" }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
+      {/* Animated gradient blobs */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <motion.div
+          className="absolute top-20 right-10 w-[400px] h-[400px] rounded-full bg-gradient-to-br from-indigo-400/20 to-purple-400/20 blur-3xl"
+          animate={{
+            scale: [1, 1.2, 1],
+            opacity: [0.3, 0.5, 0.3],
+          }}
+          transition={{
+            duration: 8,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        />
+      </div>
+
+      <div className="container mx-auto px-6 max-w-2xl relative">
+        <motion.div
+          className="mb-8"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
           <button
             onClick={() => setShowOnboarding(false)}
             className="text-sm text-gray-600 hover:text-gray-900 flex items-center gap-2 mb-4 font-medium transition-colors"
           >
             ← Back to home
           </button>
-          <h1 className="text-4xl font-bold text-gray-900">Create Your Page</h1>
+          <h1 className="text-4xl font-bold text-gray-900">
+            Create Your <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">Page</span>
+          </h1>
           <p className="text-gray-600 mt-2">Get your booking page live in 5 minutes</p>
-        </div>
+        </motion.div>
 
-        <div className="bg-white border border-gray-200 rounded-2xl p-8 space-y-6 shadow-sm">
+        <motion.div
+          className="bg-white border border-gray-200 rounded-2xl p-8 space-y-6 shadow-lg"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+        >
           {/* Service Type */}
-          <div>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+          >
             <label className="block text-sm font-semibold mb-3 text-gray-900">Service Type</label>
             <div className="grid grid-cols-3 gap-3">
-              {SERVICE_TYPES.map((type) => (
-                <button
+              {SERVICE_TYPES.map((type, index) => (
+                <motion.button
                   key={type.value}
                   onClick={() => setServiceType(type.value)}
-                  className={`p-4 rounded-xl border-2 transition ${
+                  className={`p-4 rounded-xl border-2 transition-all ${
                     serviceType === type.value
-                      ? 'border-purple-600 bg-purple-50'
-                      : 'border-gray-200 hover:border-gray-300'
+                      ? 'border-indigo-600 bg-gradient-to-br from-indigo-50 to-purple-50'
+                      : 'border-gray-200 hover:border-gray-300 hover:shadow-md'
                   }`}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.4 + index * 0.05 }}
                 >
                   <div className="text-2xl mb-1">{type.icon}</div>
                   <div className="text-sm font-medium text-gray-900">{type.label}</div>
-                </button>
+                </motion.button>
               ))}
             </div>
-          </div>
+          </motion.div>
 
           {/* Basic Info */}
           <div className="grid grid-cols-2 gap-4">
@@ -353,7 +590,7 @@ export default function Home() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="John Doe"
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white focus:border-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-600/10 transition"
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-600/10 transition"
               />
             </div>
             <div>
@@ -363,7 +600,7 @@ export default function Home() {
                 value={businessName}
                 onChange={(e) => setBusinessName(e.target.value)}
                 placeholder="John's Cuts"
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white focus:border-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-600/10 transition"
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-600/10 transition"
               />
             </div>
           </div>
@@ -376,7 +613,7 @@ export default function Home() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="john@example.com"
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white focus:border-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-600/10 transition"
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-600/10 transition"
               />
             </div>
             <div>
@@ -386,7 +623,7 @@ export default function Home() {
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder="+1 555 0192"
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white focus:border-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-600/10 transition"
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-600/10 transition"
               />
             </div>
           </div>
@@ -426,74 +663,115 @@ export default function Home() {
           </div>
 
           {/* Services */}
-          <div>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+          >
             <label className="block text-sm font-semibold mb-3 text-gray-900">
               Services <span className="text-red-500">*</span>
               <span className="text-xs text-gray-600 font-normal ml-2">(At least one required)</span>
             </label>
             <div className="space-y-3">
-              {services.map((service, index) => (
-                <div key={index} className="flex gap-3">
-                  <input
-                    type="text"
-                    value={service.name}
-                    onChange={(e) => updateService(index, 'name', e.target.value)}
-                    placeholder="Service name"
-                    className="flex-1 px-4 py-3 rounded-xl border border-gray-200 bg-white focus:border-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-600/10 transition"
-                  />
-                  <input
-                    type="number"
-                    value={service.duration}
-                    onChange={(e) => updateService(index, 'duration', parseInt(e.target.value))}
-                    placeholder="Duration"
-                    className="w-24 px-4 py-3 rounded-xl border border-gray-200 bg-white focus:border-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-600/10 transition"
-                  />
-                  <input
-                    type="number"
-                    value={service.price}
-                    onChange={(e) => updateService(index, 'price', parseFloat(e.target.value))}
-                    placeholder="Price"
-                    className="w-24 px-4 py-3 rounded-xl border border-gray-200 bg-white focus:border-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-600/10 transition"
-                  />
-                  <button
-                    onClick={() => removeService(index)}
-                    disabled={services.length === 1}
-                    className={`px-4 py-3 rounded-xl border border-gray-200 transition ${
-                      services.length === 1
-                        ? 'opacity-50 cursor-not-allowed'
-                        : 'hover:bg-gray-50'
-                    }`}
-                    title={services.length === 1 ? 'Cannot remove the last service' : 'Remove service'}
+              <AnimatePresence mode="popLayout">
+                {services.map((service, index) => (
+                  <motion.div
+                    key={index}
+                    className="flex gap-3"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 20, transition: { duration: 0.2 } }}
+                    layout
                   >
-                    🗑️
-                  </button>
-                </div>
-              ))}
-              <button
+                    <input
+                      type="text"
+                      value={service.name}
+                      onChange={(e) => updateService(index, 'name', e.target.value)}
+                      placeholder="Service name"
+                      className="flex-1 px-4 py-3 rounded-xl border border-gray-200 bg-white focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-600/10 transition"
+                    />
+                    <input
+                      type="number"
+                      value={service.duration}
+                      onChange={(e) => updateService(index, 'duration', parseInt(e.target.value))}
+                      placeholder="Duration"
+                      className="w-24 px-4 py-3 rounded-xl border border-gray-200 bg-white focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-600/10 transition"
+                    />
+                    <input
+                      type="number"
+                      value={service.price}
+                      onChange={(e) => updateService(index, 'price', parseFloat(e.target.value))}
+                      placeholder="Price"
+                      className="w-24 px-4 py-3 rounded-xl border border-gray-200 bg-white focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-600/10 transition"
+                    />
+                    <motion.button
+                      onClick={() => removeService(index)}
+                      disabled={services.length === 1}
+                      className={`px-4 py-3 rounded-xl border border-gray-200 transition ${
+                        services.length === 1
+                          ? 'opacity-50 cursor-not-allowed'
+                          : 'hover:bg-gray-50'
+                      }`}
+                      title={services.length === 1 ? 'Cannot remove the last service' : 'Remove service'}
+                      whileHover={services.length > 1 ? { scale: 1.1 } : {}}
+                      whileTap={services.length > 1 ? { scale: 0.9 } : {}}
+                    >
+                      🗑️
+                    </motion.button>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+              <motion.button
                 onClick={addService}
-                className="w-full py-3 rounded-xl border-2 border-dashed border-gray-300 hover:border-purple-600 transition text-sm font-medium text-gray-700 hover:text-purple-600"
+                className="w-full py-3 rounded-xl border-2 border-dashed border-gray-300 hover:border-indigo-600 transition text-sm font-medium text-gray-700 hover:text-indigo-600"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
               >
                 + Add Service
-              </button>
+              </motion.button>
             </div>
-          </div>
+          </motion.div>
 
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm">
-              {error}
-            </div>
-          )}
+          <AnimatePresence>
+            {error && (
+              <motion.div
+                className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm"
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+              >
+                {error}
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-          <button
+          <Button
             onClick={handleSubmit}
             disabled={loading}
-            className="w-full bg-purple-600 text-white py-4 rounded-xl font-semibold hover:bg-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-purple-600/25"
+            className="w-full group"
+            size="lg"
           >
-            {loading ? 'Creating your page...' : 'Create My Page'}
-          </button>
-        </div>
+            {loading ? (
+              <>
+                <motion.span
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                  className="inline-block mr-2"
+                >
+                  ⏳
+                </motion.span>
+                Creating your page...
+              </>
+            ) : (
+              <>
+                Create My Page
+                <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </>
+            )}
+          </Button>
+        </motion.div>
       </div>
-    </div>
+    </motion.div>
   )
 }
 
