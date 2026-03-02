@@ -322,33 +322,36 @@ export default function ProviderProfilePage() {
                 Book Your Appointment
               </h2>
 
-              {/* Calendar */}
-              <div className="bg-white border border-gray-200 rounded-xl p-6 mb-6">
-                <h3 className="text-base font-semibold text-gray-900 mb-4">Choose a Date</h3>
-                <CalendarPicker
-                  selectedDate={selectedDate}
-                  onDateSelect={handleDateSelect}
-                />
-              </div>
-
-              {/* Time Slots */}
-              <div className="bg-white border border-gray-200 rounded-xl p-6">
-                <h3 className="text-base font-semibold text-gray-900 mb-4">
-                  {selectedDate ? 'Available Times' : 'Select a date first'}
-                </h3>
-                {selectedDate ? (
-                  <TimeSlotGrid
-                    slots={timeSlots}
-                    selectedTime={selectedTime}
-                    onTimeSelect={handleTimeSelect}
-                    loading={loadingSlots}
+              {/* Calendar and Time Slots Side by Side */}
+              <div className="grid md:grid-cols-2 gap-4">
+                {/* Calendar */}
+                <div className="bg-white border border-gray-200 rounded-xl p-6">
+                  <h3 className="text-base font-semibold text-gray-900 mb-4">Choose a Date</h3>
+                  <CalendarPicker
+                    selectedDate={selectedDate}
+                    onDateSelect={handleDateSelect}
                   />
-                ) : (
-                  <div className="text-center py-12 text-gray-600">
-                    <div className="text-4xl mb-3">📅</div>
-                    <p className="text-sm">Pick a date to see available time slots</p>
-                  </div>
-                )}
+                </div>
+
+                {/* Time Slots */}
+                <div className="bg-white border border-gray-200 rounded-xl p-6">
+                  <h3 className="text-base font-semibold text-gray-900 mb-4">
+                    {selectedDate ? 'Available Times' : 'Select a date first'}
+                  </h3>
+                  {selectedDate ? (
+                    <TimeSlotGrid
+                      slots={timeSlots}
+                      selectedTime={selectedTime}
+                      onTimeSelect={handleTimeSelect}
+                      loading={loadingSlots}
+                    />
+                  ) : (
+                    <div className="text-center py-12 text-gray-600">
+                      <div className="text-4xl mb-3">📅</div>
+                      <p className="text-sm">Pick a date to see available time slots</p>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
