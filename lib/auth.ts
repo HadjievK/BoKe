@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
 // Use environment variable for JWT secret
 // In production, this MUST be a strong random secret
@@ -62,4 +62,31 @@ export function authenticateRequest(request: NextRequest): JWTPayload | null {
   }
 
   return verifyToken(token);
+}
+
+/**
+ * Authenticate provider and verify slug matches
+ * Returns auth payload or NextResponse error
+ */
+export function authenticateProviderBySlug(
+  request: NextRequest,
+  slug: string
+): { auth: JWTPayload; providerId: number } | NextResponse {
+  const auth = authenticateRequest(request);
+
+  if (!auth) {
+    return NextResponse.json(
+      { error: 'Unauthorized - Please sign in' },
+      { status: 401 }
+    );
+  }
+
+  if (auth.slug !== slug) {
+    return NextResponse.json(
+      { error: 'Forbidden - Cannot access another provider\'s data' },
+      { status: 403 }
+    );
+  }
+
+  return { auth, providerId: auth.providerId };
 }
