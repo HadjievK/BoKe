@@ -53,7 +53,7 @@ export default function AppointmentCalendar({
       const endTime = new Date(startTime.getTime() + apt.duration * 60000)
 
       validEvents.push({
-        title: `${apt.customer.first_name} ${apt.customer.last_name} · ${apt.service.name}`,
+        title: `${apt.customer_first_name} ${apt.customer_last_name} · ${apt.service.name}`,
         start: startTime,
         end: endTime,
         resource: apt,
