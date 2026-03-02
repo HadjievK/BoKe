@@ -76,20 +76,20 @@ export function formatDateShort(date: Date): string {
 }
 
 export function getCalendarDateRange(
-  view: 'week' | 'day' | 'month',
+  view: 'week' | 'day' | 'month' | 'work_week' | 'agenda',
   currentDate: Date
 ): { startDate: string; endDate: string } {
   // Lazy load moment only when needed
   const moment = require('moment')
 
-  if (view === 'week') {
+  if (view === 'week' || view === 'work_week') {
     const weekStart = moment(currentDate).startOf('isoWeek').subtract(1, 'day')
     const weekEnd = moment(currentDate).endOf('isoWeek').add(1, 'day')
     return {
       startDate: weekStart.format('YYYY-MM-DD'),
       endDate: weekEnd.format('YYYY-MM-DD')
     }
-  } else if (view === 'day') {
+  } else if (view === 'day' || view === 'agenda') {
     const dateStr = moment(currentDate).format('YYYY-MM-DD')
     return {
       startDate: dateStr,

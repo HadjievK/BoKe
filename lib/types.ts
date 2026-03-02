@@ -140,6 +140,7 @@ export interface DashboardData {
     slug: string
     name: string
     business_name: string
+    location?: string
   }
   stats: DashboardStats
   appointments: AppointmentWithDetails[]
