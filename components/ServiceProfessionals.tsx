@@ -1,3 +1,5 @@
+'use client'
+
 import { motion, useInView } from 'framer-motion'
 import { useRef } from 'react'
 import { Scissors, Stethoscope, Dumbbell, Sparkles, Briefcase, Users } from 'lucide-react'
