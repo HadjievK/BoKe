@@ -9,6 +9,7 @@ import { ArrowRight, Sparkles, Check, Calendar, Zap, Share2 } from 'lucide-react
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { fadeInUp, staggerContainer, staggerItem, scaleIn } from '@/lib/animations'
+import { ServiceProfessionals } from '@/components/ServiceProfessionals'
 
 const SERVICE_PILLS = [
   { emoji: '✂️', label: 'Barbers' },
@@ -396,6 +397,9 @@ export default function Home() {
             </motion.div>
           </div>
         </section>
+
+        {/* Service Professionals Section */}
+        <ServiceProfessionals />
 
         {/* CTA Section */}
         <section className="py-24 bg-gradient-to-b from-white to-indigo-50/30">
