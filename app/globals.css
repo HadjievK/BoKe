@@ -8,6 +8,43 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --border: 214.3 31.8% 91.4%;
+    --gold: 43 74% 66%;
+    --gold-light: 43 74% 76%;
+    --gold-dark: 43 74% 56%;
+    --cream: 40 40% 95%;
+    --cream-dark: 40 40% 85%;
+    --ink: 222 84% 5%;
+    --ink-light: 222 47% 11%;
+    --ink-foreground: 210 40% 98%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --border: 217.2 32.6% 17.5%;
+    --gold: 43 74% 66%;
+    --gold-light: 43 74% 76%;
+    --gold-dark: 43 74% 56%;
+    --cream: 222 47% 11%;
+    --cream-dark: 222 47% 6%;
+    --ink: 210 40% 98%;
+    --ink-light: 217.2 32.6% 17.5%;
+    --ink-foreground: 222.2 84% 4.9%;
+  }
+
   * {
     margin: 0;
     padding: 0;
@@ -16,7 +53,7 @@
 
   body {
     font-family: 'DM Sans', -apple-system, sans-serif;
-    @apply antialiased;
+    @apply bg-background text-foreground antialiased;
   }
 
   h1, h2, h3, h4, h5, h6 {
