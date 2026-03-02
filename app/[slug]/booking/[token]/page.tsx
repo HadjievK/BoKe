@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { formatDate, formatTime } from '@/lib/utils'
 import { AppointmentStatus, BookingManagementData } from '@/lib/types'
@@ -12,14 +12,23 @@ export default function BookingPage({
   params: { slug: string; token: string }
 }) {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const action = searchParams.get('action') // 'cancel' or 'reschedule'
+
   const [booking, setBooking] = useState<BookingManagementData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [cancelling, setCancelling] = useState(false)
+  const [showActionModal, setShowActionModal] = useState(false)
 
   useEffect(() => {
     fetchBooking()
-  }, [params.token])
+
+    // Auto-show action modal if coming from email link
+    if (action === 'cancel' || action === 'reschedule') {
+      setShowActionModal(true)
+    }
+  }, [params.token, action])
 
   const fetchBooking = async () => {
     try {
@@ -64,10 +73,16 @@ export default function BookingPage({
       // Refresh booking data
       await fetchBooking()
       setCancelling(false)
+      setShowActionModal(false)
     } catch (err) {
       setError('An error occurred. Please try again.')
       setCancelling(false)
     }
+  }
+
+  const handleReschedule = () => {
+    // Redirect to main booking page with pre-selected service
+    router.push(`/${params.slug}?reschedule=true`)
   }
 
   if (loading) {
@@ -236,13 +251,21 @@ export default function BookingPage({
           {/* Actions */}
           <div className="p-6 bg-gray-50 border-t border-gray-200 space-y-3">
             {canCancel && (
-              <button
-                onClick={handleCancel}
-                disabled={cancelling}
-                className="w-full bg-red-600 text-white py-3 px-4 rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
-              >
-                {cancelling ? 'Cancelling...' : 'Cancel Booking'}
-              </button>
+              <>
+                <button
+                  onClick={handleReschedule}
+                  className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 font-medium"
+                >
+                  📅 Reschedule Appointment
+                </button>
+                <button
+                  onClick={handleCancel}
+                  disabled={cancelling}
+                  className="w-full bg-red-600 text-white py-3 px-4 rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                >
+                  {cancelling ? 'Cancelling...' : '❌ Cancel Booking'}
+                </button>
+              </>
             )}
 
             <Link
@@ -253,6 +276,58 @@ export default function BookingPage({
             </Link>
           </div>
         </div>
+
+        {/* Action Modal - Auto-opens from email links */}
+        {showActionModal && action && canCancel && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+              {action === 'cancel' ? (
+                <>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">Cancel Booking?</h3>
+                  <p className="text-gray-600 mb-6">
+                    Are you sure you want to cancel your appointment with {provider.business_name || provider.name} on {formatDate(appointment.appointment_date)} at {formatTime(appointment.appointment_time)}?
+                  </p>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => setShowActionModal(false)}
+                      className="flex-1 bg-gray-200 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-300 font-medium"
+                    >
+                      Keep Booking
+                    </button>
+                    <button
+                      onClick={handleCancel}
+                      disabled={cancelling}
+                      className="flex-1 bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 disabled:opacity-50 font-medium"
+                    >
+                      {cancelling ? 'Cancelling...' : 'Yes, Cancel'}
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">Reschedule Appointment</h3>
+                  <p className="text-gray-600 mb-6">
+                    You'll be redirected to the booking page where you can select a new date and time.
+                  </p>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => setShowActionModal(false)}
+                      className="flex-1 bg-gray-200 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-300 font-medium"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleReschedule}
+                      className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 font-medium"
+                    >
+                      Continue
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Help Text */}
         <div className="mt-6 text-center text-sm text-gray-600">
