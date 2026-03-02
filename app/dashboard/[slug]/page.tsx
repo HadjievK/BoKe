@@ -353,7 +353,7 @@ export default function DashboardPage() {
         {/* Greeting Section */}
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-gray-900 mb-1">
-            {getGreeting()}, {provider.name.split(' ')[0]} ✨
+            {getGreeting()}, {provider.name.split(' ')[0]}
           </h1>
           <p className="text-sm text-gray-600">
             {todayDate} · {dashboardData.appointments.length} appointments today
@@ -458,11 +458,10 @@ export default function DashboardPage() {
                   onClick={() => {
                     const url = `${window.location.origin}/${slug}`
                     navigator.clipboard.writeText(url)
-                    alert('Link copied to clipboard! 📋')
+                    alert('Link copied to clipboard!')
                   }}
                   className="flex items-center justify-center gap-2 px-6 py-4 bg-purple-600 text-white rounded-xl font-semibold hover:bg-purple-700 transition shadow-lg shadow-purple-600/25"
                 >
-                  <span className="text-xl">📋</span>
                   Copy Link
                 </button>
                 <a
@@ -471,7 +470,6 @@ export default function DashboardPage() {
                   rel="noopener noreferrer"
                   className="flex items-center justify-center gap-2 px-6 py-4 bg-white text-purple-700 border-2 border-purple-600 rounded-xl font-semibold hover:bg-purple-50 transition"
                 >
-                  <span className="text-xl">👁️</span>
                   Preview
                 </a>
               </div>
@@ -500,13 +498,12 @@ export default function DashboardPage() {
                   <button
                     onClick={() => {
                       const url = `${window.location.origin}/${slug}`
-                      const text = `Book an appointment with ${provider.name}`
-                      window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank')
+                      navigator.clipboard.writeText(url)
+                      alert('Link copied! Open Instagram and paste in your story or bio.')
                     }}
-                    className="flex items-center justify-center gap-2 px-4 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
+                    className="flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 text-white rounded-lg hover:opacity-90 transition"
                   >
-                    <span className="text-xl">𝕏</span>
-                    Twitter
+                    Instagram
                   </button>
                   <button
                     onClick={() => {
@@ -515,7 +512,6 @@ export default function DashboardPage() {
                     }}
                     className="flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
                   >
-                    <span className="text-xl">f</span>
                     Facebook
                   </button>
                   <button
@@ -526,7 +522,6 @@ export default function DashboardPage() {
                     }}
                     className="flex items-center justify-center gap-2 px-4 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
                   >
-                    <span className="text-xl">💬</span>
                     WhatsApp
                   </button>
                 </div>
