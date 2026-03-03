@@ -190,92 +190,95 @@ export default function ProviderProfilePage() {
           animate={{ opacity: 1, y: 0 }}
           className="relative overflow-hidden"
         >
-          {/* Cover Photo Background */}
-          {provider.cover_photo_url ? (
-            <div className="relative h-64 overflow-hidden">
-              <img
-                src={provider.cover_photo_url}
-                alt="Cover"
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/40 to-black/60" />
-            </div>
-          ) : (
-            <div className="h-32 bg-gradient-to-r from-purple-600 to-blue-600" />
-          )}
+          {/* Cover Photo Background - Full Hero */}
+          <div className="relative">
+            {provider.cover_photo_url ? (
+              <div className="absolute inset-0 h-full overflow-hidden">
+                <img
+                  src={provider.cover_photo_url}
+                  alt="Cover"
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/50 to-black/70" />
+              </div>
+            ) : (
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-600 via-purple-700 to-blue-600" />
+            )}
 
-          <div className="bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl border-b border-white/20 dark:border-gray-800/50">
-            <div className="max-w-7xl mx-auto px-6 py-8">
-              <div className="flex items-start gap-6 mb-6">
-                {/* Avatar with photo or gradient */}
-                <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ type: 'spring', stiffness: 200 }}
-                  className="w-24 h-24 rounded-3xl flex items-center justify-center text-4xl font-bold text-white flex-shrink-0 shadow-2xl shadow-purple-500/50 overflow-hidden"
-                  style={{
-                    background: provider.avatar_url ? 'transparent' : 'linear-gradient(135deg, #9333ea 0%, #3b82f6 100%)',
-                  }}
-                >
-                  {provider.avatar_url ? (
-                    <img
-                      src={provider.avatar_url}
-                      alt={provider.name}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    provider.name.charAt(0)
-                  )}
-                </motion.div>
-
-                <div className="flex-1">
-                  {/* Status Badge */}
+            {/* Content over cover photo */}
+            <div className="relative z-10 bg-white/10 dark:bg-gray-900/10 backdrop-blur-sm border-b border-white/20 dark:border-gray-800/50">
+              <div className="max-w-7xl mx-auto px-6 py-12">
+                <div className="flex items-start gap-6 mb-6">
+                  {/* Avatar with photo or gradient */}
                   <motion.div
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.2 }}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold mb-4 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800"
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: 'spring', stiffness: 200 }}
+                    className="w-24 h-24 rounded-3xl flex items-center justify-center text-4xl font-bold text-white flex-shrink-0 shadow-2xl shadow-black/50 overflow-hidden border-4 border-white/20"
+                    style={{
+                      background: provider.avatar_url ? 'transparent' : 'linear-gradient(135deg, #9333ea 0%, #3b82f6 100%)',
+                    }}
                   >
-                    <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                    Available Now
-                  </motion.div>
-
-                  {/* Business Name */}
-                  <motion.h1
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.3 }}
-                    className="text-5xl font-black mb-3 bg-gradient-to-r from-purple-600 via-blue-600 to-purple-600 bg-clip-text text-transparent"
-                    style={{ letterSpacing: '-0.02em' }}
-                  >
-                    {provider.business_name || provider.name}
-                  </motion.h1>
-
-                  {/* Provider Info */}
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.4 }}
-                    className="flex items-center gap-6 text-gray-600 dark:text-gray-400 flex-wrap"
-                  >
-                    <div className="flex items-center gap-2">
-                      <Sparkles size={18} className="text-purple-600" />
-                      <span className="font-medium">{provider.name}</span>
-                    </div>
-                    {provider.location && (
-                      <a
-                        href={provider.latitude && provider.longitude
-                          ? `https://www.google.com/maps/dir/?api=1&destination=${provider.latitude},${provider.longitude}`
-                          : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(provider.location)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-2 hover:text-purple-600 transition-colors"
-                      >
-                        <MapPin size={18} />
-                        <span>{provider.location}</span>
-                      </a>
+                    {provider.avatar_url ? (
+                      <img
+                        src={provider.avatar_url}
+                        alt={provider.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      provider.name.charAt(0)
                     )}
                   </motion.div>
+
+                  <div className="flex-1">
+                    {/* Status Badge */}
+                    <motion.div
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.2 }}
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold mb-4 bg-green-500/90 dark:bg-green-600/90 text-white border border-white/30 backdrop-blur-md shadow-lg"
+                    >
+                      <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
+                      Available Now
+                    </motion.div>
+
+                    {/* Business Name */}
+                    <motion.h1
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.3 }}
+                      className="text-5xl font-black mb-3 text-white drop-shadow-lg"
+                      style={{ letterSpacing: '-0.02em' }}
+                    >
+                      {provider.business_name || provider.name}
+                    </motion.h1>
+
+                    {/* Provider Info */}
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.4 }}
+                      className="flex items-center gap-6 text-white/90 flex-wrap drop-shadow-md"
+                    >
+                      <div className="flex items-center gap-2">
+                        <Sparkles size={18} className="text-white" />
+                        <span className="font-medium">{provider.name}</span>
+                      </div>
+                      {provider.location && (
+                        <a
+                          href={provider.latitude && provider.longitude
+                            ? `https://www.google.com/maps/dir/?api=1&destination=${provider.latitude},${provider.longitude}`
+                            : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(provider.location)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2 hover:text-white transition-colors"
+                        >
+                          <MapPin size={18} />
+                          <span>{provider.location}</span>
+                        </a>
+                      )}
+                    </motion.div>
+                  </div>
                 </div>
               </div>
             </div>
