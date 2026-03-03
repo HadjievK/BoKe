@@ -46,6 +46,7 @@ export default function DashboardPage() {
   const [coverPhotoUrl, setCoverPhotoUrl] = useState('')
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
   const [uploadingCover, setUploadingCover] = useState(false)
+  const [uploadSuccess, setUploadSuccess] = useState<string>('')
   const [settingsError, setSettingsError] = useState('')
   const [settingsSaving, setSettingsSaving] = useState(false)
 
@@ -230,6 +231,8 @@ export default function DashboardPage() {
   const handlePhotoUpload = async (file: File, type: 'avatar' | 'cover') => {
     if (type === 'avatar') setUploadingAvatar(true)
     else setUploadingCover(true)
+    setSettingsError('')
+    setUploadSuccess('')
 
     try {
       // Create FormData to upload the image
@@ -256,12 +259,26 @@ export default function DashboardPage() {
       // Update the local state with the new URL
       if (type === 'avatar') {
         setAvatarUrl(data.url)
+        setUploadSuccess('✓ Avatar uploaded successfully')
       } else {
         setCoverPhotoUrl(data.url)
+        setUploadSuccess('✓ Cover photo uploaded successfully')
       }
 
-      // Refresh dashboard data
-      await fetchDashboard(true)
+      // Auto-hide success message after 3 seconds
+      setTimeout(() => setUploadSuccess(''), 3000)
+
+      // Update dashboardData to reflect the new photo
+      setDashboardData(prev => {
+        if (!prev) return prev
+        return {
+          ...prev,
+          provider: {
+            ...prev.provider,
+            [type === 'avatar' ? 'avatar_url' : 'cover_photo_url']: data.url
+          }
+        }
+      })
     } catch (err: any) {
       setSettingsError(err.message || 'Failed to upload photo')
     } finally {
@@ -272,13 +289,13 @@ export default function DashboardPage() {
 
   const handleSaveSettings = async () => {
     setSettingsError('')
+    setUploadSuccess('')
     setSettingsSaving(true)
     try {
       const updates: any = {}
       if (settingsTab === 'account' || !settingsTab) {
         updates.location = location
-        updates.avatar_url = avatarUrl
-        updates.cover_photo_url = coverPhotoUrl
+        // Note: avatar_url and cover_photo_url are already saved via handlePhotoUpload
         if (currentPassword && newPassword) {
           if (newPassword !== confirmPassword) {
             throw new Error('New passwords do not match')
@@ -300,6 +317,7 @@ export default function DashboardPage() {
       setCurrentPassword('')
       setNewPassword('')
       setConfirmPassword('')
+      setUploadSuccess('')
       await fetchDashboard(true)
     } catch (err: any) {
       setSettingsError(err.message)
@@ -619,6 +637,7 @@ export default function DashboardPage() {
                     onClick={() => {
                       setShowSettings(false)
                       setSettingsError('')
+                      setUploadSuccess('')
                     }}
                     className="text-white hover:bg-white/20 rounded-lg p-2 transition"
                   >
@@ -656,6 +675,13 @@ export default function DashboardPage() {
                 {settingsError && (
                   <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-600 dark:text-red-400 text-sm">
                     {settingsError}
+                  </div>
+                )}
+
+                {/* Success message */}
+                {uploadSuccess && (
+                  <div className="mb-4 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg text-green-600 dark:text-green-400 text-sm font-medium">
+                    {uploadSuccess}
                   </div>
                 )}
 
@@ -894,6 +920,7 @@ export default function DashboardPage() {
                     onClick={() => {
                       setShowSettings(false)
                       setSettingsError('')
+                      setUploadSuccess('')
                     }}
                     variant="outline"
                   >
