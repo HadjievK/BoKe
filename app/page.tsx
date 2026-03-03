@@ -16,7 +16,7 @@ import { Features } from '@/components/Features'
 import { HowItWorks } from '@/components/HowItWorks'
 import { CTA } from '@/components/CTA'
 import ThemeToggle from '@/components/ThemeToggle'
-import ReCAPTCHA from 'react-google-recaptcha'
+// import ReCAPTCHA from 'react-google-recaptcha'
 
 const SERVICE_CATEGORIES = [
   'Barbers',
@@ -56,14 +56,14 @@ export default function Home() {
   const [showOnboarding, setShowOnboarding] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const recaptchaRef = useRef<ReCAPTCHA>(null)
+  // const recaptchaRef = useRef<ReCAPTCHA>(null)
 
   // Form state
   const [serviceType, setServiceType] = useState('')
   const [customServiceType, setCustomServiceType] = useState('')
   const [isOver18, setIsOver18] = useState(false)
-  const [captchaVerified, setCaptchaVerified] = useState(false)
-  const [captchaToken, setCaptchaToken] = useState<string | null>(null)
+  // const [captchaVerified, setCaptchaVerified] = useState(false)
+  // const [captchaToken, setCaptchaToken] = useState<string | null>(null)
   const [name, setName] = useState('')
   const [businessName, setBusinessName] = useState('')
   const [email, setEmail] = useState('')
@@ -98,10 +98,10 @@ export default function Home() {
     setServices([...services, { name: '', duration: 30, price: 0, icon: '✂️' }])
   }
 
-  const handleCaptchaChange = (token: string | null) => {
-    setCaptchaToken(token)
-    setCaptchaVerified(!!token)
-  }
+  // const handleCaptchaChange = (token: string | null) => {
+  //   setCaptchaToken(token)
+  //   setCaptchaVerified(!!token)
+  // }
 
   const handleSubmit = async () => {
     setError('')
@@ -114,12 +114,12 @@ export default function Home() {
       return
     }
 
-    // Validate CAPTCHA
-    if (!captchaVerified) {
-      setError('Please complete the CAPTCHA verification')
-      setLoading(false)
-      return
-    }
+    // CAPTCHA validation removed
+    // if (!captchaVerified) {
+    //   setError('Please complete the CAPTCHA verification')
+    //   setLoading(false)
+    //   return
+    // }
 
     // Validate service type
     const finalServiceType = serviceType === 'Other' && customServiceType
@@ -663,8 +663,8 @@ export default function Home() {
             </label>
           </motion.div>
 
-          {/* Google reCAPTCHA */}
-          <motion.div
+          {/* Google reCAPTCHA - DISABLED */}
+          {/* <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="flex justify-center"
@@ -675,7 +675,7 @@ export default function Home() {
               onChange={handleCaptchaChange}
               theme="light"
             />
-          </motion.div>
+          </motion.div> */}
 
           <Button
             onClick={handleSubmit}
