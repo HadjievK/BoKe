@@ -1203,20 +1203,6 @@ export default function DashboardPage() {
 
                           <div>
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                              Icon/Emoji
-                            </label>
-                            <input
-                              type="text"
-                              maxLength={3}
-                              value={serviceForm.icon}
-                              onChange={(e) => setServiceForm({ ...serviceForm, icon: e.target.value })}
-                              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent dark:bg-gray-700 dark:text-white"
-                              placeholder="✂️ 💇 ⭐"
-                            />
-                          </div>
-
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                               Description (optional)
                             </label>
                             <textarea
@@ -1265,7 +1251,6 @@ export default function DashboardPage() {
                     {/* Services List */}
                     {services.length === 0 ? (
                       <div className="text-center py-12 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg">
-                        <div className="text-4xl mb-4">💼</div>
                         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                           No services yet
                         </h3>
