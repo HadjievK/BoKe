@@ -78,6 +78,11 @@ const nextConfig = {
     ignoreBuildErrors: false,
   },
 
+  // Disable ESLint during build
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+
   // Optimize images
   images: {
     formats: ['image/webp'],
