@@ -42,6 +42,8 @@ export default function DashboardPage() {
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [deletePassword, setDeletePassword] = useState('')
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
   const [location, setLocation] = useState('')
   const [avatarUrl, setAvatarUrl] = useState('')
   const [coverPhotoUrl, setCoverPhotoUrl] = useState('')
@@ -423,6 +425,44 @@ export default function DashboardPage() {
     } catch (err: any) {
       console.error('Save services error:', err)
       setSettingsError(err.message || 'Failed to update services')
+    } finally {
+      setSettingsSaving(false)
+    }
+  }
+
+  const handleDeleteAccount = async () => {
+    if (!deletePassword) {
+      setSettingsError('Please enter your password to confirm deletion')
+      return
+    }
+
+    setSettingsSaving(true)
+    setSettingsError('')
+
+    try {
+      const response = await fetch(`/api/dashboard/${slug}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+        },
+        credentials: 'include',
+        body: JSON.stringify({ password: deletePassword })
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.detail || 'Failed to delete account')
+      }
+
+      // Clear auth token
+      localStorage.removeItem('auth_token')
+
+      // Redirect to home page with message
+      alert('Your account has been permanently deleted.')
+      router.push('/')
+    } catch (err: any) {
+      setSettingsError(err.message || 'Failed to delete account')
     } finally {
       setSettingsSaving(false)
     }
@@ -1039,11 +1079,133 @@ export default function DashboardPage() {
                         />
                       </div>
                     </div>
+
+                    {/* Delete Account Section */}
+                    <div className="pt-4 border-t border-red-200 dark:border-red-900">
+                      <h3 className="text-lg font-semibold text-red-600 dark:text-red-400 mb-2">
+                        Delete Account
+                      </h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                        Permanently delete your account and all associated data. This action cannot be undone.
+                      </p>
+                      <Button
+                        onClick={() => setShowDeleteConfirmation(true)}
+                        variant="destructive"
+                        className="bg-red-600 hover:bg-red-700 text-white"
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Delete Account
+                      </Button>
+                    </div>
                   </div>
                 )}
 
-                {/* Calendar Settings */}
-                {settingsTab === 'calendar' && (
+                {/* Delete Account Confirmation Modal */}
+                <AnimatePresence>
+                  {showDeleteConfirmation && (
+                    <motion.div
+                      className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      onClick={() => {
+                        setShowDeleteConfirmation(false)
+                        setDeletePassword('')
+                        setSettingsError('')
+                      }}
+                    >
+                      <motion.div
+                        className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full overflow-hidden"
+                        initial={{ scale: 0.9, y: 20 }}
+                        animate={{ scale: 1, y: 0 }}
+                        exit={{ scale: 0.9, y: 20 }}
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <div className="bg-gradient-to-r from-red-600 to-red-700 p-6">
+                          <div className="flex items-center justify-between">
+                            <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+                              <AlertCircle className="h-6 w-6" />
+                              Delete Account
+                            </h2>
+                            <button
+                              onClick={() => {
+                                setShowDeleteConfirmation(false)
+                                setDeletePassword('')
+                                setSettingsError('')
+                              }}
+                              className="text-white hover:bg-white/20 rounded-lg p-2 transition"
+                            >
+                              <XCircle className="h-6 w-6" />
+                            </button>
+                          </div>
+                        </div>
+
+                        <div className="p-6">
+                          <div className="mb-6">
+                            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-4">
+                              <h4 className="font-semibold text-red-800 dark:text-red-300 mb-2">
+                                ⚠️ Warning: This action is permanent
+                              </h4>
+                              <ul className="text-sm text-red-700 dark:text-red-400 space-y-1 list-disc list-inside">
+                                <li>All your appointments will be deleted</li>
+                                <li>All customer data will be removed</li>
+                                <li>Your public booking page will be deactivated</li>
+                                <li>This action cannot be undone</li>
+                              </ul>
+                            </div>
+
+                            <p className="text-gray-700 dark:text-gray-300 mb-4">
+                              To confirm deletion, please enter your password:
+                            </p>
+
+                            <input
+                              type="password"
+                              value={deletePassword}
+                              onChange={(e) => setDeletePassword(e.target.value)}
+                              placeholder="Enter your password"
+                              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-red-600 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                            />
+                          </div>
+
+                          {settingsError && (
+                            <Alert variant="error" className="mb-4">
+                              {settingsError}
+                            </Alert>
+                          )}
+
+                          <div className="flex gap-3">
+                            <Button
+                              onClick={() => {
+                                setShowDeleteConfirmation(false)
+                                setDeletePassword('')
+                                setSettingsError('')
+                              }}
+                              variant="outline"
+                              className="flex-1"
+                            >
+                              Cancel
+                            </Button>
+                            <Button
+                              onClick={handleDeleteAccount}
+                              disabled={!deletePassword || settingsSaving}
+                              variant="destructive"
+                              className="flex-1 bg-red-600 hover:bg-red-700"
+                            >
+                              {settingsSaving ? 'Deleting...' : 'Delete My Account'}
+                            </Button>
+                          </div>
+                        </div>
+                      </motion.div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </motion.div>
+          </div>
+        )}
+
+        {/* Calendar Settings */}
+        {settingsTab === 'calendar' && (
                   <div className="space-y-6">
                     <div className="grid grid-cols-2 gap-4">
                       <div>

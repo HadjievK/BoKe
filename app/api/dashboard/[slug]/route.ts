@@ -399,3 +399,99 @@ export async function PATCH(
     );
   }
 }
+
+/**
+ * DELETE /api/dashboard/[slug] - Delete provider account
+ * Permanently deletes the provider account and all associated data
+ * Requires JWT authentication and password confirmation
+ */
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ slug: string }> }
+) {
+  try {
+    const { slug } = await params;
+    const body = await request.json();
+
+    // Authenticate and verify slug match
+    const authResult = authenticateProviderBySlug(request, slug);
+    if (authResult instanceof NextResponse) return authResult;
+
+    const { auth, providerId } = authResult;
+
+    // Verify password
+    if (!body.password) {
+      return NextResponse.json(
+        { detail: 'Password is required to delete account' },
+        { status: 400 }
+      );
+    }
+
+    // Get provider password from database
+    const providerResult = await pool.query(
+      'SELECT password FROM service_providers WHERE id = $1',
+      [providerId]
+    );
+
+    if (providerResult.rows.length === 0) {
+      return NextResponse.json(
+        { detail: 'Provider not found' },
+        { status: 404 }
+      );
+    }
+
+    // Verify password
+    const isPasswordValid = await bcrypt.compare(body.password, providerResult.rows[0].password);
+
+    if (!isPasswordValid) {
+      return NextResponse.json(
+        { detail: 'Invalid password' },
+        { status: 401 }
+      );
+    }
+
+    // Delete all associated data and the provider account
+    // Order matters due to foreign key constraints
+    await pool.query('BEGIN');
+
+    try {
+      // 1. Delete booking tokens associated with provider's appointments
+      await pool.query(
+        `DELETE FROM booking_tokens
+         WHERE appointment_id IN (
+           SELECT id FROM appointments WHERE provider_id = $1
+         )`,
+        [providerId]
+      );
+
+      // 2. Delete appointments
+      await pool.query(
+        'DELETE FROM appointments WHERE provider_id = $1',
+        [providerId]
+      );
+
+      // 3. Delete the provider account
+      await pool.query(
+        'DELETE FROM service_providers WHERE id = $1',
+        [providerId]
+      );
+
+      await pool.query('COMMIT');
+
+      return NextResponse.json({
+        success: true,
+        message: 'Account deleted successfully'
+      });
+    } catch (error) {
+      await pool.query('ROLLBACK');
+      throw error;
+    }
+
+  } catch (error: any) {
+    console.error('Account deletion error:', error);
+    return NextResponse.json(
+      { detail: `Failed to delete account: ${error.message}` },
+      { status: 500 }
+    );
+  }
+}
