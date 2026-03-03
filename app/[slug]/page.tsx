@@ -532,7 +532,7 @@ export default function ProviderProfilePage() {
                     ✉️ Check your email
                   </p>
                   <p className="text-gray-700 dark:text-gray-300 mb-4 text-lg">
-                    We've sent a confirmation to <strong className="text-purple-600">{confirmation.appointment.customer_email}</strong>
+                    We&apos;ve sent a confirmation to <strong className="text-purple-600">{confirmation.appointment.customer_email}</strong>
                   </p>
                   <p className="text-gray-600 dark:text-gray-400">
                     The email includes your booking details and a secure link to view or cancel your appointment.

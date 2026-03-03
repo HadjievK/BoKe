@@ -586,7 +586,7 @@ export default function BookingPage({
                   Reschedule Appointment
                 </h3>
                 <p className="text-gray-600 dark:text-gray-300">
-                  You'll be redirected to the booking page where you can select a new date and time.
+                  You&apos;ll be redirected to the booking page where you can select a new date and time.
                 </p>
               </div>
 
