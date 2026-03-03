@@ -16,6 +16,7 @@ import ThemeToggle from '@/components/ThemeToggle'
 import AppointmentCalendar from '@/components/dashboard/AppointmentCalendar'
 import AppointmentDetailsModal from '@/components/dashboard/AppointmentDetailsModal'
 import { Button } from '@/components/ui/button'
+import { Alert } from '@/components/ui/alert'
 import { View } from 'react-big-calendar'
 
 export default function DashboardPage() {
@@ -693,16 +694,16 @@ export default function DashboardPage() {
 
                 {/* Error message */}
                 {settingsError && (
-                  <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-600 dark:text-red-400 text-sm">
+                  <Alert variant="error" animated>
                     {settingsError}
-                  </div>
+                  </Alert>
                 )}
 
                 {/* Success message */}
                 {uploadSuccess && (
-                  <div className="mb-4 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg text-green-600 dark:text-green-400 text-sm font-medium">
+                  <Alert variant="success" animated>
                     {uploadSuccess}
-                  </div>
+                  </Alert>
                 )}
 
                 {/* Account Settings */}

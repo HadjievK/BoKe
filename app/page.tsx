@@ -8,6 +8,7 @@ import { motion, useInView, AnimatePresence } from 'framer-motion'
 import { ArrowRight, Sparkles, Check, Calendar, Zap, Share2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Alert } from '@/components/ui/alert'
 import { fadeInUp, staggerContainer, staggerItem, scaleIn } from '@/lib/animations'
 import { ServiceProfessionals } from '@/components/ServiceProfessionals'
 import { BookingDemo } from '@/components/BookingDemo'
@@ -638,14 +639,9 @@ export default function Home() {
 
           <AnimatePresence>
             {error && (
-              <motion.div
-                className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-3 rounded-xl text-sm"
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-              >
+              <Alert variant="error" animated>
                 {error}
-              </motion.div>
+              </Alert>
             )}
           </AnimatePresence>
 

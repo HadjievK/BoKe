@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowRight, Sparkles, Check, Mail, Lock, User, Building2, Phone, MapPin, Calendar } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Alert } from '@/components/ui/alert'
 import { registerProvider } from '@/lib/api'
 import type { OnboardingData } from '@/lib/types'
 import ReCAPTCHA from 'react-google-recaptcha'
@@ -296,14 +297,9 @@ export default function GetStartedPage() {
               {/* Error message */}
               <AnimatePresence>
                 {error && (
-                  <motion.div
-                    className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg"
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                  >
-                    <p className="text-red-600 dark:text-red-400 text-sm">{error}</p>
-                  </motion.div>
+                  <Alert variant="error" animated>
+                    {error}
+                  </Alert>
                 )}
               </AnimatePresence>
 

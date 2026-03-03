@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import pool from '@/lib/db';
+import bcrypt from 'bcryptjs';
 import type { DashboardData, DashboardStats, AppointmentWithDetails, CustomerPublic } from '@/lib/types';
 import { authenticateRequest } from '@/lib/auth';
 
@@ -187,6 +188,175 @@ export async function GET(
     console.error('Dashboard API error:', error);
     return NextResponse.json(
       { detail: `Failed to fetch dashboard data: ${error.message}` },
+      { status: 500 }
+    );
+  }
+}
+
+/**
+ * PATCH /api/dashboard/[slug] - Update provider settings
+ * Consolidated endpoint for all provider updates (replaces /api/provider/[slug] PATCH and /api/provider/[slug]/settings PUT)
+ * Requires JWT authentication
+ */
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ slug: string }> }
+) {
+  try {
+    const { slug } = await params;
+    const body = await request.json();
+
+    // Authenticate using JWT token
+    const auth = authenticateRequest(request);
+
+    if (!auth) {
+      return NextResponse.json(
+        { detail: 'Unauthorized - Please sign in' },
+        { status: 401 }
+      );
+    }
+
+    // Verify the slug matches the authenticated provider
+    if (auth.slug !== slug) {
+      return NextResponse.json(
+        { detail: 'Forbidden - Cannot update another provider\'s data' },
+        { status: 403 }
+      );
+    }
+
+    const providerId = auth.providerId;
+
+    // Handle password change (requires current password verification)
+    if (body.password) {
+      if (!body.currentPassword) {
+        return NextResponse.json(
+          { detail: 'Current password is required to change password' },
+          { status: 400 }
+        );
+      }
+
+      // Verify current password
+      const authResult = await pool.query(
+        'SELECT password FROM service_providers WHERE id = $1',
+        [providerId]
+      );
+
+      if (authResult.rows.length === 0) {
+        return NextResponse.json(
+          { detail: 'Provider not found' },
+          { status: 404 }
+        );
+      }
+
+      const isPasswordValid = await bcrypt.compare(body.currentPassword, authResult.rows[0].password);
+
+      if (!isPasswordValid) {
+        return NextResponse.json(
+          { detail: 'Invalid current password' },
+          { status: 401 }
+        );
+      }
+    }
+
+    // Build update query dynamically
+    const updateFields: string[] = [];
+    const updateValues: any[] = [];
+    let paramIndex = 1;
+
+    // Password update (hash before storing)
+    if (body.password !== undefined) {
+      const hashedPassword = await bcrypt.hash(body.password, 10);
+      updateFields.push(`password = $${paramIndex}`);
+      updateValues.push(hashedPassword);
+      paramIndex++;
+    }
+
+    // Location fields
+    if (body.location !== undefined) {
+      updateFields.push(`location = $${paramIndex}`);
+      updateValues.push(body.location);
+      paramIndex++;
+    }
+
+    if (body.latitude !== undefined) {
+      updateFields.push(`latitude = $${paramIndex}`);
+      updateValues.push(body.latitude);
+      paramIndex++;
+    }
+
+    if (body.longitude !== undefined) {
+      updateFields.push(`longitude = $${paramIndex}`);
+      updateValues.push(body.longitude);
+      paramIndex++;
+    }
+
+    // Calendar settings
+    if (body.calendar_start_time !== undefined) {
+      updateFields.push(`calendar_start_time = $${paramIndex}`);
+      updateValues.push(body.calendar_start_time);
+      paramIndex++;
+    }
+
+    if (body.calendar_end_time !== undefined) {
+      updateFields.push(`calendar_end_time = $${paramIndex}`);
+      updateValues.push(body.calendar_end_time);
+      paramIndex++;
+    }
+
+    if (body.slot_duration !== undefined) {
+      updateFields.push(`slot_duration = $${paramIndex}`);
+      updateValues.push(body.slot_duration);
+      paramIndex++;
+    }
+
+    if (body.buffer_time !== undefined) {
+      updateFields.push(`buffer_time = $${paramIndex}`);
+      updateValues.push(body.buffer_time);
+      paramIndex++;
+    }
+
+    if (body.working_days !== undefined) {
+      updateFields.push(`working_days = $${paramIndex}`);
+      updateValues.push(JSON.stringify(body.working_days));
+      paramIndex++;
+    }
+
+    // Services JSONB
+    if (body.services !== undefined) {
+      updateFields.push(`services = $${paramIndex}::jsonb`);
+      updateValues.push(JSON.stringify(body.services));
+      paramIndex++;
+    }
+
+    if (updateFields.length === 0) {
+      return NextResponse.json(
+        { detail: 'No updates provided' },
+        { status: 400 }
+      );
+    }
+
+    // Add provider ID to values
+    updateValues.push(providerId);
+
+    const query = `
+      UPDATE service_providers
+      SET ${updateFields.join(', ')}
+      WHERE id = $${paramIndex}
+      RETURNING id, slug, name, business_name, location, latitude, longitude,
+                calendar_start_time, calendar_end_time, slot_duration, buffer_time, working_days
+    `;
+
+    const result = await pool.query(query, updateValues);
+
+    return NextResponse.json({
+      success: true,
+      provider: result.rows[0],
+    });
+
+  } catch (error: any) {
+    console.error('Provider settings update error:', error);
+    return NextResponse.json(
+      { detail: `Failed to update provider settings: ${error.message}` },
       { status: 500 }
     );
   }

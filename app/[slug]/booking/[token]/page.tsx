@@ -8,6 +8,7 @@ import { Calendar, Clock, DollarSign, MapPin, Phone, Mail, User, Sparkles, Check
 import { formatDate, formatTime } from '@/lib/utils'
 import { AppointmentStatus, BookingManagementData } from '@/lib/types'
 import { Button } from '@/components/ui/button'
+import { Alert } from '@/components/ui/alert'
 
 export default function BookingPage({
   params,
@@ -287,14 +288,9 @@ export default function BookingPage({
                 {/* Error message */}
                 <AnimatePresence>
                   {error && (
-                    <motion.div
-                      className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg"
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      exit={{ opacity: 0, height: 0 }}
-                    >
-                      <p className="text-red-600 dark:text-red-400 text-sm">{error}</p>
-                    </motion.div>
+                    <Alert variant="error" animated>
+                      {error}
+                    </Alert>
                   )}
                 </AnimatePresence>
 

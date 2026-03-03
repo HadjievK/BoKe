@@ -8,6 +8,7 @@ import { signIn as nextAuthSignIn } from 'next-auth/react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Mail, Lock, ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Alert } from '@/components/ui/alert'
 import { scaleIn, fadeInUp } from '@/lib/animations'
 
 export default function SignInPage() {
@@ -184,14 +185,9 @@ export default function SignInPage() {
 
             <AnimatePresence>
               {error && (
-                <motion.div
-                  className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-3 rounded-lg text-sm"
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                >
+                <Alert variant="error" animated>
                   {error}
-                </motion.div>
+                </Alert>
               )}
             </AnimatePresence>
 

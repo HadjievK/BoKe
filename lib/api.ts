@@ -23,7 +23,7 @@ import type {
 // ============ Public Booking API ============
 
 export async function getProviderProfile(slug: string): Promise<ProviderWithServices> {
-  const res = await fetch(`${API_URL}/api/provider/${slug}`)
+  const res = await fetch(`${API_URL}/api/${slug}/profile`)
 
   if (!res.ok) {
     if (res.status === 404) {
@@ -292,7 +292,7 @@ export async function updateProviderProfile(
     }
   }
 ): Promise<void> {
-  const res = await fetch(`${API_URL}/api/provider/${slug}`, {
+  const res = await fetch(`${API_URL}/api/dashboard/${slug}`, {
     method: 'PATCH',
     headers: getAuthHeaders(),
     credentials: 'include',
@@ -309,13 +309,13 @@ export async function updateProviderPassword(
   currentPassword: string,
   newPassword: string
 ): Promise<void> {
-  const res = await fetch(`${API_URL}/api/provider/${slug}/password`, {
-    method: 'POST',
+  const res = await fetch(`${API_URL}/api/dashboard/${slug}`, {
+    method: 'PATCH',
     headers: getAuthHeaders(),
     credentials: 'include',
     body: JSON.stringify({
-      current_password: currentPassword,
-      new_password: newPassword,
+      currentPassword: currentPassword,
+      password: newPassword,
     }),
   })
 

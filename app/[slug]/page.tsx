@@ -11,6 +11,7 @@ import { formatDateISO } from '@/lib/utils'
 import CalendarPicker from '@/components/booking/CalendarPicker'
 import TimeSlotGrid from '@/components/booking/TimeSlotGrid'
 import CustomerForm from '@/components/booking/CustomerForm'
+import { Alert } from '@/components/ui/alert'
 
 type BookingStep = 'select-datetime' | 'enter-details' | 'success'
 
@@ -487,13 +488,11 @@ export default function ProviderProfilePage() {
                   />
 
                   {error && (
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      className="mt-6 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-6 py-4 rounded-xl"
-                    >
-                      {error}
-                    </motion.div>
+                    <div className="mt-6">
+                      <Alert variant="error" animated>
+                        {error}
+                      </Alert>
+                    </div>
                   )}
                 </div>
               </motion.div>
