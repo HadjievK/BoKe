@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
@@ -69,6 +69,9 @@ export default function DashboardPage() {
   const [showShare, setShowShare] = useState(false)
   const [copied, setCopied] = useState(false)
 
+  // Ref to track timeouts for cleanup
+  const successTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+
   const todayDate = useMemo(() => formatDateShort(new Date()), [])
 
   const getGreeting = useCallback(() => {
@@ -102,6 +105,15 @@ export default function DashboardPage() {
   useEffect(() => {
     checkAuth()
   }, [checkAuth])
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (successTimeoutRef.current) {
+        clearTimeout(successTimeoutRef.current)
+      }
+    }
+  }, [])
 
   useEffect(() => {
     if (!authenticated) return
@@ -265,8 +277,16 @@ export default function DashboardPage() {
         setUploadSuccess('✓ Cover photo uploaded successfully')
       }
 
+      // Clear previous timeout if exists
+      if (successTimeoutRef.current) {
+        clearTimeout(successTimeoutRef.current)
+      }
+
       // Auto-hide success message after 3 seconds
-      setTimeout(() => setUploadSuccess(''), 3000)
+      successTimeoutRef.current = setTimeout(() => {
+        setUploadSuccess('')
+        successTimeoutRef.current = null
+      }, 3000)
 
       // Update dashboardData to reflect the new photo
       setDashboardData(prev => {
