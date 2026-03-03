@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Calendar, Clock, MapPin, CheckCircle, Sparkles, ArrowRight, Star, Heart } from 'lucide-react'
+import { Calendar, Clock, MapPin, CheckCircle, Sparkles, ArrowRight } from 'lucide-react'
 import { getProviderProfile, getAvailability, bookAppointment } from '@/lib/api'
 import type { ProviderWithServices, Service, Customer, BookingRequest } from '@/lib/types'
 import { formatDateISO } from '@/lib/utils'
@@ -256,41 +256,6 @@ export default function ProviderProfilePage() {
                   </motion.div>
                 </div>
               </div>
-
-              {/* Quick Stats */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 }}
-                className="grid grid-cols-2 md:grid-cols-4 gap-4"
-              >
-                <div className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-lg rounded-2xl p-5 border border-white/20 dark:border-gray-700/50 text-center hover:scale-105 transition-transform">
-                  <div className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-1">
-                    {provider.services.length}
-                  </div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">Services</div>
-                </div>
-                <div className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-lg rounded-2xl p-5 border border-white/20 dark:border-gray-700/50 text-center hover:scale-105 transition-transform">
-                  <div className="flex items-center justify-center gap-1 mb-1">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} size={16} className="fill-yellow-400 text-yellow-400" />
-                    ))}
-                  </div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">Top Rated</div>
-                </div>
-                <div className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-lg rounded-2xl p-5 border border-white/20 dark:border-gray-700/50 text-center hover:scale-105 transition-transform">
-                  <div className="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mb-1">
-                    Fast
-                  </div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">Booking</div>
-                </div>
-                <div className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-lg rounded-2xl p-5 border border-white/20 dark:border-gray-700/50 text-center hover:scale-105 transition-transform">
-                  <div className="flex items-center justify-center gap-1 text-3xl mb-1">
-                    <Heart size={28} className="fill-red-500 text-red-500" />
-                  </div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">Loved</div>
-                </div>
-              </motion.div>
             </div>
           </div>
 

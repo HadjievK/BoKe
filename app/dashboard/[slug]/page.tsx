@@ -361,7 +361,7 @@ export default function DashboardPage() {
           animate={{ opacity: 1, y: 0 }}
         >
           <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
-            {getGreeting()}, {provider.name.split(' ')[0]} 👋
+            {getGreeting()}, {provider.name.split(' ')[0]}
           </h1>
           <p className="text-gray-600 dark:text-gray-300">
             {todayDate} · You have <span className="font-semibold text-purple-600 dark:text-purple-400">{dashboardData.appointments.length} appointments</span> today
@@ -437,7 +437,7 @@ export default function DashboardPage() {
           <div className="flex items-center justify-between mb-6">
             <div>
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
-                📅 Appointment Calendar
+                Appointment Calendar
               </h2>
               <p className="text-sm text-gray-600 dark:text-gray-400">
                 Click any appointment to view details or take actions
