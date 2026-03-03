@@ -60,6 +60,7 @@ export async function GET(
       longitude: provider.longitude,
       bio: provider.bio,
       avatar_url: provider.avatar_url,
+      cover_photo_url: provider.cover_photo_url,
       theme_config: provider.theme_config || { primary_color: '#C9993A', secondary_color: '#1C1812' },
       created_at: provider.created_at,
       services: formattedServices,
