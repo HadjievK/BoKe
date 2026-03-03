@@ -421,6 +421,7 @@ export default function DashboardPage() {
         successTimeoutRef.current = null
       }, 3000)
     } catch (err: any) {
+      console.error('Save services error:', err)
       setSettingsError(err.message || 'Failed to update services')
     } finally {
       setSettingsSaving(false)

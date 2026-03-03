@@ -301,7 +301,8 @@ export async function updateProviderProfile(
   })
 
   if (!res.ok) {
-    throw new Error('Failed to update provider profile')
+    const errorData = await res.json().catch(() => ({}))
+    throw new Error(errorData.detail || errorData.error || 'Failed to update provider profile')
   }
 }
 

@@ -325,7 +325,7 @@ export async function PATCH(
             { status: 400 }
           );
         }
-        if (!service.duration || typeof service.duration !== 'number' || service.duration <= 0) {
+        if (service.duration === undefined || typeof service.duration !== 'number' || service.duration <= 0) {
           return NextResponse.json(
             { detail: 'Each service must have a valid duration greater than 0' },
             { status: 400 }
@@ -343,7 +343,7 @@ export async function PATCH(
             { status: 400 }
           );
         }
-        if (service.description && typeof service.description === 'string' && service.description.length > 500) {
+        if (service.description !== undefined && typeof service.description === 'string' && service.description.length > 500) {
           return NextResponse.json(
             { detail: 'Service description must be under 500 characters' },
             { status: 400 }
