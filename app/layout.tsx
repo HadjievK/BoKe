@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import { ThemeProvider } from '@/components/ThemeProvider'
-import AuthProvider from '@/components/AuthProvider'
 
 export const metadata: Metadata = {
   title: 'BooKie - Simple Booking for Service Providers',
@@ -34,9 +33,7 @@ export default function RootLayout({
         />
       </head>
       <body>
-        <AuthProvider>
-          <ThemeProvider>{children}</ThemeProvider>
-        </AuthProvider>
+        <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>
   )
