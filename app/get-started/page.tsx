@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Alert } from '@/components/ui/alert'
 import { registerProvider } from '@/lib/api'
 import type { OnboardingData } from '@/lib/types'
-import ReCAPTCHA from 'react-google-recaptcha'
+// import ReCAPTCHA from 'react-google-recaptcha'
 
 const SERVICE_TYPES = [
   'Barber',
@@ -54,7 +54,7 @@ export default function GetStartedPage() {
   const [step, setStep] = useState<'info' | 'services' | 'schedule'>('info')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null)
+  // const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null)
   const [formData, setFormData] = useState<FormData>({
     businessName: '',
     name: '',
@@ -118,10 +118,7 @@ export default function GetStartedPage() {
         setError('Select at least one working day')
         return false
       }
-      if (!recaptchaToken) {
-        setError('Please complete the reCAPTCHA')
-        return false
-      }
+      // Removed reCAPTCHA validation
     }
     setError('')
     return true
@@ -515,13 +512,14 @@ export default function GetStartedPage() {
                       </div>
                     </div>
 
-                    <div className="flex justify-center">
+                    {/* ReCAPTCHA disabled */}
+                    {/* <div className="flex justify-center">
                       <ReCAPTCHA
                         sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY!}
                         onChange={(token) => setRecaptchaToken(token)}
                         theme="light"
                       />
-                    </div>
+                    </div> */}
                   </motion.div>
                 )}
               </AnimatePresence>
