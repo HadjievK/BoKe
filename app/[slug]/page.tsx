@@ -190,20 +190,42 @@ export default function ProviderProfilePage() {
           animate={{ opacity: 1, y: 0 }}
           className="relative overflow-hidden"
         >
+          {/* Cover Photo Background */}
+          {provider.cover_photo_url ? (
+            <div className="relative h-64 overflow-hidden">
+              <img
+                src={provider.cover_photo_url}
+                alt="Cover"
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/40 to-black/60" />
+            </div>
+          ) : (
+            <div className="h-32 bg-gradient-to-r from-purple-600 to-blue-600" />
+          )}
+
           <div className="bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl border-b border-white/20 dark:border-gray-800/50">
-            <div className="max-w-7xl mx-auto px-6 py-16">
+            <div className="max-w-7xl mx-auto px-6 py-8">
               <div className="flex items-start gap-6 mb-6">
-                {/* Avatar with gradient */}
+                {/* Avatar with photo or gradient */}
                 <motion.div
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   transition={{ type: 'spring', stiffness: 200 }}
-                  className="w-24 h-24 rounded-3xl flex items-center justify-center text-4xl font-bold text-white flex-shrink-0 shadow-2xl shadow-purple-500/50"
+                  className="w-24 h-24 rounded-3xl flex items-center justify-center text-4xl font-bold text-white flex-shrink-0 shadow-2xl shadow-purple-500/50 overflow-hidden"
                   style={{
-                    background: 'linear-gradient(135deg, #9333ea 0%, #3b82f6 100%)',
+                    background: provider.avatar_url ? 'transparent' : 'linear-gradient(135deg, #9333ea 0%, #3b82f6 100%)',
                   }}
                 >
-                  {provider.name.charAt(0)}
+                  {provider.avatar_url ? (
+                    <img
+                      src={provider.avatar_url}
+                      alt={provider.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    provider.name.charAt(0)
+                  )}
                 </motion.div>
 
                 <div className="flex-1">

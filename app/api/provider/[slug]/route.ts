@@ -15,7 +15,7 @@ export async function GET(
       `
       SELECT
         id, slug, name, business_name, service_type, email, phone,
-        location, latitude, longitude, bio, avatar_url, theme_config, services, created_at
+        location, latitude, longitude, bio, avatar_url, cover_photo_url, theme_config, services, created_at
       FROM service_providers
       WHERE slug = $1
       `,

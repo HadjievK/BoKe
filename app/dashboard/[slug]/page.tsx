@@ -42,6 +42,10 @@ export default function DashboardPage() {
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [location, setLocation] = useState('')
+  const [avatarUrl, setAvatarUrl] = useState('')
+  const [coverPhotoUrl, setCoverPhotoUrl] = useState('')
+  const [uploadingAvatar, setUploadingAvatar] = useState(false)
+  const [uploadingCover, setUploadingCover] = useState(false)
   const [settingsError, setSettingsError] = useState('')
   const [settingsSaving, setSettingsSaving] = useState(false)
 
@@ -110,6 +114,8 @@ export default function DashboardPage() {
     if (showSettings && dashboardData) {
       const provider = dashboardData.provider
       setLocation(provider.location || '')
+      setAvatarUrl(provider.avatar_url || '')
+      setCoverPhotoUrl(provider.cover_photo_url || '')
       if (provider.calendar_start_time) {
         setCalendarStartTime(provider.calendar_start_time.slice(0, 5))
       }
@@ -221,6 +227,49 @@ export default function DashboardPage() {
     )
   }, [handleUpdateAppointmentStatus])
 
+  const handlePhotoUpload = async (file: File, type: 'avatar' | 'cover') => {
+    if (type === 'avatar') setUploadingAvatar(true)
+    else setUploadingCover(true)
+
+    try {
+      // Create FormData to upload the image
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('type', type)
+
+      // Upload to our API endpoint
+      const response = await fetch(`/api/dashboard/${slug}/upload-photo`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+        },
+        body: formData
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Upload failed')
+      }
+
+      const data = await response.json()
+
+      // Update the local state with the new URL
+      if (type === 'avatar') {
+        setAvatarUrl(data.url)
+      } else {
+        setCoverPhotoUrl(data.url)
+      }
+
+      // Refresh dashboard data
+      await fetchDashboard(true)
+    } catch (err: any) {
+      setSettingsError(err.message || 'Failed to upload photo')
+    } finally {
+      if (type === 'avatar') setUploadingAvatar(false)
+      else setUploadingCover(false)
+    }
+  }
+
   const handleSaveSettings = async () => {
     setSettingsError('')
     setSettingsSaving(true)
@@ -228,6 +277,8 @@ export default function DashboardPage() {
       const updates: any = {}
       if (settingsTab === 'account' || !settingsTab) {
         updates.location = location
+        updates.avatar_url = avatarUrl
+        updates.cover_photo_url = coverPhotoUrl
         if (currentPassword && newPassword) {
           if (newPassword !== confirmPassword) {
             throw new Error('New passwords do not match')
@@ -610,7 +661,99 @@ export default function DashboardPage() {
 
                 {/* Account Settings */}
                 {settingsTab === 'account' && (
-                  <div className="space-y-4">
+                  <div className="space-y-6">
+                    {/* Profile Photos Section */}
+                    <div className="pb-6 border-b border-gray-200 dark:border-gray-700">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                        Profile Photos
+                      </h3>
+                      <div className="space-y-4">
+                        {/* Avatar Photo */}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Avatar Photo
+                          </label>
+                          <div className="flex items-center gap-4">
+                            {avatarUrl ? (
+                              <img
+                                src={avatarUrl}
+                                alt="Avatar"
+                                className="w-20 h-20 rounded-full object-cover border-2 border-gray-300 dark:border-gray-600"
+                              />
+                            ) : (
+                              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-2xl font-bold text-white">
+                                {provider.name.charAt(0)}
+                              </div>
+                            )}
+                            <div className="flex-1">
+                              <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0]
+                                  if (file) handlePhotoUpload(file, 'avatar')
+                                }}
+                                disabled={uploadingAvatar}
+                                className="hidden"
+                                id="avatar-upload"
+                              />
+                              <label
+                                htmlFor="avatar-upload"
+                                className={`inline-block px-4 py-2 bg-purple-600 text-white rounded-lg cursor-pointer hover:bg-purple-700 transition ${
+                                  uploadingAvatar ? 'opacity-50 cursor-not-allowed' : ''
+                                }`}
+                              >
+                                {uploadingAvatar ? 'Uploading...' : 'Upload Avatar'}
+                              </label>
+                              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                Recommended: Square image, at least 200x200px
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Cover Photo */}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Cover Photo
+                          </label>
+                          <div className="space-y-3">
+                            {coverPhotoUrl && (
+                              <img
+                                src={coverPhotoUrl}
+                                alt="Cover"
+                                className="w-full h-32 rounded-lg object-cover border-2 border-gray-300 dark:border-gray-600"
+                              />
+                            )}
+                            <div>
+                              <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0]
+                                  if (file) handlePhotoUpload(file, 'cover')
+                                }}
+                                disabled={uploadingCover}
+                                className="hidden"
+                                id="cover-upload"
+                              />
+                              <label
+                                htmlFor="cover-upload"
+                                className={`inline-block px-4 py-2 bg-purple-600 text-white rounded-lg cursor-pointer hover:bg-purple-700 transition ${
+                                  uploadingCover ? 'opacity-50 cursor-not-allowed' : ''
+                                }`}
+                              >
+                                {uploadingCover ? 'Uploading...' : 'Upload Cover Photo'}
+                              </label>
+                              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                Recommended: Wide image, at least 1200x400px
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Business Location

@@ -18,6 +18,7 @@ export interface Provider {
   longitude?: number
   bio?: string
   avatar_url?: string
+  cover_photo_url?: string
   theme_config: ThemeConfig
   calendar_start_time?: string
   calendar_end_time?: string
