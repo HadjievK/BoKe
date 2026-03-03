@@ -294,8 +294,63 @@ export async function PATCH(
       paramIndex++;
     }
 
-    // Services JSONB
+    // Services JSONB with validation
     if (body.services !== undefined) {
+      // Validate services array
+      if (!Array.isArray(body.services)) {
+        return NextResponse.json(
+          { detail: 'Services must be an array' },
+          { status: 400 }
+        );
+      }
+
+      if (body.services.length === 0) {
+        return NextResponse.json(
+          { detail: 'At least one service is required' },
+          { status: 400 }
+        );
+      }
+
+      // Validate each service
+      for (const service of body.services) {
+        if (!service.name || typeof service.name !== 'string' || service.name.trim().length === 0) {
+          return NextResponse.json(
+            { detail: 'Each service must have a valid name' },
+            { status: 400 }
+          );
+        }
+        if (service.name.length > 100) {
+          return NextResponse.json(
+            { detail: 'Service name must be under 100 characters' },
+            { status: 400 }
+          );
+        }
+        if (!service.duration || typeof service.duration !== 'number' || service.duration <= 0) {
+          return NextResponse.json(
+            { detail: 'Each service must have a valid duration greater than 0' },
+            { status: 400 }
+          );
+        }
+        if (service.duration > 480) {
+          return NextResponse.json(
+            { detail: 'Service duration cannot exceed 480 minutes' },
+            { status: 400 }
+          );
+        }
+        if (service.price === undefined || typeof service.price !== 'number' || service.price < 0) {
+          return NextResponse.json(
+            { detail: 'Each service must have a valid price of 0 or greater' },
+            { status: 400 }
+          );
+        }
+        if (service.description && typeof service.description === 'string' && service.description.length > 500) {
+          return NextResponse.json(
+            { detail: 'Service description must be under 500 characters' },
+            { status: 400 }
+          );
+        }
+      }
+
       updateFields.push(`services = $${paramIndex}::jsonb`);
       updateValues.push(JSON.stringify(body.services));
       paramIndex++;

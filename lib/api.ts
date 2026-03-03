@@ -290,6 +290,7 @@ export async function updateProviderProfile(
       saturday: boolean
       sunday: boolean
     }
+    services?: any[]
   }
 ): Promise<void> {
   const res = await fetch(`${API_URL}/api/dashboard/${slug}`, {
