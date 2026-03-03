@@ -37,6 +37,14 @@ export default function ProviderProfilePage() {
     async function fetchProvider() {
       try {
         const data = await getProviderProfile(slug)
+        console.log('Provider data loaded:', {
+          slug: data.slug,
+          name: data.name,
+          hasAvatar: !!data.avatar_url,
+          hasCover: !!data.cover_photo_url,
+          avatarLength: data.avatar_url?.length,
+          coverLength: data.cover_photo_url?.length
+        })
         setProvider(data)
       } catch (err: any) {
         setError(err.message)
@@ -192,6 +200,13 @@ export default function ProviderProfilePage() {
         >
           {/* Cover Photo Background - Full Hero */}
           <div className="relative">
+            {(() => {
+              console.log('Rendering cover photo:', {
+                hasCoverPhoto: !!provider.cover_photo_url,
+                coverUrl: provider.cover_photo_url?.substring(0, 50) + '...'
+              })
+              return null
+            })()}
             {provider.cover_photo_url ? (
               <div className="absolute inset-0 h-full overflow-hidden">
                 <img
