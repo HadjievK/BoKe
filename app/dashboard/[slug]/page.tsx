@@ -1090,8 +1090,7 @@ export default function DashboardPage() {
                       </p>
                       <Button
                         onClick={() => setShowDeleteConfirmation(true)}
-                        variant="destructive"
-                        className="bg-red-600 hover:bg-red-700 text-white"
+                        className="bg-red-600 hover:bg-red-700 text-white shadow-lg hover:shadow-xl"
                       >
                         <Trash2 className="h-4 w-4 mr-2" />
                         Delete Account
@@ -1494,8 +1493,7 @@ export default function DashboardPage() {
                   <Button
                     onClick={handleDeleteAccount}
                     disabled={!deletePassword || settingsSaving}
-                    variant="destructive"
-                    className="flex-1 bg-red-600 hover:bg-red-700"
+                    className="flex-1 bg-red-600 hover:bg-red-700 text-white shadow-lg hover:shadow-xl"
                   >
                     {settingsSaving ? 'Deleting...' : 'Delete My Account'}
                   </Button>
