@@ -7,7 +7,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 **BuKe** is a modern booking platform for service professionals (barbers, dentists, trainers, etc.). Key characteristics:
 - Next.js 15 with App Router and TypeScript
 - Single-page booking flow (no page transitions during booking)
-- Dual authentication system: providers (7-day JWT) and customers (30-day JWT)
+- Stateless customer bookings with magic link tokens (no passwords)
+- Provider authentication with 7-day JWT
+- Email notifications via Resend (transactional emails)
 - PostgreSQL via Supabase with direct `pg` Pool queries (no ORM)
 - Deployed on Vercel
 
@@ -46,10 +48,10 @@ const result = await pool.query(
 ### Schema Management
 - Base schema: `docs/database_schema.sql`
 - Migrations: `migrations/*.sql` (manually run against database)
-- Core tables: `service_providers`, `customers`, `appointments`, `services`
+- Core tables: `service_providers`, `appointments`, `booking_tokens`, `customers` (legacy)
+- Inline customer data: Customer information stored directly on appointments (email, first_name, last_name, phone)
 - Authentication fields:
   - Providers: `password` (bcrypt), `oauth_provider`, `oauth_provider_id`
-  - Customers: `password` (bcrypt), `email_verified`, `last_login_at`
 
 ### Key Indexes
 ```sql
@@ -61,8 +63,6 @@ idx_service_providers_slug (slug)
 
 ## Authentication System
 
-Two separate authentication flows sharing the same JWT_SECRET:
-
 ### Provider Authentication
 - Location: `lib/auth.ts` - `generateToken()`, `authenticateRequest()`
 - Token: 7-day expiration
@@ -70,12 +70,14 @@ Two separate authentication flows sharing the same JWT_SECRET:
 - Payload: `{ providerId, slug, email }`
 - Protected routes: `/dashboard/[slug]/*`, `/api/dashboard/*`
 
-### Customer Authentication
-- Location: `lib/auth.ts` - `generateCustomerToken()`, `authenticateCustomer()`
-- Token: 30-day expiration
-- Storage: `localStorage` key `customer_token` + optional cookie
-- Payload: `{ customerId, email }`
-- Protected routes: `/[slug]/my-bookings`, `/api/[slug]/my-bookings`, `/api/[slug]/bookings/*/cancel`
+### Customer Booking Access (Stateless)
+- **No passwords, no signup, no authentication**
+- Magic link tokens sent via email after booking
+- Token format: 64-character cryptographically secure hex string
+- Token expiration: 24 hours after appointment time
+- Token storage: `booking_tokens` table linked to appointments
+- Access: `/[slug]/booking/[token]` - view details, cancel, reschedule
+- Email service: Resend (see `docs/EMAIL_SETUP.md` for configuration)
 
 ### Password Handling
 - Hashing: bcrypt with 10 rounds (`bcryptjs` library)
@@ -272,12 +274,28 @@ import Link from 'next/link'
 
 ### Database Queries
 ```typescript
-// ✅ Good - single query with JOINs
+// ✅ Good - query with inline customer fields
 const result = await pool.query(`
-  SELECT a.*, c.*, s.*
+  SELECT
+    a.*,
+    a.customer_email,
+    a.customer_first_name,
+    a.customer_last_name,
+    a.customer_phone
   FROM appointments a
-  JOIN customers c ON a.customer_id = c.id
-  JOIN services s ON a.service_id = s.id
+  WHERE a.provider_id = $1
+`, [providerId])
+
+// ✅ Good - backward compatible with LEFT JOIN for old appointments
+const result = await pool.query(`
+  SELECT
+    a.*,
+    COALESCE(a.customer_email, c.email) as customer_email,
+    COALESCE(a.customer_first_name, c.first_name) as customer_first_name,
+    COALESCE(a.customer_last_name, c.last_name) as customer_last_name,
+    COALESCE(a.customer_phone, c.phone) as customer_phone
+  FROM appointments a
+  LEFT JOIN customers c ON a.customer_id = c.id
   WHERE a.provider_id = $1
 `, [providerId])
 
@@ -318,7 +336,12 @@ if (appointment.rows.length === 0) {
 ### Environment Variables
 Required in `.env.local`:
 - `DATABASE_URL` - PostgreSQL connection string
-- `JWT_SECRET` - Secret for signing tokens (must be strong in production)
+- `JWT_SECRET` - Secret for signing provider tokens (must be strong in production)
+- `RESEND_API_KEY` - Resend API key for sending emails (see `docs/EMAIL_SETUP.md`)
+- `FROM_EMAIL` - Email address for sending booking confirmations (must be from verified domain)
+- `NEXT_PUBLIC_BASE_URL` - Base URL for magic links (e.g., `http://localhost:3000` or `https://yourdomain.com`)
+
+**Note:** App will build successfully without `RESEND_API_KEY` - email sending will be gracefully skipped.
 
 ## Testing Strategy
 
@@ -329,11 +352,12 @@ No automated tests currently. Manual testing checklist:
 2. Dashboard at `/dashboard/[slug]` (view appointments, settings)
 3. Public booking page at `/[slug]` (customer-facing)
 
-### Customer Flow
+### Customer Booking Flow
 1. Book appointment at `/[slug]`
-2. Sign up/in at `/[slug]/signup` or `/[slug]/signin`
-3. View bookings at `/[slug]/my-bookings`
-4. Cancel appointment (only confirmed, future appointments)
+2. Receive confirmation email with magic link
+3. Access booking via email link: `/[slug]/booking/[token]`
+4. View details, cancel, or reschedule from booking page
+5. No signup, no passwords, no authentication required
 
 ## Common Pitfalls
 

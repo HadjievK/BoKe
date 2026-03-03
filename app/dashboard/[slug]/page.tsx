@@ -2,6 +2,12 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useParams, useRouter } from 'next/navigation'
+import { motion, AnimatePresence } from 'framer-motion'
+import {
+  Calendar, Clock, Users, TrendingUp, Settings, LogOut, Share2,
+  Sparkles, ArrowRight, CheckCircle, XCircle, AlertCircle, Plus,
+  Eye, Copy, Check, Moon, Sun
+} from 'lucide-react'
 import { getDashboardData, verifyAuth, signOut, getAppointments, updateAppointmentStatus, updateProviderProfile, updateProviderPassword } from '@/lib/api'
 import type { DashboardData, AppointmentWithDetails } from '@/lib/types'
 import { AppointmentStatus } from '@/lib/types'
@@ -9,6 +15,7 @@ import { formatDate, formatTime, formatCurrency, getCalendarDateRange, formatDat
 import ThemeToggle from '@/components/ThemeToggle'
 import AppointmentCalendar from '@/components/dashboard/AppointmentCalendar'
 import AppointmentDetailsModal from '@/components/dashboard/AppointmentDetailsModal'
+import { Button } from '@/components/ui/button'
 import { View } from 'react-big-calendar'
 
 export default function DashboardPage() {
@@ -35,7 +42,6 @@ export default function DashboardPage() {
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [location, setLocation] = useState('')
-  const [services, setServices] = useState<any[]>([])
   const [settingsError, setSettingsError] = useState('')
   const [settingsSaving, setSettingsSaving] = useState(false)
 
@@ -56,37 +62,28 @@ export default function DashboardPage() {
 
   // Share modal state
   const [showShare, setShowShare] = useState(false)
+  const [copied, setCopied] = useState(false)
 
-  // Move useMemo to top level before any early returns
   const todayDate = useMemo(() => formatDateShort(new Date()), [])
 
-  // Get greeting based on current time
   const getGreeting = useCallback(() => {
     const hour = new Date().getHours()
-
-    if (hour < 12) {
-      return 'Good morning'
-    } else if (hour < 19) {
-      return 'Good afternoon'
-    } else {
-      return 'Good evening'
-    }
+    if (hour < 12) return 'Good morning'
+    if (hour < 19) return 'Good afternoon'
+    return 'Good evening'
   }, [])
 
   const checkAuth = useCallback(async () => {
     try {
       const auth = await verifyAuth()
-
       if (!auth.authenticated) {
         router.push('/signin')
         return
       }
-
       if (auth.slug !== slug) {
         router.push(`/dashboard/${auth.slug}`)
         return
       }
-
       setAuthenticated(true)
       await fetchDashboard()
     } catch (err: any) {
@@ -97,36 +94,27 @@ export default function DashboardPage() {
     }
   }, [slug, router])
 
-  // Check authentication on mount
   useEffect(() => {
     checkAuth()
   }, [checkAuth])
 
-  // Auto-refresh dashboard every 60 seconds (optimized from 30s)
   useEffect(() => {
     if (!authenticated) return
-
     const interval = setInterval(() => {
       fetchDashboard(true)
     }, 60000)
-
     return () => clearInterval(interval)
   }, [authenticated, slug])
 
-  // Initialize settings from dashboardData when modal opens
   useEffect(() => {
     if (showSettings && dashboardData) {
       const provider = dashboardData.provider
       setLocation(provider.location || '')
-
-      // Initialize calendar settings
       if (provider.calendar_start_time) {
-        const timeStr = provider.calendar_start_time.slice(0, 5) // Extract HH:MM from HH:MM:SS
-        setCalendarStartTime(timeStr)
+        setCalendarStartTime(provider.calendar_start_time.slice(0, 5))
       }
       if (provider.calendar_end_time) {
-        const timeStr = provider.calendar_end_time.slice(0, 5)
-        setCalendarEndTime(timeStr)
+        setCalendarEndTime(provider.calendar_end_time.slice(0, 5))
       }
       if (provider.slot_duration) {
         setSlotDuration(provider.slot_duration.toString())
@@ -143,7 +131,6 @@ export default function DashboardPage() {
   const fetchDashboard = useCallback(async (silent = false) => {
     if (!silent) setLoading(true)
     setError('')
-
     try {
       const data = await getDashboardData(slug)
       setDashboardData(data)
@@ -169,7 +156,6 @@ export default function DashboardPage() {
     }
   }, [slug, calendarView, currentDate])
 
-  // Fetch calendar appointments when view/date changes
   useEffect(() => {
     if (authenticated) {
       fetchCalendarAppointments()
@@ -208,7 +194,6 @@ export default function DashboardPage() {
   ) => {
     try {
       await updateAppointmentStatus(slug, appointmentId, status)
-      // Run refreshes in parallel for faster updates
       await Promise.all([
         fetchCalendarAppointments(),
         fetchDashboard(true)
@@ -239,16 +224,10 @@ export default function DashboardPage() {
   const handleSaveSettings = async () => {
     setSettingsError('')
     setSettingsSaving(true)
-
     try {
-      // Prepare updates object
       const updates: any = {}
-
-      // Account settings
       if (settingsTab === 'account' || !settingsTab) {
         updates.location = location
-
-        // Update password if provided
         if (currentPassword && newPassword) {
           if (newPassword !== confirmPassword) {
             throw new Error('New passwords do not match')
@@ -256,19 +235,14 @@ export default function DashboardPage() {
           await updateProviderPassword(slug, currentPassword, newPassword)
         }
       }
-
-      // Calendar settings
       if (settingsTab === 'calendar') {
-        updates.calendar_start_time = calendarStartTime + ':00' // Add seconds
+        updates.calendar_start_time = calendarStartTime + ':00'
         updates.calendar_end_time = calendarEndTime + ':00'
         updates.slot_duration = parseInt(slotDuration)
         updates.buffer_time = parseInt(bufferTime)
         updates.working_days = workingDays
       }
-
-      // Update profile with all changes
       await updateProviderProfile(slug, updates)
-
       alert('Settings saved successfully!')
       setShowSettings(false)
       setSettingsTab('account')
@@ -283,124 +257,192 @@ export default function DashboardPage() {
     }
   }
 
-  // Loading Screen
+  const handleCopyLink = () => {
+    const url = `${window.location.origin}/${slug}`
+    navigator.clipboard.writeText(url)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
   if (loading) {
     return (
-      <main className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4">
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 max-w-md w-full border border-gray-200 dark:border-gray-700">
-          <div className="text-center">
-            <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
-              <svg className="w-8 h-8 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-              </svg>
-            </div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">Loading Dashboard</h1>
-            <p className="text-gray-600 dark:text-gray-400">Please wait...</p>
-          </div>
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-purple-900 flex items-center justify-center relative overflow-hidden">
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <motion.div
+            className="absolute top-20 left-10 w-72 h-72 bg-purple-200 dark:bg-purple-600 rounded-full mix-blend-multiply dark:mix-blend-soft-light filter blur-xl opacity-30"
+            animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.4, 0.3] }}
+            transition={{ duration: 4, repeat: Infinity }}
+          />
         </div>
-      </main>
+        <motion.div
+          className="text-center relative z-10"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <motion.div
+            className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-purple-600 to-blue-600 rounded-full mb-4"
+            animate={{ rotate: 360 }}
+            transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
+          >
+            <Sparkles className="w-8 h-8 text-white" />
+          </motion.div>
+          <p className="text-lg text-gray-600 dark:text-gray-300 font-medium">Loading Dashboard...</p>
+        </motion.div>
+      </div>
     )
   }
 
-  if (!dashboardData) {
-    return (
-      <main className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">Loading dashboard...</p>
-        </div>
-      </main>
-    )
-  }
+  if (!dashboardData) return null
 
   const provider = dashboardData.provider
 
   return (
-    <main className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-purple-900 relative overflow-hidden">
+      {/* Animated background */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <motion.div
+          className="absolute top-20 right-20 w-96 h-96 bg-purple-200 dark:bg-purple-600 rounded-full mix-blend-multiply dark:mix-blend-soft-light filter blur-3xl opacity-20"
+          animate={{ x: [0, 50, 0], y: [0, 30, 0] }}
+          transition={{ duration: 20, repeat: Infinity }}
+        />
+        <motion.div
+          className="absolute bottom-20 left-20 w-96 h-96 bg-blue-200 dark:bg-blue-600 rounded-full mix-blend-multiply dark:mix-blend-soft-light filter blur-3xl opacity-20"
+          animate={{ x: [0, -30, 0], y: [0, 50, 0] }}
+          transition={{ duration: 25, repeat: Infinity }}
+        />
+      </div>
+
       {/* Header */}
-      <header className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-6 py-4 border-b border-gray-200 dark:border-gray-700 shadow-sm">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="text-2xl font-bold">
-              Bo<span className="text-purple-600 dark:text-purple-400">Ke</span>
+      <header className="relative z-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg border-b border-gray-200 dark:border-gray-700">
+        <div className="max-w-7xl mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <Sparkles className="h-8 w-8 text-purple-600 dark:text-purple-400" />
+              <span className="text-2xl font-bold text-gray-900 dark:text-white">
+                Bo<span className="text-purple-600 dark:text-purple-400">Ke</span>
+              </span>
             </div>
-          </div>
-          <div className="flex items-center gap-4">
-            <ThemeToggle />
-            <button
-              onClick={() => setShowShare(true)}
-              className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition text-sm font-medium"
-            >
-              Share
-            </button>
-            <button
-              onClick={() => setShowSettings(true)}
-              className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition text-sm font-medium"
-            >
-              Settings
-            </button>
-            <button
-              onClick={handleLogout}
-              className="px-4 py-2 bg-purple-600 dark:bg-purple-500 text-white rounded-lg text-sm font-semibold hover:bg-purple-700 transition shadow-lg shadow-purple-600/25"
-            >
-              Logout
-            </button>
+            <div className="flex items-center space-x-3">
+              <ThemeToggle />
+              <Button
+                onClick={() => setShowShare(true)}
+                variant="outline"
+                className="border-2"
+              >
+                <Share2 className="h-4 w-4 mr-2" />
+                Share
+              </Button>
+              <Button
+                onClick={() => setShowSettings(true)}
+                variant="outline"
+                className="border-2"
+              >
+                <Settings className="h-4 w-4 mr-2" />
+                Settings
+              </Button>
+              <Button
+                onClick={handleLogout}
+                className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                Logout
+              </Button>
+            </div>
           </div>
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto p-6">
+      {/* Main Content */}
+      <main className="relative z-10 max-w-7xl mx-auto px-6 py-8">
         {/* Greeting Section */}
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-1">
-            {getGreeting()}, {provider.name.split(' ')[0]}
+        <motion.div
+          className="mb-8"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
+            {getGreeting()}, {provider.name.split(' ')[0]} 👋
           </h1>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            {todayDate} · {dashboardData.appointments.length} appointments today
+          <p className="text-gray-600 dark:text-gray-300">
+            {todayDate} · You have <span className="font-semibold text-purple-600 dark:text-purple-400">{dashboardData.appointments.length} appointments</span> today
           </p>
-        </div>
+        </motion.div>
 
-        {/* Stats Cards - Collapsible */}
-        <details className="mb-6" open>
-          <summary className="cursor-pointer text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
-            📊 Quick Stats
-          </summary>
-          <div className="grid grid-cols-3 gap-4">
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
-              <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">TODAY</div>
-              <div className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-1">
-                {dashboardData.stats.today_appointments}
+        {/* Stats Grid */}
+        <motion.div
+          className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+        >
+          <motion.div
+            className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-2xl p-6 border border-gray-200 dark:border-gray-700 shadow-xl"
+            whileHover={{ scale: 1.02, y: -5 }}
+            transition={{ type: 'spring', stiffness: 300 }}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900/30 dark:to-purple-800/30 rounded-xl">
+                <Calendar className="h-6 w-6 text-purple-600 dark:text-purple-400" />
               </div>
-              <div className="text-xs text-gray-600 dark:text-gray-400">appointments</div>
+              <TrendingUp className="h-5 w-5 text-green-500" />
             </div>
+            <div className="text-4xl font-bold text-gray-900 dark:text-white mb-1">
+              {dashboardData.stats.today_appointments}
+            </div>
+            <div className="text-sm text-gray-600 dark:text-gray-400">Today's Appointments</div>
+          </motion.div>
 
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
-              <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">THIS WEEK</div>
-              <div className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-1">
-                {dashboardData.stats.week_appointments}
+          <motion.div
+            className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-2xl p-6 border border-gray-200 dark:border-gray-700 shadow-xl"
+            whileHover={{ scale: 1.02, y: -5 }}
+            transition={{ type: 'spring', stiffness: 300 }}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900/30 dark:to-blue-800/30 rounded-xl">
+                <Clock className="h-6 w-6 text-blue-600 dark:text-blue-400" />
               </div>
-              <div className="text-xs text-gray-600 dark:text-gray-400">appointments</div>
+              <TrendingUp className="h-5 w-5 text-green-500" />
             </div>
+            <div className="text-4xl font-bold text-gray-900 dark:text-white mb-1">
+              {dashboardData.stats.week_appointments}
+            </div>
+            <div className="text-sm text-gray-600 dark:text-gray-400">This Week</div>
+          </motion.div>
 
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
-              <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">TOTAL CLIENTS</div>
-              <div className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-1">
-                {dashboardData.stats.total_customers}
+          <motion.div
+            className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-2xl p-6 border border-gray-200 dark:border-gray-700 shadow-xl"
+            whileHover={{ scale: 1.02, y: -5 }}
+            transition={{ type: 'spring', stiffness: 300 }}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900/30 dark:to-green-800/30 rounded-xl">
+                <Users className="h-6 w-6 text-green-600 dark:text-green-400" />
               </div>
-              <div className="text-xs text-gray-600 dark:text-gray-400">all time</div>
+              <TrendingUp className="h-5 w-5 text-green-500" />
             </div>
-          </div>
-        </details>
+            <div className="text-4xl font-bold text-gray-900 dark:text-white mb-1">
+              {dashboardData.stats.total_customers}
+            </div>
+            <div className="text-sm text-gray-600 dark:text-gray-400">Total Clients</div>
+          </motion.div>
+        </motion.div>
 
-        {/* Calendar - Main View */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 shadow-sm">
-          <div className="mb-4">
-            <h2 className="text-2xl font-bold text-gray-900">
-              Appointment Calendar
-            </h2>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-              Click on any appointment to view details or take actions
-            </p>
+        {/* Calendar Section */}
+        <motion.div
+          className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-2xl p-8 border border-gray-200 dark:border-gray-700 shadow-xl"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+        >
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
+                📅 Appointment Calendar
+              </h2>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Click any appointment to view details or take actions
+              </p>
+            </div>
           </div>
           <AppointmentCalendar
             appointments={appointments}
@@ -408,8 +450,8 @@ export default function DashboardPage() {
             onNavigate={handleNavigate}
             onViewChange={handleViewChange}
           />
-        </div>
-      </div>
+        </motion.div>
+      </main>
 
       {/* Appointment Details Modal */}
       <AppointmentDetailsModal
@@ -424,358 +466,309 @@ export default function DashboardPage() {
       />
 
       {/* Share Modal */}
-      {showShare && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl max-w-2xl w-full">
-            <div className="sticky top-0 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-t-2xl px-6 py-4 flex items-center justify-between">
-              <h2 className="text-2xl font-bold">Share Your Booking Page</h2>
-              <button
-                onClick={() => setShowShare(false)}
-                className="text-2xl hover:bg-white/20 rounded-lg w-8 h-8 flex items-center justify-center transition"
-              >
-                ×
-              </button>
-            </div>
-            <div className="p-6 space-y-6">
-              {/* Preview Card */}
-              <div className="bg-gradient-to-r from-purple-50 to-purple-100 rounded-xl p-6 border border-purple-200">
-                <div className="text-sm font-medium text-purple-900 mb-3">
-                  Your Public Booking Page
-                </div>
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="flex-1 bg-white px-4 py-3 rounded-lg font-mono text-sm text-gray-700 break-all border border-purple-200">
-                    {typeof window !== 'undefined' ? window.location.origin : ''}/{slug}
-                  </div>
-                </div>
-                <p className="text-sm text-purple-900/70">
-                  Share this link with your customers so they can book appointments with you
-                </p>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="grid grid-cols-2 gap-4">
-                <button
-                  onClick={() => {
-                    const url = `${window.location.origin}/${slug}`
-                    navigator.clipboard.writeText(url)
-                    alert('Link copied to clipboard!')
-                  }}
-                  className="flex items-center justify-center gap-2 px-6 py-4 bg-purple-600 dark:bg-purple-500 text-white rounded-xl font-semibold hover:bg-purple-700 transition shadow-lg shadow-purple-600/25"
-                >
-                  Copy Link
-                </button>
-                <a
-                  href={`/${slug}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 px-6 py-4 bg-white text-purple-700 border-2 border-purple-600 rounded-xl font-semibold hover:bg-purple-50 transition"
-                >
-                  Preview
-                </a>
-              </div>
-
-              {/* QR Code Placeholder */}
-              <div className="bg-gray-50 rounded-xl p-6 border border-gray-200 dark:border-gray-700 text-center">
-                <div className="text-sm font-medium text-gray-700 mb-3">
-                  Share via QR Code
-                </div>
-                <div className="w-48 h-48 mx-auto bg-white rounded-lg border-2 border-gray-300 flex items-center justify-center">
-                  <div className="text-gray-400 text-sm">
-                    QR Code<br />Coming Soon
-                  </div>
-                </div>
-                <p className="text-xs text-gray-600 dark:text-gray-400 mt-3">
-                  Customers can scan this QR code to book instantly
-                </p>
-              </div>
-
-              {/* Social Share Options */}
-              <div>
-                <div className="text-sm font-medium text-gray-700 mb-3">
-                  Share on Social Media
-                </div>
-                <div className="grid grid-cols-3 gap-3">
+      <AnimatePresence>
+        {showShare && (
+          <motion.div
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              className="bg-white dark:bg-gray-800 rounded-2xl max-w-2xl w-full shadow-2xl overflow-hidden"
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+            >
+              <div className="bg-gradient-to-r from-purple-600 to-blue-600 p-6">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-2xl font-bold text-white">Share Your Booking Page</h2>
                   <button
-                    onClick={() => {
-                      const url = `${window.location.origin}/${slug}`
-                      navigator.clipboard.writeText(url)
-                      alert('Link copied! Open Instagram and paste in your story or bio.')
-                    }}
-                    className="flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 text-white rounded-lg hover:opacity-90 transition"
+                    onClick={() => setShowShare(false)}
+                    className="text-white hover:bg-white/20 rounded-lg p-2 transition"
                   >
-                    Instagram
-                  </button>
-                  <button
-                    onClick={() => {
-                      const url = `${window.location.origin}/${slug}`
-                      window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank')
-                    }}
-                    className="flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-                  >
-                    Facebook
-                  </button>
-                  <button
-                    onClick={() => {
-                      const url = `${window.location.origin}/${slug}`
-                      const text = `Book an appointment with ${provider.name}`
-                      window.open(`https://wa.me/?text=${encodeURIComponent(text + ' ' + url)}`, '_blank')
-                    }}
-                    className="flex items-center justify-center gap-2 px-4 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
-                  >
-                    WhatsApp
+                    <XCircle className="h-6 w-6" />
                   </button>
                 </div>
               </div>
-            </div>
-
-            <div className="border-t border-gray-200 dark:border-gray-700 px-6 py-4 bg-gray-50 rounded-b-2xl flex items-center justify-end">
-              <button
-                onClick={() => setShowShare(false)}
-                className="px-6 py-2 text-gray-700 hover:bg-gray-200 rounded-lg transition font-medium"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Settings Modal */}
-      {showSettings && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col">
-            {/* Header */}
-            <div className="sticky top-0 bg-white border-b border-gray-200 dark:border-gray-700 px-6 py-4 flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-gray-900">Settings</h2>
-              <button
-                onClick={() => {
-                  setShowSettings(false)
-                  setSettingsTab('account')
-                }}
-                className="text-2xl text-gray-600 dark:text-gray-400 hover:text-gray-900 transition"
-              >
-                ×
-              </button>
-            </div>
-
-            {/* Tabs */}
-            <div className="flex border-b border-gray-200 dark:border-gray-700 bg-gray-50 px-6">
-              <button
-                onClick={() => setSettingsTab('account')}
-                className={`px-6 py-3 text-sm font-semibold border-b-2 transition ${
-                  settingsTab === 'account'
-                    ? 'border-purple-600 text-purple-600'
-                    : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900'
-                }`}
-              >
-                Account Settings
-              </button>
-              <button
-                onClick={() => setSettingsTab('calendar')}
-                className={`px-6 py-3 text-sm font-semibold border-b-2 transition ${
-                  settingsTab === 'calendar'
-                    ? 'border-purple-600 text-purple-600'
-                    : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900'
-                }`}
-              >
-                Calendar Settings
-              </button>
-            </div>
-
-            {/* Content */}
-            <div className="flex-1 overflow-y-auto p-6">
-              {settingsError && (
-                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
-                  {settingsError}
-                </div>
-              )}
-
-              {/* Account Settings Tab */}
-              {settingsTab === 'account' && (
-                <div className="space-y-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Business Location
-                    </label>
+              <div className="p-6 space-y-6">
+                <div className="bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-xl p-6 border border-purple-200 dark:border-purple-800">
+                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                    Your Public Booking Page
+                  </p>
+                  <div className="flex items-center space-x-3">
                     <input
                       type="text"
-                      value={location}
-                      onChange={(e) => setLocation(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
-                      placeholder="123 Main St, City, State"
+                      readOnly
+                      value={`${typeof window !== 'undefined' ? window.location.origin : ''}/${slug}`}
+                      className="flex-1 px-4 py-3 bg-white dark:bg-gray-900 rounded-lg font-mono text-sm border-2 border-purple-200 dark:border-purple-800"
                     />
-                    <p className="text-xs text-gray-500 mt-1">
-                      This will be displayed on your public booking page
-                    </p>
+                    <Button
+                      onClick={handleCopyLink}
+                      className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                    >
+                      {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                    </Button>
                   </div>
+                </div>
 
-                  <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Change Password</h3>
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Current Password
-                        </label>
+                <div className="grid grid-cols-2 gap-4">
+                  <a
+                    href={`/${slug}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Button variant="outline" className="w-full border-2">
+                      <Eye className="h-4 w-4 mr-2" />
+                      Preview Page
+                    </Button>
+                  </a>
+                  <Button
+                    onClick={handleCopyLink}
+                    className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                  >
+                    {copied ? (
+                      <>
+                        <Check className="h-4 w-4 mr-2" />
+                        Copied!
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="h-4 w-4 mr-2" />
+                        Copy Link
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Settings Modal */}
+      <AnimatePresence>
+        {showSettings && (
+          <motion.div
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              className="bg-white dark:bg-gray-800 rounded-2xl max-w-2xl w-full shadow-2xl overflow-hidden my-8"
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+            >
+              <div className="bg-gradient-to-r from-purple-600 to-blue-600 p-6">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-2xl font-bold text-white">Settings</h2>
+                  <button
+                    onClick={() => {
+                      setShowSettings(false)
+                      setSettingsError('')
+                    }}
+                    className="text-white hover:bg-white/20 rounded-lg p-2 transition"
+                  >
+                    <XCircle className="h-6 w-6" />
+                  </button>
+                </div>
+              </div>
+
+              <div className="p-6">
+                {/* Tabs */}
+                <div className="flex space-x-2 mb-6 bg-gray-100 dark:bg-gray-900/50 p-1 rounded-lg">
+                  <button
+                    onClick={() => setSettingsTab('account')}
+                    className={`flex-1 px-4 py-2 rounded-lg font-medium transition ${
+                      settingsTab === 'account'
+                        ? 'bg-white dark:bg-gray-800 text-purple-600 dark:text-purple-400 shadow'
+                        : 'text-gray-600 dark:text-gray-400'
+                    }`}
+                  >
+                    Account
+                  </button>
+                  <button
+                    onClick={() => setSettingsTab('calendar')}
+                    className={`flex-1 px-4 py-2 rounded-lg font-medium transition ${
+                      settingsTab === 'calendar'
+                        ? 'bg-white dark:bg-gray-800 text-purple-600 dark:text-purple-400 shadow'
+                        : 'text-gray-600 dark:text-gray-400'
+                    }`}
+                  >
+                    Calendar
+                  </button>
+                </div>
+
+                {/* Error message */}
+                {settingsError && (
+                  <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-600 dark:text-red-400 text-sm">
+                    {settingsError}
+                  </div>
+                )}
+
+                {/* Account Settings */}
+                {settingsTab === 'account' && (
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Business Location
+                      </label>
+                      <input
+                        type="text"
+                        value={location}
+                        onChange={(e) => setLocation(e.target.value)}
+                        className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                        placeholder="123 Main St, City, State"
+                      />
+                    </div>
+
+                    <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                        Change Password
+                      </h3>
+                      <div className="space-y-4">
                         <input
                           type="password"
                           value={currentPassword}
                           onChange={(e) => setCurrentPassword(e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
+                          className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                          placeholder="Current Password"
                         />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          New Password
-                        </label>
                         <input
                           type="password"
                           value={newPassword}
                           onChange={(e) => setNewPassword(e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
+                          className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                          placeholder="New Password"
                         />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Confirm New Password
-                        </label>
                         <input
                           type="password"
                           value={confirmPassword}
                           onChange={(e) => setConfirmPassword(e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
+                          className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                          placeholder="Confirm New Password"
                         />
                       </div>
                     </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {/* Calendar Settings Tab */}
-              {settingsTab === 'calendar' && (
-                <div className="space-y-6">
-                  {/* Working Hours */}
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Working Hours</h3>
+                {/* Calendar Settings */}
+                {settingsTab === 'calendar' && (
+                  <div className="space-y-6">
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                           Start Time
                         </label>
                         <input
                           type="time"
                           value={calendarStartTime}
                           onChange={(e) => setCalendarStartTime(e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
+                          className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent dark:bg-gray-700 dark:text-white"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                           End Time
                         </label>
                         <input
                           type="time"
                           value={calendarEndTime}
                           onChange={(e) => setCalendarEndTime(e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
+                          className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent dark:bg-gray-700 dark:text-white"
                         />
                       </div>
                     </div>
-                    <p className="text-xs text-gray-500 mt-2">
-                      Define your daily working hours for appointments
-                    </p>
-                  </div>
 
-                  {/* Time Slot Settings */}
-                  <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Time Slot Settings</h3>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                           Slot Duration (minutes)
                         </label>
                         <select
                           value={slotDuration}
                           onChange={(e) => setSlotDuration(e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
+                          className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent dark:bg-gray-700 dark:text-white"
                         >
                           <option value="15">15 minutes</option>
                           <option value="30">30 minutes</option>
                           <option value="45">45 minutes</option>
-                          <option value="60">1 hour</option>
-                          <option value="90">1.5 hours</option>
-                          <option value="120">2 hours</option>
+                          <option value="60">60 minutes</option>
                         </select>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                           Buffer Time (minutes)
                         </label>
                         <select
                           value={bufferTime}
                           onChange={(e) => setBufferTime(e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
+                          className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent dark:bg-gray-700 dark:text-white"
                         >
                           <option value="0">No buffer</option>
                           <option value="5">5 minutes</option>
                           <option value="10">10 minutes</option>
                           <option value="15">15 minutes</option>
-                          <option value="30">30 minutes</option>
                         </select>
                       </div>
                     </div>
-                    <p className="text-xs text-gray-500 mt-2">
-                      Buffer time is added between appointments for preparation
-                    </p>
-                  </div>
 
-                  {/* Working Days */}
-                  <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Working Days</h3>
-                    <div className="space-y-3">
-                      {Object.entries(workingDays).map(([day, isWorking]) => (
-                        <label key={day} className="flex items-center gap-3 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={isWorking}
-                            onChange={(e) => setWorkingDays({ ...workingDays, [day]: e.target.checked })}
-                            className="w-5 h-5 text-purple-600 border-gray-300 rounded focus:ring-2 focus:ring-purple-600"
-                          />
-                          <span className="text-sm font-medium text-gray-700 capitalize">
-                            {day}
-                          </span>
-                        </label>
-                      ))}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                        Working Days
+                      </label>
+                      <div className="grid grid-cols-4 gap-3">
+                        {['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].map((day) => (
+                          <button
+                            key={day}
+                            type="button"
+                            onClick={() =>
+                              setWorkingDays((prev) => ({
+                                ...prev,
+                                [day]: !prev[day as keyof typeof prev],
+                              }))
+                            }
+                            className={`px-4 py-2 rounded-lg border-2 transition font-medium ${
+                              workingDays[day as keyof typeof workingDays]
+                                ? 'bg-purple-600 border-purple-600 text-white'
+                                : 'bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-purple-400'
+                            }`}
+                          >
+                            {day.charAt(0).toUpperCase() + day.slice(1, 3)}
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                    <p className="text-xs text-gray-500 mt-3">
-                      Select the days you're available for appointments
-                    </p>
                   </div>
-                </div>
-              )}
-            </div>
+                )}
 
-            {/* Footer */}
-            <div className="border-t border-gray-200 dark:border-gray-700 px-6 py-4 bg-gray-50 flex items-center justify-end gap-3">
-              <button
-                onClick={() => {
-                  setShowSettings(false)
-                  setSettingsTab('account')
-                }}
-                className="px-4 py-2 text-gray-700 hover:bg-gray-200 rounded-lg transition font-medium"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSaveSettings}
-                disabled={settingsSaving}
-                className="px-4 py-2 bg-purple-600 dark:bg-purple-500 text-white rounded-lg hover:bg-purple-700 transition font-medium disabled:opacity-50"
-              >
-                {settingsSaving ? 'Saving...' : 'Save Changes'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </main>
+                {/* Save Button */}
+                <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700 flex justify-end space-x-3">
+                  <Button
+                    onClick={() => {
+                      setShowSettings(false)
+                      setSettingsError('')
+                    }}
+                    variant="outline"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleSaveSettings}
+                    disabled={settingsSaving}
+                    className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                  >
+                    {settingsSaving ? 'Saving...' : 'Save Changes'}
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   )
 }
