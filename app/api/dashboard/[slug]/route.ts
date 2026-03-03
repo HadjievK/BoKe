@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import pool from '@/lib/db';
 import bcrypt from 'bcryptjs';
 import type { DashboardData, DashboardStats, AppointmentWithDetails, CustomerPublic } from '@/lib/types';
-import { authenticateRequest } from '@/lib/auth';
+import { authenticateProviderBySlug } from '@/lib/auth';
 
 export async function GET(
   request: NextRequest,
@@ -11,25 +11,11 @@ export async function GET(
   try {
     const { slug } = await params;
 
-    // Authenticate using JWT token
-    const auth = authenticateRequest(request);
+    // Authenticate and verify slug match
+    const authResult = authenticateProviderBySlug(request, slug);
+    if (authResult instanceof NextResponse) return authResult;
 
-    if (!auth) {
-      return NextResponse.json(
-        { detail: 'Unauthorized - Please sign in' },
-        { status: 401 }
-      );
-    }
-
-    // Verify the slug matches the authenticated provider
-    if (auth.slug !== slug) {
-      return NextResponse.json(
-        { detail: 'Forbidden - Cannot access another provider\'s dashboard' },
-        { status: 403 }
-      );
-    }
-
-    const providerId = auth.providerId;
+    const { auth, providerId } = authResult;
 
     // Get provider details
     const providerResult = await pool.query(
@@ -206,25 +192,11 @@ export async function PATCH(
     const { slug } = await params;
     const body = await request.json();
 
-    // Authenticate using JWT token
-    const auth = authenticateRequest(request);
+    // Authenticate and verify slug match
+    const authResult = authenticateProviderBySlug(request, slug);
+    if (authResult instanceof NextResponse) return authResult;
 
-    if (!auth) {
-      return NextResponse.json(
-        { detail: 'Unauthorized - Please sign in' },
-        { status: 401 }
-      );
-    }
-
-    // Verify the slug matches the authenticated provider
-    if (auth.slug !== slug) {
-      return NextResponse.json(
-        { detail: 'Forbidden - Cannot update another provider\'s data' },
-        { status: 403 }
-      );
-    }
-
-    const providerId = auth.providerId;
+    const { auth, providerId } = authResult;
 
     // Handle password change (requires current password verification)
     if (body.password) {
@@ -262,11 +234,12 @@ export async function PATCH(
     const updateFields: string[] = [];
     const updateValues: any[] = [];
     let paramIndex = 1;
+    let hashedPassword: string | null = null;
 
-    // Password update (hash before storing)
+    // Password update (defer hashing until after validation)
     if (body.password !== undefined) {
-      const hashedPassword = await bcrypt.hash(body.password, 10);
       updateFields.push(`password = $${paramIndex}`);
+      hashedPassword = ''; // Placeholder, will be replaced after validation
       updateValues.push(hashedPassword);
       paramIndex++;
     }
@@ -333,6 +306,16 @@ export async function PATCH(
         { detail: 'No updates provided' },
         { status: 400 }
       );
+    }
+
+    // Now hash the password if needed (after validation that updates exist)
+    if (body.password !== undefined) {
+      hashedPassword = await bcrypt.hash(body.password, 10);
+      // Replace placeholder with actual hash
+      const passwordIndex = updateFields.findIndex(f => f.startsWith('password'));
+      if (passwordIndex !== -1) {
+        updateValues[passwordIndex] = hashedPassword;
+      }
     }
 
     // Add provider ID to values
