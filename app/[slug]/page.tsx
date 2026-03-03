@@ -37,14 +37,6 @@ export default function ProviderProfilePage() {
     async function fetchProvider() {
       try {
         const data = await getProviderProfile(slug)
-        console.log('Provider data loaded:', {
-          slug: data.slug,
-          name: data.name,
-          hasAvatar: !!data.avatar_url,
-          hasCover: !!data.cover_photo_url,
-          avatarLength: data.avatar_url?.length,
-          coverLength: data.cover_photo_url?.length
-        })
         setProvider(data)
       } catch (err: any) {
         setError(err.message)
@@ -192,23 +184,17 @@ export default function ProviderProfilePage() {
       </div>
 
       <div className="relative z-10">
-        {/* Hero Section */}
+        {/* Hero Section with Cover Photo */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           className="relative overflow-hidden"
         >
           {/* Cover Photo Background - Full Hero */}
-          <div className="relative">
-            {(() => {
-              console.log('Rendering cover photo:', {
-                hasCoverPhoto: !!provider.cover_photo_url,
-                coverUrl: provider.cover_photo_url?.substring(0, 50) + '...'
-              })
-              return null
-            })()}
+          <div className="relative min-h-[300px]">
+            {/* Background Image or Gradient */}
             {provider.cover_photo_url ? (
-              <div className="absolute inset-0 h-full overflow-hidden">
+              <div className="absolute inset-0">
                 <img
                   src={provider.cover_photo_url}
                   alt="Cover"
@@ -221,7 +207,7 @@ export default function ProviderProfilePage() {
             )}
 
             {/* Content over cover photo */}
-            <div className="relative z-10 bg-white/10 dark:bg-gray-900/10 backdrop-blur-sm border-b border-white/20 dark:border-gray-800/50">
+            <div className="relative z-10 backdrop-blur-[2px]">
               <div className="max-w-7xl mx-auto px-6 py-12">
                 <div className="flex items-start gap-6 mb-6">
                   {/* Avatar with photo or gradient */}
