@@ -211,6 +211,8 @@ export interface DashboardData {
     name: string
     business_name: string
     location?: string
+    avatar_url?: string
+    cover_photo_url?: string
     calendar_start_time?: string
     calendar_end_time?: string
     slot_duration?: number
