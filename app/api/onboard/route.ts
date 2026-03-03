@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import pool from '@/lib/db';
 import bcrypt from 'bcryptjs';
+import { generateToken } from '@/lib/auth';
 
 function generateSlug(businessName: string): string {
   const base = businessName.toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -126,11 +127,19 @@ export async function POST(request: NextRequest) {
 
     const provider = result.rows[0];
 
+    // Generate JWT token for immediate login
+    const token = generateToken({
+      providerId: provider.id,
+      slug: provider.slug,
+      email: provider.email,
+    });
+
     return NextResponse.json({
       slug,
       public_url: `https://boke-brown-ten.vercel.app/${slug}`,
       dashboard_url: `https://boke-brown-ten.vercel.app/dashboard/${slug}`,
       provider,
+      token,
     });
   } catch (error: any) {
     console.error('Onboard error:', error);

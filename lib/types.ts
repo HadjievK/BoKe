@@ -193,6 +193,7 @@ export interface OnboardingResponse {
   public_url: string
   dashboard_url: string
   provider: Provider
+  token: string
 }
 
 export interface DashboardStats {
