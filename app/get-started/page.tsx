@@ -153,18 +153,14 @@ export default function GetStartedPage() {
 
     try {
       const onboardingData: OnboardingData = {
-        businessName: formData.businessName,
+        business_name: formData.businessName,
         name: formData.name,
         email: formData.email,
         phone: formData.phone,
         password: formData.password,
-        serviceType: formData.serviceType,
+        service_type: formData.serviceType,
         location: formData.location,
-        workingDays: formData.workingDays,
-        calendarStartTime: formData.calendarStartTime,
-        calendarEndTime: formData.calendarEndTime,
         services: [], // Will be set up in dashboard
-        recaptchaToken: recaptchaToken!,
       }
 
       const response = await registerProvider(onboardingData)
