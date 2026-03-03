@@ -389,17 +389,8 @@ export default function DashboardPage() {
     setUploadSuccess('')
 
     try {
-      // Remove runtime-generated fields before saving and ensure proper structure
-      const servicesToSave = updatedServices.map(({ id, provider_id, created_at, ...rest }) => ({
-        name: rest.name,
-        duration: rest.duration,
-        price: rest.price,
-        description: rest.description || undefined,
-        icon: rest.icon || undefined,
-        is_active: rest.is_active !== undefined ? rest.is_active : true
-      }))
-
-      console.log('Saving services:', servicesToSave)
+      // Remove runtime-generated fields before saving
+      const servicesToSave = updatedServices.map(({ id, provider_id, created_at, ...rest }) => rest)
 
       await updateProviderProfile(slug, {
         services: servicesToSave

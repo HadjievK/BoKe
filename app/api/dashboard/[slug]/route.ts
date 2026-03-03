@@ -192,8 +192,6 @@ export async function PATCH(
     const { slug } = await params;
     const body = await request.json();
 
-    console.log('PATCH body received:', JSON.stringify(body, null, 2));
-
     // Authenticate and verify slug match
     const authResult = authenticateProviderBySlug(request, slug);
     if (authResult instanceof NextResponse) return authResult;
