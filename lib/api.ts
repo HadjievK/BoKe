@@ -293,6 +293,8 @@ export async function updateProviderProfile(
     services?: any[]
   }
 ): Promise<void> {
+  console.log('updateProviderProfile called with:', { slug, updates });
+
   const res = await fetch(`${API_URL}/api/dashboard/${slug}`, {
     method: 'PATCH',
     headers: getAuthHeaders(),
