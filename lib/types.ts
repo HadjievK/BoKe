@@ -226,6 +226,7 @@ export interface DashboardData {
       saturday: boolean
       sunday: boolean
     }
+    services?: any[]
   }
   stats: DashboardStats
   appointments: AppointmentWithDetails[]
