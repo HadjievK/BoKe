@@ -124,7 +124,7 @@ export default function CustomerForm({ onSubmit, loading }: CustomerFormProps) {
               ? 'border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/10'
               : 'border-gray-200 focus:border-purple-600 focus:ring-2 focus:ring-purple-600/10'
           }`}
-          placeholder="+1 (555) 123-4567"
+          placeholder="+49 30 123456"
         />
         {errors.phone && (
           <p className="text-red-500 text-xs mt-1">{errors.phone}</p>

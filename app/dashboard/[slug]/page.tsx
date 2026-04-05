@@ -1055,7 +1055,7 @@ export default function DashboardPage() {
                         value={location}
                         onChange={(e) => setLocation(e.target.value)}
                         className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent dark:bg-gray-700 dark:text-white"
-                        placeholder="123 Main St, City, State"
+                        placeholder="123 High Street, London"
                       />
                     </div>
 
@@ -1068,27 +1068,16 @@ export default function DashboardPage() {
                         onChange={(e) => setCurrency(e.target.value)}
                         className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent dark:bg-gray-700 dark:text-white"
                       >
-                        <optgroup label="European">
-                          <option value="EUR">EUR – Euro (€)</option>
-                          <option value="GBP">GBP – British Pound (£)</option>
-                          <option value="CHF">CHF – Swiss Franc (CHF)</option>
-                          <option value="SEK">SEK – Swedish Krona (kr)</option>
-                          <option value="NOK">NOK – Norwegian Krone (kr)</option>
-                          <option value="DKK">DKK – Danish Krone (kr)</option>
-                          <option value="PLN">PLN – Polish Złoty (zł)</option>
-                          <option value="CZK">CZK – Czech Koruna (Kč)</option>
-                          <option value="HUF">HUF – Hungarian Forint (Ft)</option>
-                          <option value="RON">RON – Romanian Leu (lei)</option>
-                        </optgroup>
-                        <optgroup label="Other">
-                          <option value="USD">USD – US Dollar ($)</option>
-                          <option value="CAD">CAD – Canadian Dollar (C$)</option>
-                          <option value="AUD">AUD – Australian Dollar (A$)</option>
-                          <option value="JPY">JPY – Japanese Yen (¥)</option>
-                          <option value="INR">INR – Indian Rupee (₹)</option>
-                          <option value="AED">AED – UAE Dirham (د.إ)</option>
-                          <option value="SAR">SAR – Saudi Riyal (﷼)</option>
-                        </optgroup>
+                        <option value="EUR">EUR – Euro (€)</option>
+                        <option value="GBP">GBP – British Pound (£)</option>
+                        <option value="CHF">CHF – Swiss Franc (CHF)</option>
+                        <option value="SEK">SEK – Swedish Krona (kr)</option>
+                        <option value="NOK">NOK – Norwegian Krone (kr)</option>
+                        <option value="DKK">DKK – Danish Krone (kr)</option>
+                        <option value="PLN">PLN – Polish Złoty (zł)</option>
+                        <option value="CZK">CZK – Czech Koruna (Kč)</option>
+                        <option value="HUF">HUF – Hungarian Forint (Ft)</option>
+                        <option value="RON">RON – Romanian Leu (lei)</option>
                       </select>
                     </div>
 

@@ -23,8 +23,8 @@ export function BookingDemo() {
 
   const bookingData = {
     service: 'Haircut & Styling',
-    date: 'March 5, 2026',
-    time: '2:00 PM',
+    date: '5 March 2026',
+    time: '14:00',
     customer: 'Alex Johnson',
     professional: 'Sarah\'s Salon',
   }
@@ -334,7 +334,7 @@ export function BookingDemo() {
                 <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
                   <div className="flex justify-between items-start mb-1">
                     <span className="text-sm font-medium">Morning Consultation</span>
-                    <span className="text-xs text-gray-500">10:00 AM</span>
+                    <span className="text-xs text-gray-500">10:00</span>
                   </div>
                   <p className="text-xs text-gray-500">John Smith</p>
                 </div>
@@ -386,7 +386,7 @@ export function BookingDemo() {
                 <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
                   <div className="flex justify-between items-start mb-1">
                     <span className="text-sm font-medium">Color Treatment</span>
-                    <span className="text-xs text-gray-500">4:30 PM</span>
+                    <span className="text-xs text-gray-500">16:30</span>
                   </div>
                   <p className="text-xs text-gray-500">Emma Davis</p>
                 </div>

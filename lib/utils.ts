@@ -2,7 +2,7 @@
 
 export function formatDate(date: Date | string): string {
   const d = typeof date === 'string' ? new Date(date) : date
-  return d.toLocaleDateString('en-US', {
+  return d.toLocaleDateString('en-GB', {
     weekday: 'long',
     year: 'numeric',
     month: 'long',
@@ -11,15 +11,13 @@ export function formatDate(date: Date | string): string {
 }
 
 export function formatTime(time: string): string {
-  // Convert "HH:MM" or "HH:MM:SS" to "h:MM AM/PM"
+  // Convert "HH:MM" or "HH:MM:SS" to "HH:MM" (24-hour)
   const [hours, minutes] = time.split(':').map(Number)
-  const period = hours >= 12 ? 'PM' : 'AM'
-  const displayHours = hours % 12 || 12
-  return `${displayHours}:${minutes.toString().padStart(2, '0')} ${period}`
+  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`
 }
 
 export function formatCurrency(amount: number, currency = 'EUR'): string {
-  return new Intl.NumberFormat('en-US', {
+  return new Intl.NumberFormat('en-GB', {
     style: 'currency',
     currency,
   }).format(amount)
@@ -70,7 +68,7 @@ export function cn(...classes: (string | boolean | undefined)[]): string {
 }
 
 export function formatDateShort(date: Date): string {
-  return date.toLocaleDateString('en-US', {
+  return date.toLocaleDateString('en-GB', {
     weekday: 'short',
     month: 'short',
     day: 'numeric'

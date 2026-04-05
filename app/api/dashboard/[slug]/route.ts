@@ -306,7 +306,7 @@ export async function PATCH(
     }
 
     if (body.currency !== undefined) {
-      const VALID_CURRENCIES = ['EUR','GBP','CHF','SEK','NOK','DKK','PLN','CZK','HUF','RON','USD','CAD','AUD','JPY','INR','AED','SAR'];
+      const VALID_CURRENCIES = ['EUR','GBP','CHF','SEK','NOK','DKK','PLN','CZK','HUF','RON'];
       if (!VALID_CURRENCIES.includes(body.currency)) {
         return NextResponse.json({ detail: 'Invalid currency code' }, { status: 400 });
       }

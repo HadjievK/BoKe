@@ -309,9 +309,9 @@ export default function Home() {
                   <Button
                     variant="outline"
                     size="lg"
-                    onClick={() => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })}
+                    onClick={() => document.getElementById('see-it-in-action')?.scrollIntoView({ behavior: 'smooth' })}
                   >
-                    See how it works
+                    See it in action
                   </Button>
                 </motion.div>
               </motion.div>
@@ -332,7 +332,7 @@ export default function Home() {
         </section>
 
         {/* Booking Demo Section */}
-        <section className="py-24 bg-white dark:bg-gray-900">
+        <section id="see-it-in-action" className="py-24 bg-white dark:bg-gray-900">
           <div className="container mx-auto px-6 max-w-6xl">
             <motion.div
               className="text-center mb-16"
@@ -527,7 +527,7 @@ export default function Home() {
                 type="tel"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                placeholder="+1 555 0192"
+                placeholder="+49 30 123456"
                 className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-600/10 transition"
               />
             </div>
@@ -551,7 +551,7 @@ export default function Home() {
               type="text"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
-              placeholder="Brooklyn, NY"
+              placeholder="Berlin, Germany"
               className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white focus:border-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-600/10 transition"
             />
           </div>
@@ -718,17 +718,17 @@ const DashboardMockup = () => {
 
   // Example appointments on specific days
   const appointments = {
-    8: [{ time: "9:00 AM", client: "Sarah M.", service: "Haircut" }],
+    8: [{ time: "09:00", client: "Sarah M.", service: "Haircut" }],
     12: [
-      { time: "10:00 AM", client: "John D.", service: "Fade" },
-      { time: "2:00 PM", client: "Mike R.", service: "Beard Trim" }
+      { time: "10:00", client: "John D.", service: "Colour" },
+      { time: "14:00", client: "Mike R.", service: "Trim" }
     ],
-    15: [{ time: "11:30 AM", client: "Emma W.", service: "Color" }],
+    15: [{ time: "11:30", client: "Emma W.", service: "Colour" }],
     20: [
-      { time: "9:30 AM", client: "Alex P.", service: "Haircut" },
-      { time: "1:00 PM", client: "Chris L.", service: "Style" }
+      { time: "09:30", client: "Alex P.", service: "Haircut" },
+      { time: "13:00", client: "Chris L.", service: "Style" }
     ],
-    23: [{ time: "3:00 PM", client: "Lisa K.", service: "Treatment" }],
+    23: [{ time: "15:00", client: "Lisa K.", service: "Treatment" }],
   }
 
   const days = []
@@ -801,9 +801,9 @@ const DashboardMockup = () => {
         <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">Upcoming Appointments</h4>
         <div className="space-y-2">
           {[
-            { date: "Today", time: "2:00 PM", client: "Mike R.", service: "Beard Trim", color: "indigo" },
-            { date: "Mar 15", time: "11:30 AM", client: "Emma W.", service: "Color", color: "purple" },
-            { date: "Mar 20", time: "9:30 AM", client: "Alex P.", service: "Haircut", color: "purple" },
+            { date: "Today", time: "14:00", client: "Mike R.", service: "Trim", color: "indigo" },
+            { date: "Mar 15", time: "11:30", client: "Emma W.", service: "Colour", color: "purple" },
+            { date: "Mar 20", time: "09:30", client: "Alex P.", service: "Haircut", color: "purple" },
           ].map((apt, index) => (
             <div
               key={index}

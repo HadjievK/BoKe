@@ -48,7 +48,7 @@ export async function GET(
 
     // Check if the requested date is a working day
     const requestedDate = new Date(date + 'T00:00:00');
-    const dayName = requestedDate.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+    const dayName = requestedDate.toLocaleDateString('en-GB', { weekday: 'long' }).toLowerCase();
 
     if (!workingDays[dayName]) {
       return NextResponse.json({

@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Calendar, Clock, DollarSign, MapPin, Phone, Mail, User, Sparkles, CheckCircle, XCircle, AlertCircle, ArrowRight } from 'lucide-react'
-import { formatDate, formatTime } from '@/lib/utils'
+import { Calendar, Clock, MapPin, Phone, Mail, User, Sparkles, CheckCircle, XCircle, AlertCircle, ArrowRight } from 'lucide-react'
+import { formatDate, formatTime, formatCurrency } from '@/lib/utils'
 import { AppointmentStatus, BookingManagementData } from '@/lib/types'
 import { Button } from '@/components/ui/button'
 import { Alert } from '@/components/ui/alert'
@@ -319,8 +319,7 @@ export default function BookingPage({
                             {appointment.duration} min
                           </span>
                           <span className="flex items-center">
-                            <DollarSign className="w-4 h-4 mr-1" />
-                            ${appointment.price.toFixed(2)}
+                            {formatCurrency(Number(appointment.price))}
                           </span>
                         </div>
                       </div>

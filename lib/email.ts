@@ -1,10 +1,44 @@
 import { Resend } from 'resend';
-import { formatDate, formatTime } from '@/lib/utils';
+import { formatDate, formatTime, formatCurrency } from '@/lib/utils';
 
 // Initialize Resend only if API key is available
 const resend = process.env.RESEND_API_KEY
   ? new Resend(process.env.RESEND_API_KEY)
   : null;
+
+export async function sendPasswordResetEmail(email: string, resetLink: string) {
+  if (!resend) {
+    console.warn('Resend API key not configured - skipping email send');
+    return { success: false, message: 'Email service not configured' };
+  }
+
+  return resend.emails.send({
+    from: process.env.FROM_EMAIL!,
+    to: email,
+    subject: 'Reset your BuKe password',
+    html: `
+<!DOCTYPE html>
+<html>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f5f5f5;">
+  <div style="background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+    <div style="background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%); padding: 30px 20px; text-align: center;">
+      <h1 style="color: white; margin: 0; font-size: 24px;">Reset your password</h1>
+    </div>
+    <div style="padding: 30px 20px;">
+      <p style="color: #333; font-size: 16px;">You requested a password reset. Click the button below to choose a new password:</p>
+      <div style="text-align: center; margin: 30px 0;">
+        <a href="${resetLink}" style="display: inline-block; background: #7c3aed; color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">Reset Password</a>
+      </div>
+      <p style="color: #666; font-size: 14px;">This link expires in 1 hour. If you didn't request this, you can safely ignore this email.</p>
+    </div>
+    <div style="background: #f9fafb; padding: 15px 20px; text-align: center; border-top: 1px solid #e5e7eb;">
+      <p style="color: #9ca3af; font-size: 12px; margin: 0;">BuKe Booking Platform</p>
+    </div>
+  </div>
+</body>
+</html>`,
+  });
+}
 
 export interface BookingEmailData {
   customer: {
@@ -126,7 +160,7 @@ function generateBookingConfirmationHTML(data: BookingEmailData): string {
             </tr>
             <tr>
               <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">💰 Price:</td>
-              <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 500;">$${service.price.toFixed(2)}</td>
+              <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 500;">${formatCurrency(service.price)}</td>
             </tr>
             ${provider.location ? `
             <tr>

@@ -423,7 +423,7 @@ export default function GetStartedPage() {
                         value={formData.phone}
                         onChange={(e) => updateFormData('phone', e.target.value)}
                         className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent dark:bg-gray-700 dark:text-white transition-all"
-                        placeholder="+1 (555) 123-4567"
+                        placeholder="+49 30 123456"
                       />
                     </div>
 
@@ -494,7 +494,7 @@ export default function GetStartedPage() {
                         value={formData.location}
                         onChange={(e) => updateFormData('location', e.target.value)}
                         className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent dark:bg-gray-700 dark:text-white transition-all"
-                        placeholder="123 Main St, City, State"
+                        placeholder="123 High Street, London"
                       />
                     </div>
 

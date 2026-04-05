@@ -3,6 +3,7 @@
 import React from 'react'
 import { AppointmentWithDetails, AppointmentStatus } from '@/lib/types'
 import { format } from 'date-fns'
+import { formatCurrency } from '@/lib/utils'
 
 interface AppointmentDetailsModalProps {
   appointment: AppointmentWithDetails | null
@@ -162,7 +163,7 @@ export default function AppointmentDetailsModal({
                 <div className="flex items-center gap-4 mt-2 text-sm text-gray-600">
                   <span>{appointment.duration} minutes</span>
                   <span>•</span>
-                  <span>${Number(appointment.price).toFixed(2)}</span>
+                  <span>{formatCurrency(Number(appointment.price))}</span>
                 </div>
               </div>
             </div>

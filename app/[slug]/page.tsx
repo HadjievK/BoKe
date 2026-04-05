@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Calendar, Clock, MapPin, CheckCircle, Sparkles, ArrowRight } from 'lucide-react'
 import { getProviderProfile, getAvailability, bookAppointment } from '@/lib/api'
 import type { ProviderWithServices, Service, Customer, BookingRequest } from '@/lib/types'
-import { formatDateISO } from '@/lib/utils'
+import { formatDateISO, formatCurrency, formatDate, formatTime } from '@/lib/utils'
 import CalendarPicker from '@/components/booking/CalendarPicker'
 import TimeSlotGrid from '@/components/booking/TimeSlotGrid'
 import CustomerForm from '@/components/booking/CustomerForm'
@@ -353,7 +353,7 @@ export default function ProviderProfilePage() {
                                 {service.name}
                               </h3>
                               <div className="text-2xl font-black bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-                                ${service.price}
+                                {formatCurrency(Number(service.price))}
                               </div>
                             </div>
                             <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 mb-3">
@@ -478,7 +478,7 @@ export default function ProviderProfilePage() {
                     <div className="text-sm text-gray-600 dark:text-gray-400 mb-2 font-medium">Selected Time</div>
                     <div className="flex items-center gap-2 text-lg font-bold text-gray-900 dark:text-white">
                       <CheckCircle className="text-green-500" size={24} />
-                      {selectedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })} at {selectedTime}
+                      {selectedDate.toLocaleDateString('en-GB', { weekday: 'long', month: 'long', day: 'numeric' })} at {selectedTime}
                     </div>
                   </div>
 
@@ -554,7 +554,7 @@ export default function ProviderProfilePage() {
                       <div>
                         <div className="text-sm text-gray-600 dark:text-gray-400 mb-2 font-medium">Date & Time</div>
                         <div className="text-lg font-semibold text-gray-900 dark:text-white">
-                          {new Date(confirmation.appointment.appointment_date).toLocaleDateString('en-US', {
+                          {new Date(confirmation.appointment.appointment_date).toLocaleDateString('en-GB', {
                             weekday: 'long',
                             month: 'long',
                             day: 'numeric'
@@ -569,7 +569,7 @@ export default function ProviderProfilePage() {
                       </div>
                       <div>
                         <div className="text-sm text-gray-600 dark:text-gray-400 mb-2 font-medium">Price</div>
-                        <div className="text-2xl font-black bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">${confirmation.appointment.price}</div>
+                        <div className="text-2xl font-black bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">{formatCurrency(Number(confirmation.appointment.price))}</div>
                       </div>
                     </div>
                   </div>
