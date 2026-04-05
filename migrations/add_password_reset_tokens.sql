@@ -1,7 +1,7 @@
 -- Password reset tokens table
 CREATE TABLE IF NOT EXISTS password_reset_tokens (
   id SERIAL PRIMARY KEY,
-  provider_id INTEGER NOT NULL REFERENCES service_providers(id) ON DELETE CASCADE,
+  provider_id UUID NOT NULL REFERENCES service_providers(id) ON DELETE CASCADE,
   token VARCHAR(64) NOT NULL UNIQUE,
   expires_at TIMESTAMPTZ NOT NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
