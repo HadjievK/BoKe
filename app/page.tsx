@@ -193,7 +193,7 @@ export default function Home() {
                 onClick={() => setShowOnboarding(true)}
                 size="sm"
               >
-                Get started free
+                Get started
               </Button>
             </div>
           </div>

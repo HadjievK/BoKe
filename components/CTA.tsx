@@ -69,7 +69,7 @@ export function CTA({ onGetStarted }: CTAProps) {
               onClick={onGetStarted}
               className="bg-white text-indigo-600 hover:bg-gray-100 px-8 py-6 text-lg group shadow-xl"
             >
-              Start Free Today
+              Start Your Trial
               <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Button>
             <Button
@@ -90,7 +90,7 @@ export function CTA({ onGetStarted }: CTAProps) {
           >
             <div className="flex items-center gap-2">
               <CheckCircle2 className="w-5 h-5" />
-              <span>No credit card required</span>
+              <span>Cancel anytime</span>
             </div>
             <div className="flex items-center gap-2">
               <CheckCircle2 className="w-5 h-5" />
@@ -98,7 +98,7 @@ export function CTA({ onGetStarted }: CTAProps) {
             </div>
             <div className="flex items-center gap-2">
               <CheckCircle2 className="w-5 h-5" />
-              <span>Free forever plan</span>
+              <span>Just 4.99/month</span>
             </div>
           </motion.div>
         </motion.div>

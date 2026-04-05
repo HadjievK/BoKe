@@ -77,7 +77,7 @@ export default function SignInPage() {
           </Link>
           <Button size="sm" asChild>
             <Link href="/">
-              Get started free
+              Get started
             </Link>
           </Button>
         </div>
@@ -187,7 +187,7 @@ export default function SignInPage() {
             <p className="text-sm text-gray-600">
               Don't have an account?{' '}
               <Link href="/" className="text-indigo-600 font-semibold hover:underline">
-                Sign up for free
+                Sign up
               </Link>
             </p>
           </motion.div>
