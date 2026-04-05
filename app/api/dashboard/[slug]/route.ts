@@ -19,7 +19,7 @@ export async function GET(
 
     // Get provider details
     const providerResult = await pool.query(
-      'SELECT id, slug, name, business_name, location, avatar_url, cover_photo_url, calendar_start_time, calendar_end_time, slot_duration, buffer_time, working_days FROM service_providers WHERE id = $1',
+      'SELECT id, slug, name, business_name, location, avatar_url, cover_photo_url, calendar_start_time, calendar_end_time, slot_duration, buffer_time, working_days, currency, services FROM service_providers WHERE id = $1',
       [providerId]
     );
 
@@ -157,11 +157,15 @@ export async function GET(
         name: provider.name,
         business_name: provider.business_name,
         location: provider.location,
+        avatar_url: provider.avatar_url,
+        cover_photo_url: provider.cover_photo_url,
         calendar_start_time: provider.calendar_start_time,
         calendar_end_time: provider.calendar_end_time,
         slot_duration: provider.slot_duration,
         buffer_time: provider.buffer_time,
         working_days: provider.working_days,
+        currency: provider.currency,
+        services: provider.services || [],
       },
       stats,
       appointments,
@@ -294,6 +298,16 @@ export async function PATCH(
       paramIndex++;
     }
 
+    if (body.currency !== undefined) {
+      const VALID_CURRENCIES = ['EUR','GBP','CHF','SEK','NOK','DKK','PLN','CZK','HUF','RON','USD','CAD','AUD','JPY','INR','AED','SAR'];
+      if (!VALID_CURRENCIES.includes(body.currency)) {
+        return NextResponse.json({ detail: 'Invalid currency code' }, { status: 400 });
+      }
+      updateFields.push(`currency = $${paramIndex}`);
+      updateValues.push(body.currency);
+      paramIndex++;
+    }
+
     // Services JSONB with validation
     if (body.services !== undefined) {
       // Validate services array
@@ -394,7 +408,7 @@ export async function PATCH(
   } catch (error: any) {
     console.error('Provider settings update error:', error);
     return NextResponse.json(
-      { detail: `Failed to update provider settings: ${error.message}` },
+      { detail: 'Failed to update provider settings.' },
       { status: 500 }
     );
   }

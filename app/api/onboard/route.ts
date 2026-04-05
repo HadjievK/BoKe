@@ -2,33 +2,21 @@ import { NextRequest, NextResponse } from 'next/server';
 import pool from '@/lib/db';
 import bcrypt from 'bcryptjs';
 import { generateToken } from '@/lib/auth';
-
-function generateSlug(businessName: string): string {
-  const base = businessName.toLowerCase().replace(/[^a-z0-9]/g, '');
-  return base || 'business';
-}
-
-function generatePin(): string {
-  return Math.floor(1000 + Math.random() * 9000).toString();
-}
+import { generateSlug } from '@/lib/utils';
 
 async function ensureUniqueSlug(baseSlug: string): Promise<string> {
-  let slug = baseSlug;
+  // Single query: find all existing slugs matching baseSlug or baseSlug + number
+  const result = await pool.query(
+    `SELECT slug FROM service_providers WHERE slug = $1 OR slug ~ $2`,
+    [baseSlug, `^${baseSlug}\\d+$`]
+  );
+
+  const existing = new Set(result.rows.map((r: { slug: string }) => r.slug));
+  if (!existing.has(baseSlug)) return baseSlug;
+
   let counter = 1;
-
-  while (true) {
-    const result = await pool.query(
-      'SELECT 1 FROM service_providers WHERE slug = $1',
-      [slug]
-    );
-
-    if (result.rows.length === 0) {
-      return slug;
-    }
-
-    slug = `${baseSlug}${counter}`;
-    counter++;
-  }
+  while (existing.has(`${baseSlug}${counter}`)) counter++;
+  return `${baseSlug}${counter}`;
 }
 
 export async function POST(request: NextRequest) {
@@ -42,13 +30,25 @@ export async function POST(request: NextRequest) {
 
     if (!isGoogleUser) {
       // Email/password signup - password required
-      if (!password || password.length < 6) {
+      if (!password || password.length < 8) {
         return NextResponse.json(
-          { detail: 'Password must be at least 6 characters' },
+          { detail: 'Password must be at least 8 characters' },
           { status: 400 }
         );
       }
       hashedPassword = await bcrypt.hash(password, 10);
+    }
+
+    // Check for duplicate email before attempting insert
+    const emailCheck = await pool.query(
+      'SELECT 1 FROM service_providers WHERE email = $1',
+      [email.toLowerCase().trim()]
+    );
+    if (emailCheck.rows.length > 0) {
+      return NextResponse.json(
+        { detail: 'Email already registered. Please sign in.' },
+        { status: 409 }
+      );
     }
 
     // Validate at least one service
@@ -134,27 +134,19 @@ export async function POST(request: NextRequest) {
       email: provider.email,
     });
 
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+
     return NextResponse.json({
       slug,
-      public_url: `https://boke-brown-ten.vercel.app/${slug}`,
-      dashboard_url: `https://boke-brown-ten.vercel.app/dashboard/${slug}`,
+      public_url: `${baseUrl}/${slug}`,
+      dashboard_url: `${baseUrl}/dashboard/${slug}`,
       provider,
       token,
     });
   } catch (error: any) {
     console.error('Onboard error:', error);
-
-    // Check for duplicate email
-    if (error.message?.toLowerCase().includes('email') &&
-        error.message?.toLowerCase().includes('unique')) {
-      return NextResponse.json(
-        { detail: 'Email already registered' },
-        { status: 400 }
-      );
-    }
-
     return NextResponse.json(
-      { detail: `Failed to create provider account: ${error.message}` },
+      { detail: 'Failed to create provider account. Please try again.' },
       { status: 500 }
     );
   }

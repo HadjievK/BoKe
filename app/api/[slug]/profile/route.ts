@@ -18,7 +18,7 @@ export async function GET(
       `
       SELECT
         id, slug, name, business_name, service_type, email, phone,
-        location, latitude, longitude, bio, avatar_url, cover_photo_url, theme_config, services, created_at
+        location, latitude, longitude, bio, avatar_url, cover_photo_url, theme_config, services, currency, created_at
       FROM service_providers
       WHERE slug = $1
       `,
@@ -65,6 +65,7 @@ export async function GET(
       avatar_url: provider.avatar_url,
       cover_photo_url: provider.cover_photo_url,
       theme_config: provider.theme_config || { primary_color: '#C9993A', secondary_color: '#1C1812' },
+      currency: provider.currency || 'EUR',
       created_at: provider.created_at,
       services: formattedServices,
     };
@@ -74,7 +75,7 @@ export async function GET(
   } catch (error: any) {
     console.error('Provider profile API error:', error);
     return NextResponse.json(
-      { detail: `Failed to fetch provider: ${error.message}` },
+      { detail: 'Provider not found' },
       { status: 500 }
     );
   }

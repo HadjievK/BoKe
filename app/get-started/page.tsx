@@ -53,6 +53,7 @@ export default function GetStartedPage() {
   const router = useRouter()
   const [step, setStep] = useState<'info' | 'services' | 'schedule'>('info')
   const [loading, setLoading] = useState(false)
+  const [checkingEmail, setCheckingEmail] = useState(false)
   const [error, setError] = useState('')
   // const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null)
   const [formData, setFormData] = useState<FormData>({
@@ -124,10 +125,24 @@ export default function GetStartedPage() {
     return true
   }
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (!validateStep()) return
 
     if (step === 'info') {
+      setCheckingEmail(true)
+      try {
+        const res = await fetch(`/api/onboard/check-email?email=${encodeURIComponent(formData.email)}`)
+        const data = await res.json()
+        if (!data.available) {
+          setError('This email is already registered. Please sign in.')
+          setCheckingEmail(false)
+          return
+        }
+      } catch {
+        // If check fails, let the final submit catch it
+      } finally {
+        setCheckingEmail(false)
+      }
       setStep('services')
     } else if (step === 'services') {
       setStep('schedule')
@@ -542,10 +557,11 @@ export default function GetStartedPage() {
                 {step !== 'schedule' ? (
                   <Button
                     onClick={handleNext}
+                    disabled={checkingEmail}
                     className="px-8 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
                   >
-                    Continue
-                    <ArrowRight className="ml-2 h-4 w-4" />
+                    {checkingEmail ? 'Checking...' : 'Continue'}
+                    {!checkingEmail && <ArrowRight className="ml-2 h-4 w-4" />}
                   </Button>
                 ) : (
                   <Button

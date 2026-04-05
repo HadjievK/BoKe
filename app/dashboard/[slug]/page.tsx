@@ -70,6 +70,7 @@ export default function DashboardPage() {
 
   // Services settings states
   const [services, setServices] = useState<any[]>([])
+  const [currency, setCurrency] = useState('EUR')
   const [editingServiceIndex, setEditingServiceIndex] = useState<number | null>(null)
   const [isAddingService, setIsAddingService] = useState(false)
   const [serviceForm, setServiceForm] = useState({
@@ -163,6 +164,9 @@ export default function DashboardPage() {
       // Initialize services
       if (provider.services) {
         setServices(provider.services)
+      }
+      if (provider.currency) {
+        setCurrency(provider.currency)
       }
     }
   }, [showSettings, dashboardData])
@@ -543,6 +547,7 @@ export default function DashboardPage() {
       const updates: any = {}
       if (settingsTab === 'account' || !settingsTab) {
         updates.location = location
+        updates.currency = currency
         // Note: avatar_url and cover_photo_url are already saved via handlePhotoUpload
         if (currentPassword && newPassword) {
           if (newPassword !== confirmPassword) {
@@ -1051,6 +1056,39 @@ export default function DashboardPage() {
                       />
                     </div>
 
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Currency
+                      </label>
+                      <select
+                        value={currency}
+                        onChange={(e) => setCurrency(e.target.value)}
+                        className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                      >
+                        <optgroup label="European">
+                          <option value="EUR">EUR – Euro (€)</option>
+                          <option value="GBP">GBP – British Pound (£)</option>
+                          <option value="CHF">CHF – Swiss Franc (CHF)</option>
+                          <option value="SEK">SEK – Swedish Krona (kr)</option>
+                          <option value="NOK">NOK – Norwegian Krone (kr)</option>
+                          <option value="DKK">DKK – Danish Krone (kr)</option>
+                          <option value="PLN">PLN – Polish Złoty (zł)</option>
+                          <option value="CZK">CZK – Czech Koruna (Kč)</option>
+                          <option value="HUF">HUF – Hungarian Forint (Ft)</option>
+                          <option value="RON">RON – Romanian Leu (lei)</option>
+                        </optgroup>
+                        <optgroup label="Other">
+                          <option value="USD">USD – US Dollar ($)</option>
+                          <option value="CAD">CAD – Canadian Dollar (C$)</option>
+                          <option value="AUD">AUD – Australian Dollar (A$)</option>
+                          <option value="JPY">JPY – Japanese Yen (¥)</option>
+                          <option value="INR">INR – Indian Rupee (₹)</option>
+                          <option value="AED">AED – UAE Dirham (د.إ)</option>
+                          <option value="SAR">SAR – Saudi Riyal (﷼)</option>
+                        </optgroup>
+                      </select>
+                    </div>
+
                     <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
                       <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                         Change Password
@@ -1245,7 +1283,7 @@ export default function DashboardPage() {
                             </div>
                             <div>
                               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Price ($) *
+                                Price ({currency}) *
                               </label>
                               <input
                                 type="number"
@@ -1371,7 +1409,7 @@ export default function DashboardPage() {
                                 {service.duration} minutes
                               </span>
                               <span className="font-semibold text-purple-600 dark:text-purple-400">
-                                ${typeof service.price === 'number' ? service.price.toFixed(2) : service.price}
+                                {formatCurrency(typeof service.price === 'number' ? service.price : parseFloat(service.price) || 0, currency)}
                               </span>
                             </div>
                           </div>

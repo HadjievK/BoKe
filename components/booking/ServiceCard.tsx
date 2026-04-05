@@ -3,11 +3,12 @@ import { formatCurrency } from '@/lib/utils'
 
 interface ServiceCardProps {
   service: Service
+  currency?: string
   selected?: boolean
   onClick?: () => void
 }
 
-export default function ServiceCard({ service, selected, onClick }: ServiceCardProps) {
+export default function ServiceCard({ service, currency = 'EUR', selected, onClick }: ServiceCardProps) {
   return (
     <div
       onClick={onClick}
@@ -17,7 +18,7 @@ export default function ServiceCard({ service, selected, onClick }: ServiceCardP
         <div className="text-4xl">{service.icon || '⭐'}</div>
         <div className="text-right">
           <div className="text-2xl font-bold text-gold">
-            {formatCurrency(service.price)}
+            {formatCurrency(service.price, currency)}
           </div>
           <div className="text-sm text-ink-light">
             {service.duration} min

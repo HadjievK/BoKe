@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
   } catch (error: any) {
     console.error('Sign in error:', error);
     return NextResponse.json(
-      { detail: `Failed to sign in: ${error.message}` },
+      { detail: 'Failed to sign in. Please try again.' },
       { status: 500 }
     );
   }

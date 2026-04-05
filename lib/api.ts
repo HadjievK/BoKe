@@ -281,6 +281,7 @@ export async function updateProviderProfile(
     calendar_end_time?: string
     slot_duration?: number
     buffer_time?: number
+    currency?: string
     working_days?: {
       monday: boolean
       tuesday: boolean

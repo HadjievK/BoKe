@@ -24,6 +24,7 @@ export interface Provider {
   calendar_end_time?: string
   slot_duration?: number
   buffer_time?: number
+  currency?: string
   working_days?: {
     monday: boolean
     tuesday: boolean
@@ -217,6 +218,7 @@ export interface DashboardData {
     calendar_end_time?: string
     slot_duration?: number
     buffer_time?: number
+    currency?: string
     working_days?: {
       monday: boolean
       tuesday: boolean

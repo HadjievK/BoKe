@@ -18,10 +18,10 @@ export function formatTime(time: string): string {
   return `${displayHours}:${minutes.toString().padStart(2, '0')} ${period}`
 }
 
-export function formatCurrency(amount: number): string {
+export function formatCurrency(amount: number, currency = 'EUR'): string {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: 'USD'
+    currency,
   }).format(amount)
 }
 
@@ -33,8 +33,10 @@ export function formatDateISO(date: Date): string {
 export function generateSlug(businessName: string): string {
   return businessName
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '')
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '')
+    || 'business'
 }
 
 export function validateEmail(email: string): boolean {

@@ -185,7 +185,7 @@ export default function BookingPage() {
               <div>
                 <div className="text-sm text-ink-light mb-1">Price</div>
                 <div className="font-semibold text-gold text-xl">
-                  {formatCurrency(confirmation.appointment.price)}
+                  {formatCurrency(confirmation.appointment.price, provider?.currency || 'EUR')}
                 </div>
               </div>
             </div>
@@ -261,6 +261,7 @@ export default function BookingPage() {
                 <ServiceCard
                   key={service.id}
                   service={service}
+                  currency={provider.currency || 'EUR'}
                   selected={selectedService?.id === service.id}
                   onClick={() => handleServiceSelect(service)}
                 />
@@ -278,7 +279,7 @@ export default function BookingPage() {
                 <div>
                   <h3 className="font-semibold text-lg">{selectedService.name}</h3>
                   <p className="text-sm text-ink-light">
-                    {selectedService.duration} min • {formatCurrency(selectedService.price)}
+                    {selectedService.duration} min • {formatCurrency(selectedService.price, provider?.currency || 'EUR')}
                   </p>
                 </div>
                 <button
@@ -343,7 +344,7 @@ export default function BookingPage() {
               <div className="text-sm text-ink-light space-y-1">
                 <p>{selectedService.name}</p>
                 <p>{formatDate(selectedDate)} at {formatTime(selectedTime)}</p>
-                <p className="text-gold font-semibold">{formatCurrency(selectedService.price)}</p>
+                <p className="text-gold font-semibold">{formatCurrency(selectedService.price, provider?.currency || 'EUR')}</p>
               </div>
             </div>
 
