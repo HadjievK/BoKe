@@ -550,6 +550,9 @@ export default function DashboardPage() {
         updates.currency = currency
         // Note: avatar_url and cover_photo_url are already saved via handlePhotoUpload
         if (currentPassword && newPassword) {
+          if (newPassword.length < 8) {
+            throw new Error('New password must be at least 8 characters')
+          }
           if (newPassword !== confirmPassword) {
             throw new Error('New passwords do not match')
           }

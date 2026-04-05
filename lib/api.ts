@@ -323,6 +323,7 @@ export async function updateProviderPassword(
   })
 
   if (!res.ok) {
-    throw new Error('Failed to update password')
+    const errorData = await res.json().catch(() => ({}))
+    throw new Error(errorData.detail || 'Failed to update password')
   }
 }

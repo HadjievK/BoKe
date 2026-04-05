@@ -204,6 +204,13 @@ export async function PATCH(
 
     // Handle password change (requires current password verification)
     if (body.password) {
+      if (body.password.length < 8) {
+        return NextResponse.json(
+          { detail: 'New password must be at least 8 characters' },
+          { status: 400 }
+        );
+      }
+
       if (!body.currentPassword) {
         return NextResponse.json(
           { detail: 'Current password is required to change password' },

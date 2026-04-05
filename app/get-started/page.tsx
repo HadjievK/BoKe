@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowRight, Sparkles, Check, Mail, Lock, User, Building2, Phone, MapPin, Calendar } from 'lucide-react'
+import { ArrowRight, Sparkles, Check, Mail, Lock, User, Building2, Phone, MapPin, Calendar, Plus, Trash2, Clock } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Alert } from '@/components/ui/alert'
 import { registerProvider } from '@/lib/api'
@@ -35,6 +35,12 @@ const WORKING_DAYS = [
   'Sunday',
 ]
 
+interface ServiceEntry {
+  name: string
+  duration: number
+  price: number
+}
+
 interface FormData {
   businessName: string
   name: string
@@ -44,6 +50,7 @@ interface FormData {
   confirmPassword: string
   serviceType: string
   location: string
+  services: ServiceEntry[]
   workingDays: string[]
   calendarStartTime: string
   calendarEndTime: string
@@ -65,6 +72,7 @@ export default function GetStartedPage() {
     confirmPassword: '',
     serviceType: '',
     location: '',
+    services: [{ name: '', duration: 30, price: 0 }],
     workingDays: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
     calendarStartTime: '09:00',
     calendarEndTime: '18:00',
@@ -80,6 +88,29 @@ export default function GetStartedPage() {
       workingDays: prev.workingDays.includes(day)
         ? prev.workingDays.filter((d) => d !== day)
         : [...prev.workingDays, day],
+    }))
+  }
+
+  const updateService = (index: number, field: keyof ServiceEntry, value: string | number) => {
+    setFormData((prev) => ({
+      ...prev,
+      services: prev.services.map((s, i) =>
+        i === index ? { ...s, [field]: value } : s
+      ),
+    }))
+  }
+
+  const addService = () => {
+    setFormData((prev) => ({
+      ...prev,
+      services: [...prev.services, { name: '', duration: 30, price: 0 }],
+    }))
+  }
+
+  const removeService = (index: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      services: prev.services.filter((_, i) => i !== index),
     }))
   }
 
@@ -112,6 +143,16 @@ export default function GetStartedPage() {
       }
       if (!formData.location.trim()) {
         setError('Location is required')
+        return false
+      }
+      const validServices = formData.services.filter(s => s.name.trim())
+      if (validServices.length === 0) {
+        setError('Add at least one service')
+        return false
+      }
+      const incomplete = validServices.find(s => !s.name.trim() || s.duration <= 0 || s.price < 0)
+      if (incomplete) {
+        setError('All services must have a name, duration, and price')
         return false
       }
     } else if (step === 'schedule') {
@@ -173,7 +214,11 @@ export default function GetStartedPage() {
         password: formData.password,
         service_type: formData.serviceType,
         location: formData.location,
-        services: [], // Will be set up in dashboard
+        services: formData.services.filter(s => s.name.trim()).map(s => ({
+          name: s.name.trim(),
+          duration: s.duration,
+          price: s.price,
+        })),
       }
 
       const response = await registerProvider(onboardingData)
@@ -453,18 +498,76 @@ export default function GetStartedPage() {
                       />
                     </div>
 
-                    <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg p-6">
-                      <div className="flex items-start space-x-3">
-                        <Check className="h-5 w-5 text-purple-600 dark:text-purple-400 mt-0.5" />
-                        <div className="flex-1">
-                          <p className="text-sm font-medium text-purple-900 dark:text-purple-300 mb-1">
-                            You'll customize your services later
-                          </p>
-                          <p className="text-sm text-purple-700 dark:text-purple-400">
-                            After registration, you can add specific services, pricing, and durations in your dashboard.
-                          </p>
-                        </div>
+                    {/* Services */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                        Services <span className="text-red-500">*</span>
+                        <span className="text-xs text-gray-500 dark:text-gray-400 ml-1">(At least one required)</span>
+                      </label>
+                      <div className="space-y-3">
+                        {formData.services.map((service, index) => (
+                          <div key={index} className="flex items-start gap-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
+                            <div className="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                              <div>
+                                <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">Name</label>
+                                <input
+                                  type="text"
+                                  value={service.name}
+                                  onChange={(e) => updateService(index, 'name', e.target.value)}
+                                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent dark:bg-gray-700 dark:text-white text-sm"
+                                  placeholder="e.g. Haircut"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">
+                                  <Clock className="inline h-3 w-3 mr-0.5" />
+                                  Duration (min)
+                                </label>
+                                <input
+                                  type="number"
+                                  min="5"
+                                  max="480"
+                                  step="5"
+                                  value={service.duration}
+                                  onChange={(e) => updateService(index, 'duration', parseInt(e.target.value) || 0)}
+                                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent dark:bg-gray-700 dark:text-white text-sm"
+                                  placeholder="30"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">Price (EUR)</label>
+                                <input
+                                  type="number"
+                                  min="0"
+                                  step="0.01"
+                                  value={service.price}
+                                  onChange={(e) => updateService(index, 'price', parseFloat(e.target.value) || 0)}
+                                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent dark:bg-gray-700 dark:text-white text-sm"
+                                  placeholder="25.00"
+                                />
+                              </div>
+                            </div>
+                            {formData.services.length > 1 && (
+                              <button
+                                type="button"
+                                onClick={() => removeService(index)}
+                                className="mt-6 p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition"
+                                title="Remove service"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                            )}
+                          </div>
+                        ))}
                       </div>
+                      <button
+                        type="button"
+                        onClick={addService}
+                        className="mt-3 flex items-center gap-2 text-sm font-medium text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 transition-colors"
+                      >
+                        <Plus className="h-4 w-4" />
+                        Add another service
+                      </button>
                     </div>
                   </motion.div>
                 )}
